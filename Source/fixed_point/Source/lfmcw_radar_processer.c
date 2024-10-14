@@ -9,11 +9,11 @@
  * 
  */
 #include "radar_types.h"
-int radar_init(radar_handle_t *radar)
+int radardsp_init(radar_handle_t *radar)
 {
 }
 
 
-int radar_input_new_frame(radar_handle_t *radar, void *data)
+int radardsp_input_new_frame(radar_handle_t *radar, void *data)
 {
 }
