@@ -27,10 +27,10 @@ option(LAXVECTORCONVERSIONS "Lax vector conversions" ON)
 # ##########################
 add_library(CMSISDSP STATIC)
 
-# 设置lib的输出路径
-set_target_properties(CMSISDSP PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${DSP}/lib
-)
+# # 设置lib的输出路径
+# set_target_properties(CMSISDSP PROPERTIES
+#     ARCHIVE_OUTPUT_DIRECTORY ${DSP}/lib
+# )
 
 include(BasicMathFunctions/Config.cmake)
 

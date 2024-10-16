@@ -1,2 +1,4 @@
-build
+
+.output
 .vscode/compile_commands.json
+build
