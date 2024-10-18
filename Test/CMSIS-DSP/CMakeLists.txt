@@ -27,7 +27,3 @@ target_include_directories(test-cmsisdsp PUBLIC
 target_compile_definitions(test-cmsisdsp PRIVATE
     -D__GNUC_PYTHON__ # CMSIS-DSP不适用CMSIS-CORE
 )
-
-target_compile_options(test-cmsisdsp PRIVATE
-    -g
-)

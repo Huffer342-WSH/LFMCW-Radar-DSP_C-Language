@@ -6,12 +6,20 @@
 	],
 	"extensions": {
 		"recommendations": [
+			// C/C++
 			"ms-vscode.cpptools",
 			"ms-vscode.cmake-tools",
 			"josetr.cmake-language-support-vscode",
 			"cschlosser.doxdocgen",
-			"mhutchie.git-graph"
+			// Git
+			"mhutchie.git-graph",
+			// Python
+			"ms-toolsai.jupyter",
+			"ms-python.python",
+			"ms-python.black-formatter",
+			// Other
+			"IBM.output-colorizer"
 		]
 	},
-	"settings": {}
+
 }
