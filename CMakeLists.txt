@@ -6,12 +6,14 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
 # 设置输出路径
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/.output/${CMAKE_BUILD_TYPE}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/.output/${CMAKE_BUILD_TYPE}/lib)
-set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/.output/${CMAKE_BUILD_TYPE}/)
+set(TATGET_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/.output/${CMAKE_BUILD_TYPE})
+set(EXECUTABLE_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/bin)
+set(LIBRARY_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/lib)
+set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
+
 
 # 添加全局依赖库
-link_libraries(m)
+# link_libraries(m)
 
 # 编译依赖库
 add_subdirectory(ThirdParty)
@@ -21,3 +23,7 @@ add_subdirectory(Source)
 
 # 编译测试
 add_subdirectory(Test)
+
+
+# 构建Python模块
+add_subdirectory(PythonWrapper)
