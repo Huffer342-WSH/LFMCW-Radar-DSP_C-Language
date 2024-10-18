@@ -8,27 +8,50 @@
  * @copyright Copyright (c) 2024
  * 
  */
-#include "radar_types.h"
 #include "radar_processer.h"
 #include "radar_cfar.h"
-
+#include <assert.h>
+#include <stdlib.h>
 int radardsp_init(radar_handle_t *radar)
 {
     /*
     初始化radar里面的值，有需要的参数直接从外部传入
     */
+    radar->param.numChannel = 2;
+    radar->param.numChrip = 32;
+    radar->param.numRangeBin = 25;
+    radar->basic.numChannel = 2;
+    radar->basic.numRangeBin = 25;
+    radar->basic.staticClutter =
+        malloc(sizeof(double) * 2 * radar->basic.numChannel * radar->basic.numRangeBin);
 }
-
 
 int radardsp_input_new_frame(radar_handle_t *radar, void *data)
 {
+    assert(data != NULL);
+    assert(radar->basic.staticClutter != NULL);
     /*
     输入一帧RDM（2D-FFT后的产物）
     RDM的两个维度是(距离，速度)，速度是没有结果fftshift的，所以说后一半是负速度，前一半是正速度
     */
 
+
+    int shape0 = radar->param.numRangeBin;
+    int shape1 = radar->param.numChrip * 2;
+    double(*rdms)[shape0][shape1] = (double(*)[shape0][shape1 * 2]) data;
     /* 1. 更新静态杂波，并减去静态杂波
      */
+
+
+    double(*staticClutter)[shape0 * 2] = (double(*)[shape0 * 2]) radar->basic.staticClutter;
+
+    for (uint16_t j = 0; j < radar->basic.numChannel; j++) {
+        for (uint16_t i = 0; i < shape0; i++) {
+            staticClutter[j][i * 2] = rdms[j][i][0];
+            staticClutter[j][i * 2 + 1] = rdms[j][i][1];
+        }
+    }
+
 
 
     /* 2. 计算幅度谱 */
@@ -78,4 +101,5 @@ int radardsp_input_new_frame(radar_handle_t *radar, void *data)
         假如只使用直角坐标，相当于丢失了观测噪声在极坐标中的信息，比如测角精度固定，那越近直角坐标就越准吗。本来观测噪声是在极坐标下的，在经过观测矩阵后就可以把这个性质表达到直角坐标中。如果直接使用直角坐标系，就体现不出这个性质。
         
     */
+    return 0;
 }

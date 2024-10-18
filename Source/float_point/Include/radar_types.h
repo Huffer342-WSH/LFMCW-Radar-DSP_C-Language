@@ -1,6 +1,14 @@
+#ifndef _RADAR_TYPES_H_
+#define _RADAR_TYPES_H_
 
 #include <stdint.h>
 #include "radar_math_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 
 /**
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
@@ -11,6 +19,7 @@ typedef struct {
     double timeChrip;    //单位:s
     double timeChripGap; //单位:s
     double timeFrameGap; //单位:s
+    uint16_t numChannel;
     uint16_t numPoint;
     uint16_t numRangeBin;
     uint16_t numChrip;
@@ -36,7 +45,9 @@ typedef struct {
 } radar_config_t;
 
 typedef struct {
-    void *staticClutter;
+    uint16_t numChannel;
+    uint16_t numRangeBin;
+    double *staticClutter;
 } radar_basic_data_t;
 
 
@@ -46,3 +57,8 @@ typedef struct {
     radar_config_t config;
     radar_basic_data_t basic;
 } radar_handle_t;
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* _RADAR_TYPES_H_ */
