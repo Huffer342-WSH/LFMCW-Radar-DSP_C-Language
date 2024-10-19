@@ -13,4 +13,5 @@ target_include_directories(lfmcwradar_float PRIVATE
 
 target_sources(lfmcwradar_float PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_processer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/spec_clustering.c
 )

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #ifndef _RADAR_CFAR_H_
 #define _RADAR_CFAR_H_
 
