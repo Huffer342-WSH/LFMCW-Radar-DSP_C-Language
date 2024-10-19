@@ -14,7 +14,7 @@
  * 
  */
 #include <stdio.h>
-
+#include <string.h>
 #include <stdint.h>
 #include "radar_cfar.h"
 
@@ -97,3 +97,36 @@ void spec_clustering(cfar2d_result_t *cfar2d_result) //数组传进来只有1个
     }
 }
 /*  在目标里从速度维聚类*/
+
+
+void cfar2d_del_point(cfar2d_result_t *list)
+{
+    cfar2d_point_t *pLeft, *pRight, *pEnd;
+    pLeft = list->point;
+    pRight = pLeft + 1;
+    pEnd = &list->point[list->numPoint];
+    while (pRight < pEnd) {
+        // 速度维度相邻
+        if (pLeft->idx0 == pRight->idx0 && pLeft->idx1 + 1 == pRight->idx1) {
+            if (pLeft->amp < pRight->amp ||
+                (pLeft->amp == pRight->amp && pLeft->snr < pRight->snr)) {
+                //  左 < 右
+                pLeft->amp = 0; //标记为删除掉的点
+            } else {
+                //  左 > 右
+                pRight->amp = 0;
+            }
+        }
+        pRight++;
+        pLeft++;
+    }
+    // 删除不需要的点
+    for (pRight = pLeft = list->point; pRight < pEnd; pRight++) {
+        if (pRight->amp != 0) {
+            if (pLeft != pRight)
+                memcpy(pLeft, pRight, sizeof(cfar2d_point_t));
+            pLeft++;
+        }
+    }
+    list->numPoint = pLeft - list->point;
+}
