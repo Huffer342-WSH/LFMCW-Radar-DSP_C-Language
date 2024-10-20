@@ -45,9 +45,11 @@ typedef struct {
 } radar_config_t;
 
 typedef struct {
-    uint16_t numChannel;
-    uint16_t numRangeBin;
+    radar_param_t *param;
+    uint16_t numStaticClutterAcc; //staticClutterAccBuffer中累加的数量
     double *staticClutter;
+    double *staticClutterAccBuffer; // 保存一段时间的静态杂波的累加
+    double *ampSpec2D;              // 幅度谱缓冲区
 } radar_basic_data_t;
 
 

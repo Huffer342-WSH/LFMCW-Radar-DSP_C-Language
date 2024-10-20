@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include "module_wrapper.hh"
 #include "radar_types.h"
 #include "radar_processer.h"
 
@@ -40,45 +41,27 @@ PYBIND11_MODULE(pyRadar, m)
         .def(
             py::init<>(),
             "Default constructor initializes numChannel and numRangeBin to 0 and staticClutter to nullptr")
-        .def_readwrite("numChannel", &radar_basic_data_t::numChannel)
-        .def_readwrite("numRangeBin", &radar_basic_data_t::numRangeBin)
         .def_property(
             "staticClutter",
             [](radar_basic_data_t &self) -> py::array_t<std::complex<double> > {
-                if (!self.staticClutter) {
-                    // 如果 staticClutter 为空，返回空的 numpy 数组
-                    return py::array_t<std::complex<double> >(
-                        { 0, 0 },                             // Shape
-                        { sizeof(std::complex<double>),       // Strides (step size in bytes)
-                          sizeof(std::complex<double>) * 0 }, // Adjusted for your array size
-                        nullptr // Data pointer (nullptr if you don't have one yet)
-                    );
-                }
-
-                // 创建 numpy 数组，返回指向 staticClutter 的数据
-                return py::array_t<std::complex<double> >(
-                    { self.numChannel, self.numRangeBin }, // 形状
-                    { sizeof(std::complex<double>) * self.numRangeBin,
-                      sizeof(std::complex<double>) },                            // 步长
-                    reinterpret_cast<std::complex<double> *>(self.staticClutter) // 数据指针
-                );
+                std::vector<size_t> shape = { self.param->numChannel, self.param->numRangeBin };
+                return array_c2numpy<std::complex<double> >(self.staticClutter, shape);
             },
-            [](radar_basic_data_t &self, py::array_t<std::complex<double> > arr) {
-                py::buffer_info buf_info = arr.request();
-
-                if (buf_info.ndim != 2 || buf_info.shape[0] != self.numChannel ||
-                    buf_info.shape[1] != self.numRangeBin) {
-                    throw std::runtime_error("Shape mismatch for staticClutter array");
-                }
-
-                // 如果 staticClutter 为空，分配内存
-                if (!self.staticClutter) {
-                    self.staticClutter = (double *)malloc(self.numChannel * self.numRangeBin *
-                                                          sizeof(std::complex<double>));
-                }
-
-                // 直接将数据写入 staticClutter
-                std::memcpy(self.staticClutter, buf_info.ptr, buf_info.size * buf_info.itemsize);
+            [](radar_basic_data_t &self,
+               py::array_t<std::complex<double>, py::array::c_style | py::array::forcecast> arr) {
+                std::vector<size_t> shape = { self.param->numChannel, self.param->numRangeBin };
+                array_numpy2c<std::complex<double> >(self.staticClutter, arr, shape);
+            })
+        .def_property(
+            "ampSpec2D",
+            [](radar_basic_data_t &self) -> py::array_t<double> {
+                std::vector<size_t> shape = { self.param->numRangeBin, self.param->numChrip };
+                return array_c2numpy<double>(self.ampSpec2D, shape);
+            },
+            [](radar_basic_data_t &self,
+               py::array_t<double, py::array::c_style | py::array::forcecast> arr) {
+                std::vector<size_t> shape = { self.param->numRangeBin, self.param->numChrip };
+                array_numpy2c<double>(self.ampSpec2D, arr, shape);
             });
 
 
@@ -100,7 +83,9 @@ PYBIND11_MODULE(pyRadar, m)
 
     // 封装 radardsp_input_new_frame
     m.def("radardsp_input_new_frame",
-          [](radar_handle_t &radar, py::array_t<std::complex<double> > array) -> int {
+          [](radar_handle_t &radar,
+             py::array_t<std::complex<double>, py::array::c_style | py::array::forcecast> array)
+              -> int {
               // 获取数组形状
               int shape0 = radar.param.numChannel;
               int shape1 = radar.param.numRangeBin;

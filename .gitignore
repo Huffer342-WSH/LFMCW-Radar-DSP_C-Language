@@ -3,3 +3,7 @@
 .output
 .venv
 build
+**/__pycache__/
+**/__pycache__/**
+
+data/RadarData_Simulate.mat

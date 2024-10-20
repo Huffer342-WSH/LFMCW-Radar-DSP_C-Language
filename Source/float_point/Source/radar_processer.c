@@ -12,18 +12,27 @@
 #include "radar_cfar.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <math.h>
+
 int radardsp_init(radar_handle_t *radar)
 {
     /*
     初始化radar里面的值，有需要的参数直接从外部传入
     */
-    radar->param.numChannel = 2;
-    radar->param.numChrip = 32;
-    radar->param.numRangeBin = 25;
-    radar->basic.numChannel = 2;
-    radar->basic.numRangeBin = 25;
-    radar->basic.staticClutter =
-        malloc(sizeof(double) * 2 * radar->basic.numChannel * radar->basic.numRangeBin);
+    radar_param_t *param = &radar->param;
+    radar_basic_data_t *basic = &radar->basic;
+
+    param->numChannel = 2;
+    param->numChrip = 32;
+    param->numRangeBin = 25;
+
+    basic->param = param;
+    basic->staticClutter = malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
+    // basic->staticClutter = NULL;
+    basic->numStaticClutterAcc = 0;
+    basic->staticClutterAccBuffer =
+        malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
+    basic->ampSpec2D = malloc(sizeof(double) * param->numRangeBin * param->numChrip);
 }
 
 int radardsp_input_new_frame(radar_handle_t *radar, void *data)
@@ -38,23 +47,46 @@ int radardsp_input_new_frame(radar_handle_t *radar, void *data)
 
     int shape0 = radar->param.numRangeBin;
     int shape1 = radar->param.numChrip * 2;
-    double(*rdms)[shape0][shape1] = (double(*)[shape0][shape1 * 2]) data;
-    /* 1. 更新静态杂波，并减去静态杂波
-     */
+    double(*rdms)[shape0][shape1][2] = (double(*)[shape0][shape1][2])data;
 
+    /* 1. 更新静态杂波，并减去静态杂波 */
+    {
+        uint32_t numCH = radar->param.numChannel;
+        uint32_t numRB = radar->param.numRangeBin;
+        uint32_t numChrip = radar->param.numChrip;
+        double *pSrc = (double *)data;
+        double *pDest = radar->basic.staticClutter;
+        double *pEnd = pDest + numCH * numRB * 2;
+        while (pDest < pEnd) {
+            // 更新静态杂波
+            *pDest = (*pDest + *pSrc) / 2;
+            *(pDest + 1) = (*(pDest + 1) + *(pSrc + 1)) / 2;
+            // *pDest = *pSrc;
+            // *(pDest + 1) = *(pSrc + 1);
+            // 减去静态杂波
+            *pSrc -= *pDest;
+            *(pSrc + 1) -= *(pDest + 1);
 
-    double(*staticClutter)[shape0 * 2] = (double(*)[shape0 * 2]) radar->basic.staticClutter;
-
-    for (uint16_t j = 0; j < radar->basic.numChannel; j++) {
-        for (uint16_t i = 0; i < shape0; i++) {
-            staticClutter[j][i * 2] = rdms[j][i][0];
-            staticClutter[j][i * 2 + 1] = rdms[j][i][1];
+            pSrc += numChrip * 2;
+            pDest += 2;
         }
     }
 
 
 
     /* 2. 计算幅度谱 */
+    {
+        double *pSrc0 = (double *)data;
+        double *pSrc1 = (double *)data + radar->param.numRangeBin * radar->param.numChrip * 2;
+        double *pDest = radar->basic.ampSpec2D;
+        double *pEnd = pDest + radar->param.numRangeBin * radar->param.numChrip;
+        while (pDest < pEnd) {
+            double real, imag;
+            real = *pSrc0++;
+            imag = *pSrc0++;
+            *pDest++ = sqrt(real * real + imag * imag);
+        }
+    }
 
 
     /* 3. CFAR搜索点，最终输出的检测结果包含点的 */

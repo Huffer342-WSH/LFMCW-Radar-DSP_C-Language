@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 # 指定需要安装的库列表
-REQUIRED_PACKAGES = ["numpy", "scipy", "ipython", "ipykernel", "pybind11", "pybind11-stubgen"]
+REQUIRED_PACKAGES = ["numpy", "scipy", "ipython", "ipykernel", "pybind11", "pybind11-stubgen", "nbformat", "joblib", "moviepy"]
 
 
 def get_python_version(venv_python):
