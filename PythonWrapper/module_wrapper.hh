@@ -3,9 +3,16 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/detail/common.h>
 #include <iostream>
 namespace py = pybind11;
 
+/**
+ * 将C语言数组转换为 numpy 数组
+ * @param data     C语言数组的指针
+ * @param shape    C语言数组的形状
+ * @return         numpy 数组
+ */
 template <typename T> py::array_t<T> array_c2numpy(void *data, const std::vector<size_t> &shape)
 {
     if (!data) {
@@ -15,12 +22,14 @@ template <typename T> py::array_t<T> array_c2numpy(void *data, const std::vector
     // 计算步长
     std::vector<size_t> strides(shape.size());
     size_t stride = sizeof(T);
-    for (int i = shape.size() - 1; i >= 0; --i) {
+    for (int i = static_cast<int>(shape.size()) - 1; i >= 0; --i) {
         strides[i] = stride;
         stride *= shape[i];
     }
     return py::array_t<T>(shape, strides, static_cast<T *>(data));
 }
+
+
 
 template <typename T>
 void array_numpy2c(void *data, py::array arr, const std::vector<size_t> &shape)
@@ -60,8 +69,8 @@ void array_numpy2c(void *data, py::array arr, const std::vector<size_t> &shape)
 
     // 检查内存是否是连续的
     bool is_contiguous = true;
-    ssize_t expected_stride = buf_info.itemsize;
-    for (ssize_t i = buf_info.ndim - 1; i >= 0; --i) {
+    long long expected_stride = buf_info.itemsize;
+    for (int i = static_cast<int>(buf_info.ndim) - 1; i >= 0; --i) {
         if (buf_info.strides[i] != expected_stride) {
             is_contiguous = false;
             break;
@@ -81,8 +90,8 @@ void array_numpy2c(void *data, py::array arr, const std::vector<size_t> &shape)
 
         for (size_t i = 0; i < total_size; ++i) {
             // 计算在原数据中的偏移量
-            ssize_t src_offset = 0;
-            for (size_t j = 0; j < buf_info.ndim; ++j) {
+            long long src_offset = 0;
+            for (int j = 0; j < buf_info.ndim; ++j) {
                 src_offset += indices[j] * buf_info.strides[j] / buf_info.itemsize;
             }
 
@@ -90,8 +99,8 @@ void array_numpy2c(void *data, py::array arr, const std::vector<size_t> &shape)
             dst[i] = src[src_offset];
 
             // 更新indices（多维数组下标遍历）
-            for (ssize_t j = buf_info.ndim - 1; j >= 0; --j) {
-                if (++indices[j] < buf_info.shape[j]) {
+            for (int j = static_cast<int>(buf_info.ndim) - 1; j >= 0; --j) {
+                if (++indices[j] < static_cast<size_t>(buf_info.shape[j])) {
                     break;
                 }
                 indices[j] = 0;

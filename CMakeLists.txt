@@ -11,6 +11,16 @@ set(EXECUTABLE_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/bin)
 set(LIBRARY_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/lib)
 set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
 
+if(MSVC)
+    # 关闭警告 C4819: 无效的字符。避免中文注释被警告
+    add_compile_options(
+        "/wd4819"
+    )
+
+    # 关闭 /showIncludes
+    string(REPLACE "/showIncludes" "" CMAKE_DEPFILE_FLAGS_C "${CMAKE_DEPFILE_FLAGS_C}")
+    string(REPLACE "/showIncludes" "" CMAKE_DEPFILE_FLAGS_CXX "${CMAKE_DEPFILE_FLAGS_CXX}")
+endif()
 
 # 添加全局依赖库
 # link_libraries(m)
@@ -23,7 +33,6 @@ add_subdirectory(Source)
 
 # 编译测试
 add_subdirectory(Test)
-
 
 # 构建Python模块
 add_subdirectory(PythonWrapper)

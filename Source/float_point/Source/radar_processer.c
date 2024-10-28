@@ -33,6 +33,7 @@ int radardsp_init(radar_handle_t *radar)
     basic->staticClutterAccBuffer =
         malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
     basic->ampSpec2D = malloc(sizeof(double) * param->numRangeBin * param->numChrip);
+    return 0;
 }
 
 int radardsp_input_new_frame(radar_handle_t *radar, void *data)
@@ -47,7 +48,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, void *data)
 
     int shape0 = radar->param.numRangeBin;
     int shape1 = radar->param.numChrip * 2;
-    double(*rdms)[shape0][shape1][2] = (double(*)[shape0][shape1][2])data;
+    // double(*rdms)[shape0][shape1][2] = (double(*)[shape0][shape1][2])data;
 
     /* 1. 更新静态杂波，并减去静态杂波 */
     {

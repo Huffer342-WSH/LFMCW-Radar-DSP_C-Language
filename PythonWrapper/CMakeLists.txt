@@ -5,15 +5,6 @@ cmake_minimum_required(VERSION 3.5)
 # 项目名称和语言
 project(pyRadar)
 
-if(MSVC)
-    # 关闭警告 C4819
-    message(STATUS "Disable warning C4819")
-    add_compile_options(
-        "/nologo"
-        "/wd4819"
-    )
-endif()
-
 if(WIN32)
     set(PYTHON_EXECUTABLE ${CMAKE_SOURCE_DIR}/.venv/Scripts/python.exe)
 else()
