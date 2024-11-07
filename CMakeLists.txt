@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
+
 project(LFMCWRadarProcesser)
+
+enable_testing()
 
 # 设置 C++ 标准
 set(CMAKE_C_STANDARD 11)
@@ -11,16 +14,13 @@ set(EXECUTABLE_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/bin)
 set(LIBRARY_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/lib)
 set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
 
-if(MSVC)
-    # 关闭警告 C4819: 无效的字符。避免中文注释被警告
-    add_compile_options(
-        "/wd4819"
-    )
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
-    # 关闭 /showIncludes
-    string(REPLACE "/showIncludes" "" CMAKE_DEPFILE_FLAGS_C "${CMAKE_DEPFILE_FLAGS_C}")
-    string(REPLACE "/showIncludes" "" CMAKE_DEPFILE_FLAGS_CXX "${CMAKE_DEPFILE_FLAGS_CXX}")
-endif()
+# 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
+include(set_python3_path)
+
+# 设置 MSVC 编译选项
+include(msvc_compile_options)
 
 # 添加全局依赖库
 # link_libraries(m)
@@ -31,8 +31,11 @@ add_subdirectory(ThirdParty)
 # 编译雷达信号处理库
 add_subdirectory(Source)
 
-# 编译测试
-add_subdirectory(Test)
+# 构建C语言测试
+add_subdirectory(Test) 
 
 # 构建Python模块
 add_subdirectory(PythonWrapper)
+
+# 添加 pytest 测试命令
+include(pytest)

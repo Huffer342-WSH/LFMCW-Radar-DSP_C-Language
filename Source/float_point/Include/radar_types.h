@@ -49,7 +49,7 @@ typedef struct {
     uint16_t numStaticClutterAcc; //staticClutterAccBuffer中累加的数量
     double *staticClutter;
     double *staticClutterAccBuffer; // 保存一段时间的静态杂波的累加
-    double *ampSpec2D;              // 幅度谱缓冲区
+    double *magSpec2D;              // 幅度谱缓冲区
 } radar_basic_data_t;
 
 

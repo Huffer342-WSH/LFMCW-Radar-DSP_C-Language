@@ -1,6 +1,6 @@
 # %%
 
-from pylfmcwradar import pyRadar
+from pylfmcwradar import pyradar_float as pyRadar
 import numpy as np
 import scipy.io
 from scipy.fft import fft, fft2, fftshift
@@ -9,12 +9,10 @@ import drawhelp.draw as dh
 
 # 注意使用np.ascontiguousarray保证numpy数组在内存中的连续性，否则C语言模块无法兼容
 
-# %%
 
 radarHandle = pyRadar.RadarHandle()
 pyRadar.radardsp_init(radarHandle)
-
-pyRadar.radardsp_init(radarHandle)
+# %%
 print(
     f"\ntype of radarParam.numPoint :{type(radarHandle.basic.staticClutter)}\n"
     f"radarHandle.param.numChannel: {radarHandle.param.numChannel}\n"
@@ -67,13 +65,13 @@ chripMean = fft2(radarDataCube[0], axes=(-2, -1))[:, 0, :]
 # %%
 # 使用C语言模块处理数据k,同时把数据保存下来观察
 
-ampSpec2DList = []
+magSpec2DList = []
 for frame in radarDataCube:
     rdms = fft(fft(frame, axis=-1)[:, :, :numRangeBin], axis=-2).transpose(0, 2, 1)
     pyRadar.radardsp_input_new_frame(radarHandle, rdms)
-    ampSpec2DList.append(radarHandle.basic.ampSpec2D)
-    ampSpec2D = np.abs(rdms[0])
-    radarHandle.basic.ampSpec2D[0][0]
-    # print(f"误差： {np.mean(np.abs(radarHandle.basic.ampSpec2D - ampSpec2D))}")
-dh.draw_2d_spectrumlist(ampSpec2DList[::40], title="幅度谱")
+    magSpec2DList.append(radarHandle.basic.magSpec2D)
+    magSpec2D = np.abs(rdms[0])
+    radarHandle.basic.magSpec2D[0][0]
+    # print(f"误差： {np.mean(np.abs(radarHandle.basic.magSpec2D - magSpec2D))}")
+dh.draw_2d_spectrumlist(magSpec2DList[::40], title="幅度谱")
 # %%

@@ -1,48 +1,37 @@
-# Windwos平台的Python模块需要使用msvc构建，主要原因是Windows平台和Unix平台的动态链接库调用方式不同，mingw并不兼容
+cmake_minimum_required(VERSION 3.15)
 
-cmake_minimum_required(VERSION 3.5)
+project(pythonwrapper VERSION 0.1)
 
-# 项目名称和语言
-project(pyRadar)
+# 假设 Python3_EXECUTABLE 已经定义（例如通过 find_package 查找到）
+if(Python3_EXECUTABLE)
+    # 尝试运行 Python3_EXECUTABLE --version 来检查是否是有效的 Python 可执行文件
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} --version
+        RESULT_VARIABLE PYTHON_EXEC_CHECK
+        OUTPUT_VARIABLE PYTHON_VERSION_OUTPUT
+        ERROR_VARIABLE PYTHON_VERSION_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_STRIP_TRAILING_WHITESPACE
+    )
 
-if(WIN32)
-    set(PYTHON_EXECUTABLE ${CMAKE_SOURCE_DIR}/.venv/Scripts/python.exe)
+    if(PYTHON_EXEC_CHECK EQUAL 0)
+        message(STATUS "Python executable found: ${Python3_EXECUTABLE}")
+        message(STATUS "Python version output: ${PYTHON_VERSION_OUTPUT}")
+    else()
+        message(WARNING "The specified Python3_EXECUTABLE (${Python3_EXECUTABLE}) is not a valid Python executable.")
+    endif()
 else()
-    set(PYTHON_EXECUTABLE ${CMAKE_SOURCE_DIR}/.venv/bin/python)
+    message(FATAL_ERROR "Python3_EXECUTABLE is not set.")
 endif()
 
-# 添加 pybind11 子目录（假设它位于项目根目录的 pybind11-2.13.6/ 目录下）
-add_subdirectory(pybind11-2.13.6)
+# 设置生成的python包名称
+set(PYTHON_PACKAGE_NAME pylfmcwradar)
 
-pybind11_add_module(pyRadar
-    bind.cc
-)
-target_include_directories(pyRadar PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+# 设置包生成路径
+set(PYTHON_PACKAGE_OUTPUT_DIR ${TATGET_OUTPUT_PATH}/python/${PYTHON_PACKAGE_NAME})
 
-target_link_libraries(pyRadar PRIVATE
-    lfmcwradar_float
-)
+# 设置包安装目录
+set(PYTHON_PACKAGE_INATSLL_DIR "${CMAKE_SOURCE_DIR}/.venv/Lib/site-packages/${PYTHON_PACKAGE_NAME}")
 
-set_target_properties(pyRadar
-    PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${TATGET_OUTPUT_PATH}/python/pyRadar"
-)
-
-get_target_property(PYRADAR_OUTPUT_DIR pyRadar LIBRARY_OUTPUT_DIRECTORY)
-
-add_custom_command(TARGET pyRadar POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${PYRADAR_OUTPUT_DIR}" ${PYTHON_EXECUTABLE} -m pybind11_stubgen pyRadar --output-dir ${PYRADAR_OUTPUT_DIR}
-    DEPENDS pyRadar
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Generating .pyi file for pyRadar"
-    VERBATIM
-)
-
-add_custom_command(TARGET pyRadar POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PYRADAR_OUTPUT_DIR}"
-    "${CMAKE_SOURCE_DIR}/.venv/Lib/site-packages/pylfmcwradar"
-    COMMENT "Copying pyRadar output directory to ${CMAKE_SOURCE_DIR}/.venv/Lib/site-packages/pylfmcwradar"
-)
+# 添加源文件
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pylfmcwradar_pkg)

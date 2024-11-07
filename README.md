@@ -2,14 +2,17 @@
 
 ## 1.简介
 
-该项目旨在使用C语言实现一个可移植的适用于LFMCW雷达的目标检测程序，包含信号处理和目标跟踪等功能。为了提高算法的可移植性，一些比较消耗性能的功能比如`开方`、`三角函数`、`FFT`，均需要外部以函数指针的方式提供。之所以这样是因为部分算法可能会有硬件加速，比如硬件FFT加速。
+该项目旨在使用C语言实现一个可移植的适用于LFMCW雷达的目标检测程序，包含信号处理和目标跟踪等功能。
+
+为了提高算法的可移植性，一些比较消耗性能的功能比如`开方`、`三角函数`、`FFT`，均需要外部以函数指针的方式提供。之所以这样是因为部分算法可能会有硬件加速，比如硬件FFT加速。后续也可以考虑增加算法库内部实现的函数。
+
 
 文件结构：
 ```
 ├──.output         # 生成的可执行文件和库文件
 ├──.venv           # Python虚拟环境
 ├──.vscode         # VSCode配置
-├──data            # 测试数据
+├──Data            # 测试数据
 ├──Doc             # 文档
 ├──PythonWrapper   # C语言静态库封装成Python模块
 ├──Source          # C语言源码
@@ -37,13 +40,15 @@
      └───python   # python模块
 ```
 
-构建pyRadar还会复制python模块到`.venv/Lib/site-packages/pylfmcwradar`目录中 
+构建好的python包还会被安装到`.venv/Lib/site-packages/pylfmcwradar`目录中，在项目根目录下的Python虚拟环境中可直接导入模块。
 
-### 2.0 准备工具
+### 2.0 下载工程并准备工具
 
-- Python： 用来创建venv
-- GCC/MinGW： 虽然Python官方推荐在Windows平台下使用MSVC构建模块，但是MinGW貌似也行。 推荐版本：[w64devkit](https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe)
-  > MSVC不支持可变长度数组，不是很方便。
+- Python： 用来创建venv，以及给Python包构建提供依赖
+- C语言编译器
+  + windwos： 官方推荐MSVC，实测w64devkit提供的mingw64-gcc也可以编译模块。下载路径：[w64devkit](https://github.com/skeeto/w64devkit/releases/download/v2.0.0/w64devkit-x64-2.0.0.exe)
+  + Linux: GCC
+  > MSVC不支持可变长度数组
 - CMake, 下载路径: [主页](https://cmake.org/download/)、[windows版本](https://github.com/Kitware/CMake/releases/download/v3.31.0-rc2/cmake-3.31.0-rc2-windows-x86_64.msi)
 
 安装好后将主程序的所在文件夹添加到PATH环境变量中
@@ -107,7 +112,7 @@ cmake --build ./build --target test-cmsisdsp -j
 激活工程中的虚拟环境后，使用以下代码导入模块
 
 ```python
-from pylfmcwradar import pyRadar
+from pylfmcwradar import pyradar_float
 ```
 
 算法还在开发阶段，模块具体的使用方法请阅读C语言代码以及`PythonWrapper`文件夹下的模块封装代码。

@@ -1,24 +1,50 @@
+#ifndef _RADAR_TYPES_H_
+#define _RADAR_TYPES_H_
 
-#include <stdint.h>
 #include "radar_math_types.h"
+#include "radar_cfar.h"
+
+/**
+ * @brief 量测值，包含距离，速度，方位。CFAR检测结果作为补充
+ *
+ */
+typedef struct {
+    rd_float_t distance; // 径向距离
+    rd_float_t velocity; // 径向速度
+    rd_float_t azimuth;  // 方位角
+    rd_float_t amp;
+    rd_float_t snr;
+} radar_measurements_t;
+
+/**
+ * @brief 量测值，包含距离，速度，方位。CFAR检测结果作为补充
+ *
+ */
+typedef struct {
+    radar_measurements_t *meas;
+    size_t num;
+    size_t capacity;
+} radar_measurement_list_t;
 
 /**
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
  */
 typedef struct {
-    uq32_t wavelength;   //单位:m 雷达波长
-    uint32_t bandwidth;  //单位:Hz 雷达有效带宽
-    uq32_t timeChrip;    //单位:s
-    uq32_t timeChripGap; //单位:s
-    uq32_t timeFrameGap; //单位:s
-    uint16_t numPoint;
+    rd_float_t wavelength;   // 单位:m 雷达波长，24GHz雷达波长为 12.42663038e-3
+    rd_float_t bandwidth;    // 单位:Hz 雷达有效带宽
+    rd_float_t timeChrip;    // 单位:s
+    rd_float_t timeChripGap; // 单位:s
+    rd_float_t timeFrameGap; // 单位:s
+
+    uint16_t numChannel;
+    uint16_t numSample;
     uint16_t numRangeBin;
     uint16_t numChrip;
 
     /* 以下参数位衍生参数，有上方参数计算得到，用于方便计算 */
-    uq32_t timeFrameVaild; //单位:s 一帧的有效时间
-    uq32_t resRange;       //单位:m 距离分辨率
-    uq32_t resVelocity;    //单位:m/s 速度分辨率
+    rd_float_t timeFrameVaild; // 单位:s 一帧的有效时间
+    rd_float_t resRange;       // 单位:m 距离分辨率
+    rd_float_t resVelocity;    // 单位:m/s 速度分辨率
 
 } radar_param_t;
 
@@ -26,23 +52,38 @@ typedef struct {
  * @brief 雷达配置，主要包含信号处理时可配置的参数，比如ROI、阈值等
  */
 typedef struct {
-    uint16_t cfarGuardRange; //CFAR 保护单元大小-距离维度
-    uint16_t cfarGuardVelo;  //CFAR 保护单元大小-速度维度
-    uint16_t cfarTrainRange; //CFAR 训练单元大小-距离维度
-    uint16_t cfarTrainVelo;  //CFAR 训练单元大小-速度维度
-    uint32_t cfarThSNR;      //CFAR 阈值-信噪比
-    uint32_t cfarThAmp;      //CFAR 阈值-幅度
-
+    cfar2d_cfg_t cfarCfg;
+    cfar2d_filter_cfg_t cfar_filter_cfg;
 } radar_config_t;
 
 typedef struct {
+    radar_param_t *param;
+    matrix2d_complex_int16_t *rdm;
     void *staticClutter;
+    matrix2d_int32_t magSpec2D;
 } radar_basic_data_t;
 
+typedef struct {
+    int32_t (*sqrt_rdint_i)(int32_t);
+} radar_math_function_t;
 
 typedef struct {
     uint32_t cntFrame;
     radar_param_t param;
     radar_config_t config;
     radar_basic_data_t basic;
+    radar_math_function_t func;
+    cfar2d_result_t cfar;
+    radar_measurement_list_t meas;
 } radar_handle_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+radar_measurement_list_t *radar_measurement_list_alloc(size_t capacity);
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* _RADAR_TYPES_H_ */

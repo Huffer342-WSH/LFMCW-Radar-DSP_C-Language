@@ -13,11 +13,11 @@ namespace py = pybind11;
  * @param shape    C语言数组的形状
  * @return         numpy 数组
  */
-template <typename T> py::array_t<T> array_c2numpy(void *data, const std::vector<size_t> &shape)
+template <typename T> pybind11::array_t<T> array_c2numpy(void *data, const std::vector<size_t> &shape)
 {
     if (!data) {
         throw std::runtime_error("array is NULL");
-        return py::array_t<T>({ 0 });
+        return pybind11::array_t<T>({ 0 });
     }
     // 计算步长
     std::vector<size_t> strides(shape.size());
@@ -26,15 +26,13 @@ template <typename T> py::array_t<T> array_c2numpy(void *data, const std::vector
         strides[i] = stride;
         stride *= shape[i];
     }
-    return py::array_t<T>(shape, strides, static_cast<T *>(data));
+    return pybind11::array_t<T>(shape, strides, static_cast<T *>(data));
 }
 
 
-
-template <typename T>
-void array_numpy2c(void *data, py::array arr, const std::vector<size_t> &shape)
+template <typename T> void array_numpy2c(void *data, pybind11::array arr, const std::vector<size_t> &shape)
 {
-    py::buffer_info buf_info = arr.request();
+    pybind11::buffer_info buf_info = arr.request();
 
     // 检查数组维度和形状是否匹配
     if (buf_info.ndim != shape.size()) {
@@ -48,7 +46,7 @@ void array_numpy2c(void *data, py::array arr, const std::vector<size_t> &shape)
     }
 
     // 检查数组的数据类型是否匹配模板类型 T
-    if (!py::isinstance<py::array_t<T> >(arr)) {
+    if (!pybind11::isinstance<pybind11::array_t<T>>(arr)) {
         throw std::runtime_error("Dtype mismatch for array");
     }
 

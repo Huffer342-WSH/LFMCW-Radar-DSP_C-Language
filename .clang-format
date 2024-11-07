@@ -1,131 +1,42 @@
-# SPDX-License-Identifier: GPL-2.0
-#
-# clang-format configuration file. Intended for clang-format >= 11.
-#
-# For more information, see:
-#
-#   Documentation/process/clang-format.rst
-#   https://clang.llvm.org/docs/ClangFormat.html
-#   https://clang.llvm.org/docs/ClangFormatStyleOptions.html
-#
----
-AccessModifierOffset: -4
-AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlignEscapedNewlines: Left
-AlignOperands: true
-AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
-AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: false
-BinPackArguments: true
-BinPackParameters: true
-BraceWrapping:
-  AfterClass: false
-  AfterControlStatement: false
-  AfterEnum: false
-  AfterFunction: true
-  AfterNamespace: true
-  AfterObjCDeclaration: false
-  AfterStruct: false
-  AfterUnion: false
-  AfterExternBlock: false
-  BeforeCatch: false
-  BeforeElse: false
-  IndentBraces: false
-  SplitEmptyFunction: true
-  SplitEmptyRecord: true
-  SplitEmptyNamespace: true
-BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Custom
-BreakBeforeInheritanceComma: false
-BreakBeforeTernaryOperators: false
-BreakConstructorInitializersBeforeComma: false
-BreakConstructorInitializers: BeforeComma
-BreakAfterJavaFieldAnnotations: false
-BreakStringLiterals: false
-ColumnLimit: 100
-CommentPragmas: '^ IWYU pragma:'
-CompactNamespaces: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
-ConstructorInitializerIndentWidth: 4
-ContinuationIndentWidth: 4
-Cpp11BracedListStyle: false
-DerivePointerAlignment: false
-DisableFormat: false
-ExperimentalAutoDetectBinPacking: false
-FixNamespaceComments: false
+BasedOnStyle: WebKit # 风格基准
+AccessModifierOffset: -4 # 访问修饰符（如 public、protected）缩进偏移量，负数表示左缩进。
 
-IncludeBlocks: Preserve
-IncludeCategories:
-  - Regex: '.*'
-    Priority: 1
-IncludeIsMainRegex: '(Test)?$'
-IndentCaseLabels: false
-IndentGotoLabels: false
-IndentPPDirectives: None
-IndentWidth: 4
-IndentWrappedFunctionNames: false
-JavaScriptQuotes: Leave
-JavaScriptWrapImports: true
-KeepEmptyLinesAtTheStartOfBlocks: false
-MacroBlockBegin: ''
-MacroBlockEnd: ''
-MaxEmptyLinesToKeep: 3
-NamespaceIndentation: None
-ObjCBinPackProtocolList: Auto
-ObjCBlockIndentWidth: 4
-ObjCSpaceAfterProperty: true
-ObjCSpaceBeforeProtocolList: true
+AlignAfterOpenBracket: BlockIndent # 在换行时对齐括号内的参数。
+AlignConsecutiveAssignments: false # 是否对齐连续的赋值语句。
+AlignConsecutiveBitFields: Consecutive # 是否对齐连续的位域声明
+AlignConsecutiveDeclarations: false # 是否对齐连续的声明。
+AlignEscapedNewlines: Left # 续行符（\）对齐方向。
+AlignOperands: Align # 是否对齐多行表达式中的操作数。
+AlignTrailingComments: true # 是否对齐行尾注释。
 
-# Taken from git's rules
-PenaltyBreakAssignment: 10
-PenaltyBreakBeforeFirstCallParameter: 30
-PenaltyBreakComment: 10
-PenaltyBreakFirstLessLess: 0
-PenaltyBreakString: 10
-PenaltyExcessCharacter: 100
-PenaltyReturnTypeOnItsOwnLine: 60
+AllowAllParametersOfDeclarationOnNextLine: false # 是否允许所有函数参数放在下一行。
+AllowShortBlocksOnASingleLine: Empty # 是否允许单行显示短代码块（如 { int x; }）。
+AllowShortCaseLabelsOnASingleLine: false # 是否允许单行显示短的 switch case 标签。
+AllowShortFunctionsOnASingleLine: None # 是否允许单行显示短函数。
+AllowShortIfStatementsOnASingleLine: false # 是否允许单行显示短 if 语句。
+AllowShortLoopsOnASingleLine: true # 是否允许单行显示短循环语句。
 
-PointerAlignment: Right
-ReflowComments: false
-SortIncludes: false
-SortUsingDeclarations: false
-SpaceAfterCStyleCast: false
-SpaceAfterTemplateKeyword: true
-SpaceBeforeAssignmentOperators: true
-SpaceBeforeCtorInitializerColon: true
-SpaceBeforeInheritanceColon: true
-SpaceBeforeParens: ControlStatementsExceptForEachMacros
-SpaceBeforeRangeBasedForLoopColon: true
-SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 1
-SpacesInAngles: false
-SpacesInContainerLiterals: false
-SpacesInCStyleCastParentheses: false
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
-Standard: Cpp03
-TabWidth: 4
-UseTab: Never 
+AlwaysBreakAfterDefinitionReturnType: None # 定义函数返回类型后是否换行。
+AlwaysBreakAfterReturnType: None # 声明函数返回类型后是否换行。
+AlwaysBreakBeforeMultilineStrings: false # 多行字符串前是否换行。
+AlwaysBreakTemplateDeclarations: false # 模板声明是否换行。
 
-BlankLineBefore:
-  AfterFunction: false
-  AfterFunctionDefinition: true
-  AfterStruct: false
-  BeforeFunction: true
-  BeforeFunctionDefinition: true
-  AfterEnum: false
-  BeforeStruct: false
-  BeforeNamespace: false
-  BeforeEnum: false
-  BeforeClass: false
-...
+BreakBeforeBinaryOperators: None # 二元运算符前是否换行。
+BreakBeforeBraces: Linux # 大括号换行方式。
+BreakBeforeInheritanceComma: false # 继承列表中的逗号前是否换行。
+BreakBeforeTernaryOperators: false # 三元运算符前是否换行。
+
+BreakConstructorInitializersBeforeComma: false # 构造函数初始化列表的逗号前是否换行。
+BreakConstructorInitializers: BeforeComma # 构造函数初始化列表换行位置。
+
+
+MaxEmptyLinesToKeep: 2 # 要保留的最大连续空行数。
+
+
+PointerAlignment: Right # 指针对齐方式。
+ColumnLimit: 200 # 每行的最大列数。
+
+CommentPragmas: '^ IWYU pragma:' # 注释中的编译指令正则匹配。
+
+TabWidth: 4 # 制表符宽度。
+UseTab: Never # 是否使用制表符代替空格。

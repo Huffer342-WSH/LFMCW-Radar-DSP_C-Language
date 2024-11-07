@@ -32,7 +32,7 @@ int radardsp_init(radar_handle_t *radar)
     basic->numStaticClutterAcc = 0;
     basic->staticClutterAccBuffer =
         malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
-    basic->ampSpec2D = malloc(sizeof(double) * param->numRangeBin * param->numChrip);
+    basic->magSpec2D = malloc(sizeof(double) * param->numRangeBin * param->numChrip);
     return 0;
 }
 
@@ -79,7 +79,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, void *data)
     {
         double *pSrc0 = (double *)data;
         double *pSrc1 = (double *)data + radar->param.numRangeBin * radar->param.numChrip * 2;
-        double *pDest = radar->basic.ampSpec2D;
+        double *pDest = radar->basic.magSpec2D;
         double *pEnd = pDest + radar->param.numRangeBin * radar->param.numChrip;
         while (pDest < pEnd) {
             double real, imag;
