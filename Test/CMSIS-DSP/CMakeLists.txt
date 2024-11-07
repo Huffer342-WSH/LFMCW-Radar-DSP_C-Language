@@ -29,3 +29,9 @@ target_compile_definitions(test-cmsisdsp PRIVATE
 )
 
 add_test(test-cmsisdsp ${EXECUTABLE_OUTPUT_PATH}/test-cmsisdsp)
+
+if(ENABLE_TEST_ARM_SQRT_Q31)
+    add_executable(test_arm_sqrt_q31 test_arm_sqrt_q31.cc)
+    target_link_libraries(test_arm_sqrt_q31 CMSISDSP GTest::gtest_main)
+    gtest_discover_tests(test_arm_sqrt_q31)
+endif()

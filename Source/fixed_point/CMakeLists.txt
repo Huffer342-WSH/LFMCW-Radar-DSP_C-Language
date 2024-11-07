@@ -4,6 +4,10 @@ project(LFMCW-Radar-Processer-FixedPointEdition)
 
 add_library(lfmcwradar_fixed STATIC)
 
+target_link_libraries(lfmcwradar_fixed PRIVATE
+    CMSISDSP
+)
+
 target_include_directories(lfmcwradar_fixed PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Include
 )

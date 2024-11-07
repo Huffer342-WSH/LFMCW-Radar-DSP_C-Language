@@ -22,6 +22,8 @@ include(set_python3_path)
 # 设置 MSVC 编译选项
 include(msvc_compile_options)
 
+include(configTest.cmake)
+
 # 添加全局依赖库
 # link_libraries(m)
 

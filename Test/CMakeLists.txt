@@ -1,19 +1,15 @@
-# 第三方库测试
-add_subdirectory(FFTW EXCLUDE_FROM_ALL)
-add_subdirectory(CMSIS-DSP EXCLUDE_FROM_ALL)
+include(GoogleTest)
+
+# FFTW测试
+if(ENABLE_TEST_FFTW)
+    add_subdirectory(FFTW)
+endif()
+
+# CMSIS-DSP测试
+if(ENABLE_TEST_ARM_CFFT_Q15)
+    add_subdirectory(CMSIS-DSP)
+endif()
+
 
 # 雷达信号处理库测试
-add_subdirectory(radar_dsp_float_point_test)
-
-
-add_executable(
-    gtestdemo_test
-    gtestdemo_test.cc
-)
-target_link_libraries(
-    gtestdemo_test
-    GTest::gtest_main
-)
-
-include(GoogleTest)
-gtest_discover_tests(gtestdemo_test)
+add_subdirectory(Radar_Fixed)
