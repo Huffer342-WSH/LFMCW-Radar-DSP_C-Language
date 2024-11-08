@@ -25,7 +25,7 @@ int cfar2d_result_reset(cfar2d_result_t *cfar)
  * @param[in] n 需要分配的CFAR检测点的数量
  * @return cfar2d_result_t* 一个指向初始化的2D-CFAR结果结构的指针，或者在失败时为NULL
  */
-cfar2d_result_t *cfar2d_result_calloc(size_t n)
+cfar2d_result_t *cfar2d_result_alloc(size_t n)
 {
     // 分配结果结构
     cfar2d_result_t *res = (cfar2d_result_t *)malloc(sizeof(cfar2d_result_t));
@@ -125,7 +125,7 @@ int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *mag, cfar2d_
  *
  *
  */
-int radr_cfar_result_filtering(cfar2d_result_t *res, cfar2d_filter_cfg_t *cfg)
+int radar_cfar_result_filtering(cfar2d_result_t *res, cfar2d_filter_cfg_t *cfg)
 {
     return 0;
 }

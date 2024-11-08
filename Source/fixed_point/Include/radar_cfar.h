@@ -45,14 +45,15 @@ typedef struct {
 extern "C" {
 #endif
 
-cfar2d_result_t *cfar2d_result_calloc(size_t n);
+cfar2d_result_t *cfar2d_result_alloc(size_t n);
+
 cfar2d_result_t *cfar2d_result_calloc_from_block(void *block, size_t blockSize, size_t n);
 
 void cfar2d_result_free(cfar2d_result_t *result);
 
 int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *amp, cfar2d_cfg_t *cfg);
 
-int radr_cfar_result_filtering(cfar2d_result_t *res, cfar2d_filter_cfg_t *cfg);
+int radar_cfar_result_filtering(cfar2d_result_t *res, cfar2d_filter_cfg_t *cfg);
 
 int cfar2d_result_reset(cfar2d_result_t *cfar);
 

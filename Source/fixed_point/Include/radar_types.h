@@ -58,21 +58,18 @@ typedef struct {
 
 typedef struct {
     radar_param_t *param;
-    matrix2d_complex_int16_t *rdm;
-    void *staticClutter;
-    matrix2d_int32_t magSpec2D;
+    matrix3d_complex_int16_t *rdms;
+    matrix2d_complex_int32_t *staticClutter;
+    matrix2d_complex_int32_t *staticClutterAccBuffer;
+    matrix2d_int32_t *magSpec2D;
 } radar_basic_data_t;
 
-typedef struct {
-    int32_t (*sqrt_rdint_i)(int32_t);
-} radar_math_function_t;
 
 typedef struct {
     uint32_t cntFrame;
     radar_param_t param;
     radar_config_t config;
     radar_basic_data_t basic;
-    radar_math_function_t func;
     cfar2d_result_t cfar;
     radar_measurement_list_t meas;
 } radar_handle_t;
@@ -81,6 +78,7 @@ typedef struct {
 extern "C" {
 #endif
 
+int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param);
 radar_measurement_list_t *radar_measurement_list_alloc(size_t capacity);
 
 #ifdef __cplusplus

@@ -5,8 +5,8 @@
 #include <cstring>
 #include <random>
 
-// 测试 arm_sqrt_q31 函数
-TEST(test_radar_clac_magSpec2D, Correctness)
+
+TEST(RadarFixedTest, radar_clac_magSpec2D)
 {
     static int16_t in[2][20][50][2];
     static int32_t out[20][50];

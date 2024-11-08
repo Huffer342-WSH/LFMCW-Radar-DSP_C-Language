@@ -23,11 +23,24 @@
 #include <stdlib.h>
 #include <math.h>
 
-int radardsp_init(radar_handle_t *radar)
+int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
 {
-    /*
-    初始化radar里面的值，有需要的参数直接从外部传入
-    */
+    radar->cntFrame = 0;
+
+    radar->param.wavelength = param->wavelength;
+    radar->param.bandwidth = param->bandwidth;
+    radar->param.timeChrip = param->timeChrip;
+    radar->param.timeChripGap = param->timeChripGap;
+    radar->param.timeFrameGap = param->timeFrameGap;
+    radar->param.numChannel = param->numChannel;
+    radar->param.numRangeBin = param->numRangeBin;
+    radar->param.numChrip = param->numChrip;
+    radar->param.timeFrameVaild = radar->param.numChrip * (radar->param.timeChrip + radar->param.timeChripGap);
+    radar->param.resRange = 1449896229.0 / radar->param.bandwidth;
+    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild);
+
+    radar_basic_data_init(&radar->basic, &radar->param);
+
 
     return 0;
 }
@@ -40,24 +53,19 @@ int radardsp_init(radar_handle_t *radar)
  * @param size data的大小，单位int16。 冗余参数，增加代码可靠性
  * @return int
  */
-int radardsp_input_new_frame(radar_handle_t *radar, int16_t *data, size_t size)
+int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rdms)
 {
-    RADAR_ASSERT(data != NULL);
-    RADAR_ASSERT(size == radar->param.numChannel * radar->param.numRangeBin * radar->param.numChrip * 2);
+    RADAR_ASSERT(
+        rdms != NULL && rdms->size0 == radar->param.numChannel && rdms->size1 == radar->param.numRangeBin &&
+        rdms->size2 == radar->param.numChrip
+    );
 
     /*
     输入一帧RDM（2D-FFT后的产物）
     RDM的两个维度是(距离，速度)，速度是没有结果fftshift的，所以说后一半是负速度，前一半是正速度
     */
+    radar->basic.rdms = rdms;
 
-    /* 将输入的数据封装成矩阵 */
-    for (int i = 0; i < radar->param.numChannel; i++) {
-        radar_matrix2d_int16_setData(
-            &radar->basic.rdm[i],                                              // 矩阵结构体指针
-            data + i * (radar->param.numRangeBin * radar->param.numChrip * 2), // 缓冲区地址
-            radar->param.numRangeBin, radar->param.numChrip * 2, 0             // 尺寸、拥有者
-        );
-    }
 
 #if ENABLE_STATIC_CLUTTER_FILTERING == ON
     /* 1. 更新静态杂波，并减去静态杂波 */
@@ -68,8 +76,8 @@ int radardsp_input_new_frame(radar_handle_t *radar, int16_t *data, size_t size)
 
     /* 2. 计算幅度谱 */
     radar_clac_magSpec2D(
-        &radar->basic.magSpec2D, // 幅度谱
-        &radar->basic.rdm[0],    // RDM
+        radar->basic.magSpec2D,  // 幅度谱
+        radar->basic.rdms,       // RDM
         radar->param.numChannel, // 需要累加的通道数
         0                        // 起始RDM编号
     );
@@ -83,24 +91,26 @@ int radardsp_input_new_frame(radar_handle_t *radar, int16_t *data, size_t size)
 
     /* 4. CFAR搜索点，最终输出的检测结果包含点的 */
     cfar2d_result_reset(&radar->cfar);
-    radar_cfar2d_goca(&radar->cfar, &radar->basic.magSpec2D, &radar->config.cfarCfg);
+    radar_cfar2d_goca(&radar->cfar, radar->basic.magSpec2D, &radar->config.cfarCfg);
 
 
     /* 5. 点云凝聚： 删除CFAR结果中一些幅度较小的点 */
     /* 一个目标的信号往往会分散到多个单元中，部分单元中的能量较小，导致测角精度低，\
         进而导致点云聚类的时候不能很好的将这些点分到一个簇中，因此要提前把这些点删除掉 */
-    radr_cfar_result_filtering(&radar->cfar, &radar->config.cfar_filter_cfg);
+    radar_cfar_result_filtering(&radar->cfar, &radar->config.cfar_filter_cfg);
 
 
     /* 6. 从微动信息中查询0速度点，添加到点云中 */
 
 
     /* 7. 计算速度和距离 */
-    radar_clac_dis_and_velo(&radar->meas, &radar->cfar, &radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
+    radar_clac_dis_and_velo(
+        &radar->meas, &radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity
+    );
 
 
     /* 8. 计算角度 */
-    radar_dual_channel_clac_angle(&radar->meas, &radar->cfar, radar->basic.rdm);
+    radar_dual_channel_clac_angle(&radar->meas, &radar->cfar, radar->basic.rdms);
 
 
     /* 9. 二维平面聚类(DBSCAN) */

@@ -49,7 +49,7 @@ enum {
 #define RADAR_ERROR(reason, error_code)                      \
     do {                                                     \
         radar_error(reason, __FILE__, __LINE__, error_code); \
-        return error_code;                                   \
+                                                             \
     } while (0)
 
 

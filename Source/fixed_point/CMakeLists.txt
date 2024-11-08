@@ -4,7 +4,7 @@ project(LFMCW-Radar-Processer-FixedPointEdition)
 
 add_library(lfmcwradar_fixed STATIC)
 
-target_link_libraries(lfmcwradar_fixed PRIVATE
+target_link_libraries(lfmcwradar_fixed PUBLIC
     CMSISDSP
 )
 
@@ -21,8 +21,10 @@ target_sources(lfmcwradar_fixed PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_cfar.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_dis_velo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_doa.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_error.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_mag.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_math.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_matrix.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_micromotion.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_processer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_types.c

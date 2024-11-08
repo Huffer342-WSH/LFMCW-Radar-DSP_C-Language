@@ -25,14 +25,14 @@ def generate_fft_data_to_c_file(length, data_type="real"):
         # Write input data as C array
         if data_type == "real":
             f.write(f"static q15_t {input_array_name}[] = {{\n    ")
-            f.write(f"{input[1]}")
+            f.write(f"{input[1].astype(np.int16)}")
             for i in range(1, len(input)):
-                f.write(f", {input[i]}")
+                f.write(f", {input[i].astype(np.int16)}")
             f.write("\n};\n\n")
         else:
             f.write(f"static q15_t {input_array_name}[] = {{\n")
             for value in input:
-                f.write(f"    {value.real}, {value.imag},\n")
+                f.write(f"    {value.real.astype(np.int16)}, {value.imag.astype(np.int16)},\n")
             f.write("};\n\n")
 
         # Write FFT result as C array

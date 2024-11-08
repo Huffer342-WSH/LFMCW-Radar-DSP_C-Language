@@ -1,5 +1,4 @@
-#ifndef _RADAR_PROCESSER_H_
-#define _RADAR_PROCESSER_H_
+#pragma once
 
 #include "radar_config.h"
 #include "radar_types.h"
@@ -9,10 +8,22 @@ extern "C" {
 #endif
 
 
-int radardsp_input_new_frame(radar_handle_t *radar, int16_t *data, size_t size);
+typedef struct {
+    float wavelength;
+    float bandwidth;
+    float timeChrip;
+    float timeChripGap;
+    float timeFrameGap;
+    uint16_t numChannel;
+    uint16_t numRangeBin;
+    uint16_t numChrip;
+} radar_init_param_t;
+
+int radardsp_init(radar_handle_t *radar, radar_init_param_t *param);
+
+int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rdms);
 
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* _RADAR_PROCESSER_H_ */

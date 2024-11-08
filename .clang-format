@@ -14,6 +14,7 @@ AllowShortBlocksOnASingleLine: Empty # 是否允许单行显示短代码块（�
 AllowShortCaseLabelsOnASingleLine: false # 是否允许单行显示短的 switch case 标签。
 AllowShortFunctionsOnASingleLine: None # 是否允许单行显示短函数。
 AllowShortIfStatementsOnASingleLine: false # 是否允许单行显示短 if 语句。
+AllowShortLambdasOnASingleLine: Empty # 是否允许单行显示短的 lambda 表达式。
 AllowShortLoopsOnASingleLine: true # 是否允许单行显示短循环语句。
 
 AlwaysBreakAfterDefinitionReturnType: None # 定义函数返回类型后是否换行。
@@ -34,7 +35,7 @@ MaxEmptyLinesToKeep: 2 # 要保留的最大连续空行数。
 
 
 PointerAlignment: Right # 指针对齐方式。
-ColumnLimit: 200 # 每行的最大列数。
+ColumnLimit: 120 # 每行的最大列数。
 
 CommentPragmas: '^ IWYU pragma:' # 注释中的编译指令正则匹配。
 

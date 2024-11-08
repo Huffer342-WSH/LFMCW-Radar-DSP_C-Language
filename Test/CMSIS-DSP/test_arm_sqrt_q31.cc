@@ -4,7 +4,7 @@
 #include <cstdint>
 
 // 测试 arm_sqrt_q31 函数
-TEST(test_arm_sqrt_q31, Correctness)
+TEST(CMSISDSPTest, arm_sqrt_q31)
 {
     int32_t in[] = { 16 };
     int32_t out[sizeof(in) / sizeof(in[0])];

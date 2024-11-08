@@ -6,6 +6,8 @@ project(pyradar_fixed)
 pybind11_add_module(pyradar_fixed
     bind.cc
     source/pyradar_fixed_radar_types.cc
+    source/pyradar_fixed_radar_matrix.cc
+    source/pyradar_fixed_radar_processer.cc
     source/pyradar_fixed_radar_cfar.cc
 )
 
