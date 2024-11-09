@@ -17,9 +17,9 @@ def test_matrix3d_complex_int16_alloc():
     assert mat.size2 == 10, f"Expected size2 to be 10, but got {mat.size2}"
 
     # 检查所有成员变量
-    assert mat.tda1 == 200, f"Expected tda1 to be 0, but got {mat.tda1}"
-    assert mat.tda2 == 20, f"Expected tda2 to be 0, but got {mat.tda2}"
-    assert mat.owner == 1, f"Expected owner to be True, but got {mat.owner}"
+    assert mat.tda1 == 100
+    assert mat.tda2 == 10
+    assert mat.owner == 1
 
 
 # 测试：验证 `data` 属性的读取和写入

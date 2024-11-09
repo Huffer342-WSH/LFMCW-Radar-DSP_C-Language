@@ -1,7 +1,7 @@
 BasedOnStyle: WebKit # 风格基准
 AccessModifierOffset: -4 # 访问修饰符（如 public、protected）缩进偏移量，负数表示左缩进。
 
-AlignAfterOpenBracket: BlockIndent # 在换行时对齐括号内的参数。
+AlignAfterOpenBracket: Align # 在换行时对齐括号内的参数。
 AlignConsecutiveAssignments: false # 是否对齐连续的赋值语句。
 AlignConsecutiveBitFields: Consecutive # 是否对齐连续的位域声明
 AlignConsecutiveDeclarations: false # 是否对齐连续的声明。
@@ -35,7 +35,7 @@ MaxEmptyLinesToKeep: 2 # 要保留的最大连续空行数。
 
 
 PointerAlignment: Right # 指针对齐方式。
-ColumnLimit: 120 # 每行的最大列数。
+ColumnLimit: 160 # 每行的最大列数。
 
 CommentPragmas: '^ IWYU pragma:' # 注释中的编译指令正则匹配。
 

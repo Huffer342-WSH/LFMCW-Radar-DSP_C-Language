@@ -4,3 +4,4 @@ option(ENABLE_TEST_ARM_SQRT_Q31 "Enable test for arm_sqrt_q31" ON)
 option(ENABLE_TEST_PYTHON_MODULE "Enable pytest testing" ON)
 
 option(ENABLE_TEST_RADAR_CLAC_MAGSPEC2D "Enable test for radar_clac_magSpec2D" ON)
+option(ENABLE_TEST_RADAR_MATRIX "Enable test for radar_matrix" ON)

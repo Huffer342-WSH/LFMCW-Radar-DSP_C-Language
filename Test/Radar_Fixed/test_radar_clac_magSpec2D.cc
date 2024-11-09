@@ -53,7 +53,7 @@ TEST(RadarFixedTest, radar_clac_magSpec2D)
                 for (size_t k = 0; k < 50; k++) {
                     int64_t square;
                     square = (int64_t)((int32_t)in[i][j][k][0] * in[i][j][k][0]) + (int32_t)in[i][j][k][1] * in[i][j][k][1];
-                    ASSERT_LT(square, (1 << 31) - 1);
+                    ASSERT_LT(square, ((int64_t)1 << 31) - 1);
                     ref[j][k] += (int32_t)(sqrt(square) * sqrt(1 << 25));
                 }
             }
@@ -66,7 +66,7 @@ TEST(RadarFixedTest, radar_clac_magSpec2D)
         for (size_t j = 0; j < 20; j++) {
             for (size_t k = 0; k < 50; k++) {
                 for (size_t i = 0; i < 2; i++) {
-                    printf("[%2llu, %2llu, %2llu]  %-8d %-8d  |", i, j, k, in[i][j][k][0], in[i][j][k][1]);
+                    printf("[%2lu, %2lu, %2lu]  %-8d %-8d  |", i, j, k, in[i][j][k][0], in[i][j][k][1]);
                     printf(" %+8d |", ref[j][k]);
                     printf(" %+8d |\n", out[j][k]);
                 }

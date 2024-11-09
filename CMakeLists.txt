@@ -19,6 +19,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 # 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
 include(configPython3)
 
+# 包含 AddressSanitizer 配置文件
+include(configAddressSanitizer)
+
 # 设置 MSVC 编译选项
 include(msvc_compile_options)
 
