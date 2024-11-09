@@ -23,6 +23,10 @@
 #include <stdlib.h>
 #include <math.h>
 
+
+static void check_and_delete_static_point(radar_handle_t *radar);
+
+
 int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
 {
     radar->cntFrame = 0;
@@ -36,10 +40,12 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
     radar->param.numRangeBin = param->numRangeBin;
     radar->param.numChrip = param->numChrip;
     radar->param.timeFrameVaild = radar->param.numChrip * (radar->param.timeChrip + radar->param.timeChripGap);
+    radar->param.timeFrameTotal = radar->param.timeFrameVaild + radar->param.timeFrameGap;
     radar->param.resRange = 1449896229.0 / radar->param.bandwidth;
     radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild);
 
     radar_basic_data_init(&radar->basic, &radar->param);
+    radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFrameTotal));
 
 
     return 0;
@@ -72,6 +78,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 
 #endif /* ENABLE_STATIC_CLUTTER_FILTERING */
 
+
 #if AMPLITUDE_SPECTRUM_CALCULATION_METHOD == AMP_SPEC_CLAC_METHOD_INSIDE
 
     /* 2. 计算幅度谱 */
@@ -87,7 +94,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 
 
     /* 3. 维护微动信息 */
-
+    radar_micromotion_add_frame(&radar->micromotion, radar->basic.rdms);
 
     /* 4. CFAR搜索点，最终输出的检测结果包含点的 */
     cfar2d_result_reset(&radar->cfar);
@@ -100,8 +107,8 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     radar_cfar_result_filtering(&radar->cfar, &radar->config.cfar_filter_cfg);
 
 
-    /* 6. 从微动信息中查询0速度点，添加到点云中 */
-
+    /* 6. CFAR结果中的0速度点查询微动信息，删除不符合要求的点 */
+    check_and_delete_static_point(radar);
 
     /* 7. 计算速度和距离 */
     radar_clac_dis_and_velo(
@@ -153,4 +160,13 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 
     */
     return 0;
+}
+
+/**
+ * @brief CFAR中的每一个速度为0的点，都一次查询微动信息，不符合要求的点删除
+ *
+ * @param radar
+ */
+static void check_and_delete_static_point(radar_handle_t *radar)
+{
 }

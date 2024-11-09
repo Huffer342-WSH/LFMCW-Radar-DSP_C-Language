@@ -2,30 +2,37 @@
 
 #include <stdlib.h>
 
-radar_micromotion_handle_t *radar_micromotion_queue_alloc(size_t numRangeBin, size_t capacity)
+void radar_micromotion_handle_init(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity)
 {
-    radar_micromotion_handle_t *queue = (radar_micromotion_handle_t *)malloc(sizeof(radar_micromotion_handle_t));
-
-    queue->numRangeBin = numRangeBin;
-    queue->capacity = capacity;
-    queue->in = 0;
-    queue->numFrame = 0;
-    queue->prevFrame = radar_matrix2d_complex_int16_alloc(numRangeBin, 1);
-    queue->phaseChange = radar_matrix2d_int16_alloc(numRangeBin, capacity);
-    return queue;
+    mm->numRangeBin = numRangeBin;
+    mm->capacity = capacity;
+    mm->in = 0;
+    mm->numFrame = 0;
+    mm->prevFramePhase = radar_matrix2d_int16_alloc(numRangeBin, 1);
+    mm->deltaPhase = radar_matrix2d_int16_alloc(numRangeBin, capacity);
 }
 
+
+void radar_micromotion_handle_deinit(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity)
+{
+    radar_matrix2d_int16_free(mm->prevFramePhase);
+    radar_matrix2d_int16_free(mm->deltaPhase);
+    mm->in = 0;
+}
 
 /**
  * @brief 添加一帧信息
  *
- * @param queue
- * @param rdm
+ * @param mm
+ * @param rdms
  * @return int
+ *
+ * @details 遍历每一个距离单元，计算这一帧数据0速度的相位。
+ *          和上一帧相位比较得到相位差，保存到deltaPhase中，新计算的相位保存到prevFramePhase中
+ *          其中幅度较小的点的相位差记为0
  */
-int radar_micromotion_add_frame(radar_micromotion_handle_t *queue, matrix2d_complex_int16_t *rdm)
+void radar_micromotion_add_frame(radar_micromotion_handle_t *mmhandle, matrix3d_complex_int16_t *rdms)
 {
-    return 0;
 }
 
 /**
@@ -34,8 +41,10 @@ int radar_micromotion_add_frame(radar_micromotion_handle_t *queue, matrix2d_comp
  * @param queue
  * @param rangeBin
  * @return radar_micromotion_target_info_t
+ *
+ * @details 遍历指定距离单元的相位差，得到相位-时间曲线。遍历过程中统计相位最大值最小值以及绝对值的累加和，作为微动信息
  */
-radar_micromotion_target_info_t radar_micromotion_check_rangebin(radar_micromotion_handle_t *queue, size_t rangeBin)
+radar_micromotion_target_info_t radar_micromotion_check_rangebin(radar_micromotion_handle_t *mmhandle, size_t rangeBin)
 {
     radar_micromotion_target_info_t res;
 

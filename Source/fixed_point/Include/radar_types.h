@@ -3,6 +3,7 @@
 
 #include "radar_math_types.h"
 #include "radar_cfar.h"
+#include "radar_micromotion.h"
 
 /**
  * @brief 量测值，包含距离，速度，方位。CFAR检测结果作为补充
@@ -43,6 +44,7 @@ typedef struct {
 
     /* 以下参数位衍生参数，有上方参数计算得到，用于方便计算 */
     rd_float_t timeFrameVaild; // 单位:s 一帧的有效时间
+    rd_float_t timeFrameTotal; // 单位:s 一帧的有效时间
     rd_float_t resRange;       // 单位:m 距离分辨率
     rd_float_t resVelocity;    // 单位:m/s 速度分辨率
 
@@ -70,6 +72,7 @@ typedef struct {
     radar_param_t param;
     radar_config_t config;
     radar_basic_data_t basic;
+    radar_micromotion_handle_t micromotion;
     cfar2d_result_t cfar;
     radar_measurement_list_t meas;
 } radar_handle_t;
