@@ -40,5 +40,5 @@ add_custom_command(TARGET pyradar_fixed POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${PYTHON_PACKAGE_OUTPUT_DIR}"
     "${PYTHON_PACKAGE_INATSLL_DIR}"
-    COMMENT "Copying pyRadar output directory to ${CMAKE_SOURCE_DIR}/.venv/Lib/site-packages/pylfmcwradar"
+    COMMENT "Copying pyRadar from ${PYTHON_PACKAGE_OUTPUT_DIR} to ${PYTHON_PACKAGE_INATSLL_DIR}"
 )

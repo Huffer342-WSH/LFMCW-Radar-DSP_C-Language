@@ -27,10 +27,12 @@ option(LAXVECTORCONVERSIONS "Lax vector conversions" ON)
 # ##########################
 add_library(CMSISDSP STATIC)
 
-# # 设置lib的输出路径
-# set_target_properties(CMSISDSP PROPERTIES
-#     ARCHIVE_OUTPUT_DIRECTORY ${DSP}/lib
-# )
+if(CMAKE_SYSTEM_NAME MATCHES "Linux" OR CMAKE_SYSTEM_NAME MATCHES "Unix" OR CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang" AND NOT CMAKE_CXX_COMPILER_ID MATCHES "MinGW")
+        target_compile_options(CMSISDSP PRIVATE -fPIC)
+    endif()
+endif()
+
 
 include(BasicMathFunctions/Config.cmake)
 

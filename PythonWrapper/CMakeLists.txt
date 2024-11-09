@@ -31,7 +31,7 @@ set(PYTHON_PACKAGE_NAME pylfmcwradar)
 set(PYTHON_PACKAGE_OUTPUT_DIR ${TATGET_OUTPUT_PATH}/python/${PYTHON_PACKAGE_NAME})
 
 # 设置包安装目录
-set(PYTHON_PACKAGE_INATSLL_DIR "${CMAKE_SOURCE_DIR}/.venv/Lib/site-packages/${PYTHON_PACKAGE_NAME}")
+set(PYTHON_PACKAGE_INATSLL_DIR "${Python3_SITEARCH}/${PYTHON_PACKAGE_NAME}")
 
 # 添加源文件
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pylfmcwradar_pkg)

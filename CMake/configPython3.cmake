@@ -7,6 +7,8 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 # 检查是否找到 Python3 解释器
 if(Python3_FOUND)
     message(STATUS "Found Python interpreter: ${Python3_EXECUTABLE}")
+    message(STATUS "Python site-packages path: ${Python3_SITEARCH}")
+
 else()
     message(FATAL_ERROR "Python interpreter not found in venv.")
 endif()

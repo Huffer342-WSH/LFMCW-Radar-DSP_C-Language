@@ -18,6 +18,7 @@
 #define _RADAR_MATH_TYPES_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef float rd_float_t;
 
