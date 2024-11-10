@@ -15,9 +15,11 @@ typedef struct {
  */
 typedef struct {
     cfar2d_point_t *point; /* 需要外部分配内存然后赋值 */
-    size_t numMax;
+    size_t capacity;
     size_t numPoint;
-    int owner;
+    uint8_t is_point_need_free  : 1;
+    uint8_t is_struct_need_free : 1;
+    uint8_t reserved            : 6;
 } cfar2d_result_t;
 
 /**
@@ -51,7 +53,8 @@ cfar2d_result_t *cfar2d_result_calloc_from_block(void *block, size_t blockSize, 
 
 void cfar2d_result_free(cfar2d_result_t *result);
 
-int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *amp, cfar2d_cfg_t *cfg);
+int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *magSepc2D, cfar2d_cfg_t *cfg);
+int radar_cfar2d_goca_debug(matrix2d_int32_t *noise, const matrix2d_int32_t *magSepc2D, cfar2d_cfg_t *cfg);
 
 int radar_cfar_result_filtering(cfar2d_result_t *res, cfar2d_filter_cfg_t *cfg);
 
