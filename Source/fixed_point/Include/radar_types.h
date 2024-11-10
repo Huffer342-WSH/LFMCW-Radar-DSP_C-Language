@@ -73,7 +73,7 @@ typedef struct {
     radar_config_t config;
     radar_basic_data_t basic;
     radar_micromotion_handle_t micromotion;
-    cfar2d_result_t cfar;
+    cfar2d_result_t *cfar;
     radar_measurement_list_t meas;
 } radar_handle_t;
 

@@ -34,3 +34,8 @@ def test_cfar_result_alloc_and_readwrite():
     assert cfar_result_list[0].idx0 == 2
     assert cfar_result_list[0].idx1 == 3
     assert cfar_result_list[0].snr == 4
+    print(cfar_result_list[0])
+
+
+if __name__ == "__main__":
+    test_cfar_result_alloc_and_readwrite()

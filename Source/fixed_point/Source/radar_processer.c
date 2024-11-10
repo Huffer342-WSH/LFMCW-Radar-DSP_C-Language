@@ -47,6 +47,15 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
     radar_basic_data_init(&radar->basic, &radar->param);
     radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFrameTotal));
 
+    radar->config.cfarCfg.numGuard[0] = 1;
+    radar->config.cfarCfg.numGuard[1] = 2;
+    radar->config.cfarCfg.numTrain[0] = 2;
+    radar->config.cfarCfg.numTrain[1] = 4;
+    radar->config.cfarCfg.thAmp = 0;
+    radar->config.cfarCfg.thSNR = 2.0;
+
+    radar->cfar = cfar2d_result_alloc(param->numMaxCfarPoints);
+
 
     return 0;
 }
@@ -96,28 +105,26 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     /* 3. 维护微动信息 */
     radar_micromotion_add_frame(&radar->micromotion, radar->basic.rdms);
 
+
     /* 4. CFAR搜索点，最终输出的检测结果包含点的 */
-    cfar2d_result_reset(&radar->cfar);
-    radar_cfar2d_goca(&radar->cfar, radar->basic.magSpec2D, &radar->config.cfarCfg);
-
-
+    cfar2d_result_reset(radar->cfar);
+    radar_cfar2d_goca(radar->cfar, radar->basic.magSpec2D, &radar->config.cfarCfg);
+#if 0
     /* 5. 点云凝聚： 删除CFAR结果中一些幅度较小的点 */
     /* 一个目标的信号往往会分散到多个单元中，部分单元中的能量较小，导致测角精度低，\
         进而导致点云聚类的时候不能很好的将这些点分到一个簇中，因此要提前把这些点删除掉 */
-    radar_cfar_result_filtering(&radar->cfar, &radar->config.cfar_filter_cfg);
+    radar_cfar_result_filtering(radar->cfar, &radar->config.cfar_filter_cfg);
 
 
     /* 6. CFAR结果中的0速度点查询微动信息，删除不符合要求的点 */
     check_and_delete_static_point(radar);
 
     /* 7. 计算速度和距离 */
-    radar_clac_dis_and_velo(
-        &radar->meas, &radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity
-    );
+    radar_clac_dis_and_velo(&radar->meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
 
 
     /* 8. 计算角度 */
-    radar_dual_channel_clac_angle(&radar->meas, &radar->cfar, radar->basic.rdms);
+    radar_dual_channel_clac_angle(&radar->meas, radar->cfar, radar->basic.rdms);
 
 
     /* 9. 二维平面聚类(DBSCAN) */
@@ -159,6 +166,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
         假如只使用直角坐标，相当于丢失了观测噪声在极坐标中的信息，比如测角精度固定，那越近直角坐标就越准吗。本来观测噪声是在极坐标下的，在经过观测矩阵后就可以把这个性质表达到直角坐标中。如果直接使用直角坐标系，就体现不出这个性质。
 
     */
+#endif
     return 0;
 }
 

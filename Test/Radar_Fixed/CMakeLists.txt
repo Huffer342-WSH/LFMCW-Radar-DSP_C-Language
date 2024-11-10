@@ -1,4 +1,9 @@
-
+if(ENABLE_TEST_RADAR_CFAR)
+    add_executable(test_radar_cfar test_radar_cfar.cc)
+    target_compile_options(test_radar_cfar PRIVATE ${ADDRESSSANITIZER_FLAGS})
+    target_link_libraries(test_radar_cfar lfmcwradar_fixed asan GTest::gtest_main)
+    gtest_discover_tests(test_radar_cfar)
+endif()
 
 if(ENABLE_TEST_RADAR_CLAC_MAGSPEC2D)
     add_executable(test_radar_clac_magSpec2D test_radar_clac_magSpec2D.cc)

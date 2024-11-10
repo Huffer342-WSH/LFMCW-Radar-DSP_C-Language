@@ -17,6 +17,7 @@ typedef struct {
     uint16_t numChannel;
     uint16_t numRangeBin;
     uint16_t numChrip;
+    uint16_t numMaxCfarPoints;
 } radar_init_param_t;
 
 int radardsp_init(radar_handle_t *radar, radar_init_param_t *param);

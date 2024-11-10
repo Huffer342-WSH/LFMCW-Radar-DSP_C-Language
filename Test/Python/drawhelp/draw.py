@@ -15,7 +15,7 @@ def draw_spectrum(spec, x=None, y=None, title: str = "default"):
     x_grid, y_grid = np.meshgrid(x, y)
     fig = go.Figure(data=[go.Surface(z=spec, x=x_grid, y=y_grid)])
     fig.update_layout(title=title, scene=dict(xaxis_title="X", yaxis_title="Y", zaxis_title="Z"))
-    fig.show()
+    return fig
 
 
 def draw_2d_spectrumlist(z, x=None, y=None, title: str = "未命名") -> go.Figure:

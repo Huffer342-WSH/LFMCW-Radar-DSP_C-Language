@@ -23,23 +23,23 @@ void bind_radar_init_param(pybind11::module_ &m)
         .def_readwrite("numChannel", &radar_init_param_t::numChannel)
         .def_readwrite("numRangeBin", &radar_init_param_t::numRangeBin)
         .def_readwrite("numChrip", &radar_init_param_t::numChrip)
-        .def(
-            "to_numpy",
-            [](radar_init_param_t &self) {
-                return array_c2numpy<radar_init_param_t>(&self, { 1 });
-            }
-        )
+        .def_readwrite("numMaxCfarPoints", &radar_init_param_t::numMaxCfarPoints)
+        .def("to_numpy",
+             [](radar_init_param_t &self) {
+                 return array_c2numpy<radar_init_param_t>(&self, { 1 });
+             })
         .def("__repr__", [](const radar_init_param_t &self) {
             std::ostringstream oss;
             oss << "radar_init_param:\n"
-                << "  wavelength   = " << std::setw(3) << self.wavelength << "\n"
-                << "  bandwidth    = " << std::setw(3) << self.bandwidth << "\n"
-                << "  timeChrip    = " << std::setw(3) << self.timeChrip << "\n"
-                << "  timeChripGap = " << std::setw(3) << self.timeChripGap << "\n"
-                << "  timeFrameGap = " << std::setw(3) << self.timeFrameGap << "\n"
-                << "  numChannel   = " << std::setw(3) << self.numChannel << "\n"
-                << "  numRangeBin  = " << std::setw(3) << self.numRangeBin << "\n"
-                << "  numChrip     = " << std::setw(3) << self.numChrip << "\n";
+                << std::setw(25) << "wavelength       =" << std::setw(3) << self.wavelength << "\n"
+                << std::setw(25) << "bandwidth        =" << std::setw(3) << self.bandwidth << "\n"
+                << std::setw(25) << "timeChrip        =" << std::setw(3) << self.timeChrip << "\n"
+                << std::setw(25) << "timeChripGap     =" << std::setw(3) << self.timeChripGap << "\n"
+                << std::setw(25) << "timeFrameGap     =" << std::setw(3) << self.timeFrameGap << "\n"
+                << std::setw(25) << "numChannel       =" << std::setw(3) << self.numChannel << "\n"
+                << std::setw(25) << "numRangeBin      =" << std::setw(3) << self.numRangeBin << "\n"
+                << std::setw(25) << "numChrip         =" << std::setw(3) << self.numChrip << "\n"
+                << std::setw(25) << "numMaxCfarPoints =" << std::setw(3) << self.numMaxCfarPoints << "\n";
             return oss.str();
         });
     ;

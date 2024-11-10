@@ -33,6 +33,7 @@ numPoint = mat["numPoint"][0, 0]
 numRangeBin = 25
 numChrip = mat["numChrip"][0, 0]
 numChannel = mat["numChannel"][0, 0]
+numFrame = len(mat["radarDataCube"])
 
 rdms_list = fft(fft(mat["radarDataCube"], axis=-1)[:, :, :, :numRangeBin], axis=-2).transpose(0, 1, 3, 2)
 rdms_list = rdms_list * (2**15 - 1) / np.max(np.abs(rdms_list))
@@ -44,6 +45,15 @@ rdms_list.imag = rdms_list.imag.astype(np.int16)
 radar_init_param = pyRadar.radar_init_param()
 radar_handle = pyRadar.radar_handle()
 rdms = pyRadar.matrix3d_complex_int16_alloc(numChannel, numRangeBin, numChrip)
+cfar_cfg = pyRadar.cfar2d_cfg()
+noise_buffer = pyRadar.matrix2d_int32_alloc(numRangeBin, numChrip)
+
+cfar_cfg.numGuard[0] = 2
+cfar_cfg.numGuard[1] = 2
+cfar_cfg.numTrain[0] = 2
+cfar_cfg.numTrain[1] = 2
+cfar_cfg.thSNR - 2.0
+cfar_cfg.thAmp = 0
 
 radar_init_param.wavelength = wavelength
 radar_init_param.bandwidth = bandwidth
@@ -53,31 +63,75 @@ radar_init_param.timeFrameGap = timeFrameGap
 radar_init_param.numChannel = numChannel
 radar_init_param.numRangeBin = numRangeBin
 radar_init_param.numChrip = numChrip
+radar_init_param.numMaxCfarPoints = 20
 
 print(f"雷达初始化参数:\n{radar_init_param}")
 pyRadar.radardsp_init(radar_handle, radar_init_param)
 
 
+# %% 输入一个帧
+def add_one_frame(frame):
+    set_matrix3d_complex_int16(rdms, rdms_list[0])
+    pyRadar.radardsp_input_new_frame(radar_handle, rdms)
+    pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
+    mag = radar_handle.getMagSpec2D()
+    count = radar_handle.cfar.numPoint
+    indices = np.column_stack((radar_handle.cfar.point[:count]["idx0"], radar_handle.cfar.point[:count]["idx1"]))
+    return (mag, indices)
+
+
 # %% 输入所有帧
 
-magSpec2D_list = []
-magSpec2DRef_list = []
+magSpec2D_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
+magSpec2DRef_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
+noise_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
+indicesList = []  # 每个元素代表一帧，帧为一个Nx2的矩阵，记录N个RDM中的坐标
 
-for frame in rdms_list:
+for i, frame in enumerate(rdms_list):
+    print(f"第{i}帧", flush=True)
     set_matrix3d_complex_int16(rdms, frame)
     pyRadar.radardsp_input_new_frame(radar_handle, rdms)
 
-    magSpec2D_list.append(radar_handle.getMagSpec2D())
-    magSpec2DRef_list.append(np.sum(np.abs(frame) * np.sqrt(2**25), axis=0))
+    pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
+
+    magSpec2D_list[i] = radar_handle.getMagSpec2D()
+    magSpec2DRef_list[i] = np.sum(np.abs(frame) * np.sqrt(2**25), axis=0)
+    noise_list[i] = noise_buffer.data.copy()
+    count = radar_handle.cfar.numPoint
+    indicesList.append(np.column_stack((radar_handle.cfar.point[:count]["idx0"], radar_handle.cfar.point[:count]["idx1"])))
+
+snr_list = magSpec2D_list / noise_list
 
 mese = np.mean([np.mean(np.abs(magSpec2D_list[i] - magSpec2DRef_list[i]) ** 2) for i in range(len(magSpec2D_list))])
 print("幅度谱均方误差：", mese)
-# %%
-go.Figure(data=[go.Surface(z=magSpec2D_list[0])]).show()
-
 
 # %%
 dh.draw_2d_spectrumlist(magSpec2D_list[::100], title="幅度谱").show()
 dh.draw_2d_spectrumlist(magSpec2DRef_list[::100], title="幅度谱").show()
+dh.draw_2d_spectrumlist(snr_list[::100], title="幅度谱").show()
+
+# %%
+""" 绘制RDM的CFAR搜索结果 """
+listData = []
+for i in range(numFrame):
+    data = list()
+    data.append(go.Scatter(x=indicesList[i][:, 0], y=indicesList[i][:, 1], mode="markers", name="Raw"))
+    listData.append(data)
+fig = dh.draw_animation(listData[::100], title="RDM的 GOCA-2DCFAR 搜索结果")
+fig.update_layout(
+    xaxis=dict(range=[-1, numRangeBin + 1]),
+    yaxis=dict(range=[-1, numChrip + 1]),
+    title="点云",
+)
+fig.show()
+
+
+# %% 绘制一帧数据
+i = 176
+go.Figure(data=[go.Surface(z=magSpec2D_list[i])]).show()
+go.Figure(data=[go.Surface(z=magSpec2DRef_list[i])]).show()
+go.Figure(data=[go.Surface(z=noise_list[i])]).show()
+go.Figure(data=[go.Surface(z=snr_list[i])]).show()
+
 
 # %%
