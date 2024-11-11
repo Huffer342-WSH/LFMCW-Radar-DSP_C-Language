@@ -1,4 +1,7 @@
-option(ENABLE_TEST_FFTW "Enable test for FFTW" OFF)
+option(ENABLE_TEST_STC "Enable test for libiary stc" OFF)
+option(ENABLE_TEST_STC_CBITS "Enable test for stc/cbits" ON)
+
+option(ENABLE_TEST_FFTW "Enable test for libiary FFTW" OFF)
 option(ENABLE_TEST_ARM_CFFT_Q15 "Enable test for arm_cfft_q15" ON)
 option(ENABLE_TEST_ARM_SQRT_Q31 "Enable test for arm_sqrt_q31" ON)
 option(ENABLE_TEST_PYTHON_MODULE "Enable pytest testing" ON)
