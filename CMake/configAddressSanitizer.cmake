@@ -1,4 +1,6 @@
 # configAddressSanitizer.cmake
+message(STATUS "Configuring AddressSanitizer")
+
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     # 对于 Clang 或 GCC，启用 AddressSanitizer，并生成调试信息
@@ -10,6 +12,7 @@ elseif(MSVC)
     message(STATUS "Configuring AddressSanitizer for MSVC")
     set(ADDRESSSANITIZER_FLAGS "/fsanitize=address")
 else()
-    message(WARNING "AddressSanitizer not supported for this compiler.")
-    return()
+    message(FATAL_ERROR "Unknown compiler.")
 endif()
+
+message(STATUS "AddressSanitizer flags: ${ADDRESSSANITIZER_FLAGS}\n")

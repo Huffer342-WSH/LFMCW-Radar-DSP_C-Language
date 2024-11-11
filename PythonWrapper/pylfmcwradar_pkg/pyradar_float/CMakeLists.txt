@@ -23,18 +23,25 @@ set_target_properties(pyradar_float
 
 # 生成头文件
 add_custom_command(TARGET pyradar_float POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${PYTHON_PACKAGE_OUTPUT_DIR}" ${Python3_EXECUTABLE} -m pybind11_stubgen pyradar_float --output-dir ${PYTHON_PACKAGE_OUTPUT_DIR}
+    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${PYTHON_PACKAGE_OUTPUT_DIR}" ${Python_EXECUTABLE} -m pybind11_stubgen pyradar_float --output-dir ${PYTHON_PACKAGE_OUTPUT_DIR}
     DEPENDS pyradar_float
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Generating .pyi file for pyRadar"
     VERBATIM
 )
 
-# 安装
+
 add_custom_command(TARGET pyradar_float POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${PYTHON_PACKAGE_INATSLL_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PYTHON_PACKAGE_OUTPUT_DIR}"
-    "${PYTHON_PACKAGE_INATSLL_DIR}"
-    COMMENT "Copying pyRadar output directory to ${CMAKE_SOURCE_DIR}/.venv/Lib/site-packages/pylfmcwradar"
+
+    # 复制生成的库文件
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:pyradar_float>"
+    "${PYTHON_PACKAGE_INATSLL_DIR}/$<TARGET_FILE_NAME:pyradar_float>"
+
+    # 复制生成的 .pyi 文件
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PYTHON_PACKAGE_OUTPUT_DIR}/pyradar_float.pyi"
+    "${PYTHON_PACKAGE_INATSLL_DIR}/pyradar_float.pyi"
+
+    COMMAND ${CMAKE_COMMAND} -E echo "Copying $<TARGET_FILE_NAME:pyradar_float> and pyradar_float.pyi from ${PYTHON_PACKAGE_OUTPUT_DIR} to ${PYTHON_PACKAGE_INATSLL_DIR}"
 )

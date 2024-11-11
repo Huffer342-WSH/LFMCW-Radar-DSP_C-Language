@@ -16,16 +16,13 @@ set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
-# 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
-include(configPython3)
+include(configPython) # 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
 
-# 包含 AddressSanitizer 配置文件
-include(configAddressSanitizer)
+include(configAddressSanitizer) # 包含 AddressSanitizer 配置文件
 
-# 设置 MSVC 编译选项
-include(msvc_compile_options)
+include(configTest) # 配置测试
 
-include(configTest.cmake)
+include(msvc_compile_options) # 设置 MSVC 编译选项
 
 # 添加全局依赖库
 # link_libraries(m)
@@ -36,8 +33,8 @@ add_subdirectory(ThirdParty)
 # 编译雷达信号处理库
 add_subdirectory(Source)
 
-# 构建C语言测试
-add_subdirectory(Test)
-
 # 构建Python模块
 add_subdirectory(PythonWrapper)
+
+# 构建测试
+add_subdirectory(Test)
