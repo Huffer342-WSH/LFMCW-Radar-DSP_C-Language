@@ -18,8 +18,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include <stc/cbits.h>
+
 static inline int unwrapper_neg(int x, int n);
-static inline int unwrapper_pos(int x, int n);
+static inline int wrap_pos(int x, int n);
 
 
 int cfar2d_result_reset(cfar2d_result_t *cfar)
@@ -112,6 +114,19 @@ void cfar2d_result_free(cfar2d_result_t *result)
     }
 }
 
+
+int cfar2d_result_add_point(cfar2d_result_t *result, uint16_t idx0, uint16_t idx1, int32_t amp, int32_t snr)
+{
+    if (result->numPoint >= result->capacity) {
+        return -1;
+    }
+    result->point[result->numPoint].idx0 = idx0;
+    result->point[result->numPoint].idx1 = idx1;
+    result->point[result->numPoint].amp = amp;
+    result->point[result->numPoint].snr = snr;
+    result->numPoint++;
+    return 0;
+}
 /**
  * @brief 2D-CFAR
  *
@@ -123,7 +138,7 @@ void cfar2d_result_free(cfar2d_result_t *result)
 int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *magSepc2D, cfar2d_cfg_t *cfg)
 {
 
-#define A(i, j) magSepc2D->data[(i) * magSepc2D->tda1 + (unwrapper_pos(j, magSepc2D->size1))]
+#define A(i, j) magSepc2D->data[(i) * magSepc2D->tda1 + (wrap_pos(j, magSepc2D->size1))]
 #define DIV_Q16(a, b) ((((int64_t)a << 32) / b) >> 16)
 
     RADAR_ASSERT(res->point != NULL);
@@ -234,8 +249,8 @@ int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *magSepc2D, c
 int radar_cfar2d_goca_debug(matrix2d_int32_t *noise, const matrix2d_int32_t *magSepc2D, cfar2d_cfg_t *cfg)
 {
 
-#define A(i, j) magSepc2D->data[(i) * magSepc2D->tda1 + (unwrapper_pos(j, magSepc2D->size1))]
-#define NOISE(i, j) noise->data[(i) * noise->tda1 + (unwrapper_pos(j, noise->size1))]
+#define A(i, j) magSepc2D->data[(i) * magSepc2D->tda1 + (wrap_pos(j, magSepc2D->size1))]
+#define NOISE(i, j) noise->data[(i) * noise->tda1 + (wrap_pos(j, noise->size1))]
 #define DIV_Q16(a, b) ((((int64_t)a << 32) / b) >> 16)
 
     RADAR_ASSERT(noise != NULL && magSepc2D != NULL && cfg != NULL);
@@ -326,23 +341,71 @@ int radar_cfar2d_goca_debug(matrix2d_int32_t *noise, const matrix2d_int32_t *mag
 /**
  * @brief 删除部分2D-CFAR检测结果
  *
- * @note CFAR检测结果中，一个目标可能会对应多个点。
- *          但是这些点的幅度角度的旁瓣测角精度较差，
- *          会导致后续聚类时无法正确聚类，
- *          因此要提前删除这些点。
+ * @note CFAR检测结果中，一个目标可能会产生小范围内的多个点。
+ *       部分点的信噪比较低，导致后续计算角度时的精度很低，
+ *       会导致后续在二维平面上聚类时无法将这些点分配正确的簇上
+ *       因此要提前删除这些点。
  *
- * @details 当点A和点B的距离小于range，且A < th * B 时，删除点A
+ * @details 当点A和点B的距离小对于range，且A < th * B 时，删除点A。
+ *          在程序中使用乘法代替除法，比较公式为 A * r < B, 其中 r = 1/th。
  *
- * @param[in] res  CFAR检测结果
- * @param[in] range0  维度0范围
- * @param[in] range1  维度1范围
- * @param[in] th  删除阈值
- * @return 0 - success
+ * @warning 维度1方向上的距离计算的是解周期后的距离，即对于范围[0,8), 0和7点距离是1而不是7
+ *          因此在使用radar_cfar2d_goca()函数的时候就要确保输入的幅度谱是一个维度依次为[距离，速度]的二维矩阵。
  *
+ * @warning 输入的检测结果要确保idx0是有序的，res->point[i].idx0 <= res->point[i + 1].idx0
+ *          radar_cfar2d_goca()函数输出的结果是满足要求的，使用有序的数据结构可以提高效率
  *
+ * @param res  CFAR检测结果
+ * @param cfg  CFAR筛选配置
+ *               range0 ：维度0的距离；
+ *               range1：维度1的距离；
+ *               shape1：维度1的长度;
+ *               thSNR：SNR阈值；
+ * @return int
  */
-int radar_cfar_result_filtering(cfar2d_result_t *res, cfar2d_filter_cfg_t *cfg)
+int radar_cfar_result_filtering(cfar2d_result_t *res, const cfar2d_filter_cfg_t *cfg)
 {
+    const size_t n = res->numPoint;
+    cfar2d_point_t *p = res->point;
+    cbits mask = cbits_with_size(n, true);
+    int32_t r_q16 = div_i32q16_i32q16(1 << 16, (int32_t)(cfg->thSNR * (1 << 16)));
+    for (size_t i = 0; i < n; i++) {
+        cfar2d_point_t *a = &p[i];
+        int64_t ar_q16 = (int64_t)a->amp * r_q16;
+        for (size_t j = 0; j < n; j++) {
+            if (i == j)
+                continue;
+            cfar2d_point_t *b = &p[j];
+            if (b->idx0 + cfg->range0 < a->idx0) {
+                continue;
+            }
+            if (b->idx0 > a->idx0 + cfg->range0) {
+                break;
+            }
+            uint16_t diff;
+            diff = abs_diff(a->idx1, b->idx1);
+            if (diff > cfg->shape1 / 2) {
+                diff = cfg->shape1 - diff;
+            }
+            if (diff <= cfg->range1) {
+                if (ar_q16 < ((int64_t)b->amp << 16)) {
+                    cbits_reset(&mask, i);
+                    break;
+                }
+            }
+        }
+    }
+    /* 删除掉不满足条件的点 */
+    size_t numPoint = 0;
+    for (size_t i = 0; i < n; i++) {
+        if (cbits_test(&mask, i)) {
+            if (numPoint != i)
+                p[numPoint] = p[i];
+            numPoint++;
+        }
+    }
+    res->numPoint = numPoint;
+    cbits_drop(&mask);
     return 0;
 }
 
@@ -357,7 +420,7 @@ static inline int unwrapper_neg(int x, int n)
 {
     return x & (n - 1);
 }
-static inline int unwrapper_pos(int x, int n)
+static inline int wrap_pos(int x, int n)
 {
     return x & (n - 1);
 }
@@ -367,7 +430,7 @@ static inline int unwrapper_neg(int x, int n)
 {
     return x < 0 ? x + n : x;
 }
-static inline int unwrapper_pos(int x, int n)
+static inline int wrap_pos(int x, int n)
 {
     return x >= n ? x - n : x;
 }
@@ -376,7 +439,7 @@ static inline int unwrapper_neg(int x, int n)
 {
     return (x + n) % n;
 }
-static inline int unwrapper_pos(int x, int n)
+static inline int wrap_pos(int x, int n)
 {
     return x % n;
 }

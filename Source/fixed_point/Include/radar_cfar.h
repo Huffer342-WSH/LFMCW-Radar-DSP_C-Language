@@ -1,7 +1,7 @@
 #ifndef _RADAR_CFAR_H_
 #define _RADAR_CFAR_H_
 
-#include "radar_math_types.h"
+#include "radar_math.h"
 
 typedef struct {
     uint16_t idx0;
@@ -40,6 +40,7 @@ typedef struct {
 typedef struct {
     uint16_t range0;
     uint16_t range1;
+    uint16_t shape1;
     float thSNR;
 } cfar2d_filter_cfg_t;
 
@@ -53,10 +54,13 @@ cfar2d_result_t *cfar2d_result_calloc_from_block(void *block, size_t blockSize, 
 
 void cfar2d_result_free(cfar2d_result_t *result);
 
+
+int cfar2d_result_add_point(cfar2d_result_t *result, uint16_t idx0, uint16_t idx1, int32_t amp, int32_t snr);
+
 int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *magSepc2D, cfar2d_cfg_t *cfg);
 int radar_cfar2d_goca_debug(matrix2d_int32_t *noise, const matrix2d_int32_t *magSepc2D, cfar2d_cfg_t *cfg);
 
-int radar_cfar_result_filtering(cfar2d_result_t *res, cfar2d_filter_cfg_t *cfg);
+int radar_cfar_result_filtering(cfar2d_result_t *res, const cfar2d_filter_cfg_t *cfg);
 
 int cfar2d_result_reset(cfar2d_result_t *cfar);
 
