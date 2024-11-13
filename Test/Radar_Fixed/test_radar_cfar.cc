@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <cstdio>
 #include <chrono>
+#include <random>
 
 class RadarFixedTest : public ::testing::Test
 {
@@ -99,6 +100,79 @@ TEST_F(RadarFixedTest, radar_cfar)
     cfar2d_result_free(res);
 #undef MAG
 }
+
+
+TEST_F(RadarFixedTest, radar_cfar_result_filtering)
+{
+
+    const size_t repeat_times = 100;
+    const uint16_t M = 25, N = 64;
+    int32_t map[M][N];
+    cfar2d_result_t *res = cfar2d_result_alloc(200);
+    cfar2d_filter_cfg_t cfg = { .range0 = 1, .range1 = 5, .shape1 = N, .thSNR = 0.78 };
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int32_t> dis(40000, 60000);
+    for (size_t repeat = 0; repeat < repeat_times; repeat++) {
+        /* 生成随机数据 */
+        res->numPoint = 0;
+        memset(map, 0, M * N * sizeof(int32_t));
+        for (int k = 0; k < 10; k++) {
+            int32_t a = dis(gen);
+            int x = a % M;
+            int y = a % N;
+            for (int i = 0; i < M; i++) {
+                for (int j = 0; j < N; j++) {
+                    map[i][j] += a / (abs(i - x) + abs(j - y) + 1);
+                }
+            }
+        }
+        for (int i = 0; i < M; i++) {
+            for (int j = 0; j < N; j++) {
+                if (map[i][j] > 40000) {
+                    cfar2d_result_add_point(res, i, j, map[i][j], 1024);
+                }
+            }
+        }
+        std::cout << "numPoint: " << res->numPoint << std::endl;
+
+        radar_cfar_result_filtering(res, &cfg);
+
+
+        /* 验证 */
+        std::cout << "numPoint: " << res->numPoint << std::endl;
+        for (int i = 0; i < res->numPoint; i++) {
+            for (int j = 0; j < res->numPoint; j++) {
+                if (i == j) {
+                    continue;
+                }
+                cfar2d_point_t *a = &res->point[i];
+                cfar2d_point_t *b = &res->point[j];
+                int r0 = abs((int)a->idx0 - (int)b->idx0);
+                int r1 = abs((int)a->idx1 - (int)b->idx1);
+                if (r1 > N / 2)
+                    r1 = N - r1;
+                if (r0 <= cfg.range0 && r1 <= cfg.range1) {
+                    printf("a: (%d,%d): %d\n", a->idx0, a->idx1, a->amp);
+                    printf("b: (%d,%d): %d\n", b->idx0, b->idx1, b->amp);
+                    ASSERT_GT(a->amp, b->amp * cfg.thSNR);
+                }
+            }
+        }
+    }
+    cfar2d_result_free(res);
+}
+
+
+// TEST_F(RadarFixedTest, neg_mod)
+// {
+
+//     int32_t a = -1;
+//     int32_t b = 8;
+//     std::cout << a % b << std::endl;
+// }
+
+
 // 运行所有测试
 int main(int argc, char **argv)
 {
