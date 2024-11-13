@@ -6,6 +6,9 @@ cmake_minimum_required(VERSION 3.13)
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.15.2)
 
+add_compile_options(${ADDRESSSANITIZER_FLAGS})
+add_link_options(${ADDRESSSANITIZER_LINKER_FLAGS})
+
 if(NOT CYGWIN AND NOT MSYS AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL QNX)
   set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
@@ -19,6 +22,8 @@ include(GNUInstallDirs)
 option(BUILD_GMOCK "Builds the googlemock subproject" OFF)
 option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" OFF)
 option(GTEST_HAS_ABSL "Use Abseil and RE2. Requires Abseil and RE2 to be separately added to the build." OFF)
+
+
 
 if(GTEST_HAS_ABSL)
   if(NOT TARGET absl::base)

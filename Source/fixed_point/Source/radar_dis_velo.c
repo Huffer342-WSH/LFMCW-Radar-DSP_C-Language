@@ -38,7 +38,7 @@ int radar_clac_dis_and_velo(radar_measurement_list_fixed_t *meas, const cfar2d_r
             b_q32 = (int64_t)1 << 32;
             denominator = MAG(a + 1, idxV);
         } else if (a + 1 == mag->size0 || MAG(a - 1, idxV) > MAG(a + 1, idxV)) {
-            b_q32 = -(int64_t)1 << 32;
+            b_q32 = -((int64_t)1 << 32);
             denominator = MAG(a - 1, idxV);
         } else {
             b_q32 = 0;

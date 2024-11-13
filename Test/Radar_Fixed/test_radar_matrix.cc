@@ -8,11 +8,11 @@
 
 TEST(RadarFixedTest, radar_matrix_static_alloc)
 {
-    static __attribute__((aligned(
-        MATRIX_STATIC_BUFFER_ALIGN(matrix3d_complex_int16_t, int16_t)))) uint8_t buffer[MATRIX_STATIC_BUFFER_SIZE(matrix3d_complex_int16_t, int16_t, 12000)];
+    alignas(MATRIX_STATIC_BUFFER_ALIGN(matrix3d_complex_int16_t,
+                                       int16_t)) static uint8_t buffer[MATRIX_STATIC_BUFFER_SIZE(matrix3d_complex_int16_t, int16_t, 12000)];
 
 
-    printf("%-50s \t 0x%016lx\n", "buffer addr:", (uintptr_t)buffer);
+    printf("%-50s \t 0x%016jx\n", "buffer addr:", (uintptr_t)buffer);
     printf("%-50s \t %-10zu\n", "alignof( matrix3d_complex_int16_t ):", alignof(matrix3d_complex_int16_t));
     printf("%-50s \t %-10zu\n", "alignof( int16_t ):", alignof(int16_t));
 
@@ -26,8 +26,8 @@ TEST(RadarFixedTest, radar_matrix_static_alloc)
     matrix3d_complex_int16_t *m = radar_matrix3d_complex_int16_alloc_static(buffer, sizeof(buffer), 10, 20, 30);
 
     ASSERT_NE((uintptr_t)m, 0);
-    printf("%-50s \t 0x%016lx\n", "matrix addr:", (uintptr_t)m);
-    printf("%-50s \t 0x%016lx\n", "matirx.data addr:", (uintptr_t)m->data);
+    printf("%-50s \t 0x%016jx\n", "matrix addr:", (uintptr_t)m);
+    printf("%-50s \t 0x%016jx\n", "matirx.data addr:", (uintptr_t)m->data);
 
 
     memset(m->data, 0, sizeof(int16_t) * m->size0 * m->size1 * m->size2 * 2);

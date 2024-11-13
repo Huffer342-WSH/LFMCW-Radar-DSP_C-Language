@@ -86,12 +86,12 @@ TEST_F(RadarFixedTest, radar_cfar)
 
     /* 1 */
     radar_cfar2d_goca(res, magSpec2D, &cfg);
-    printf("%-30s %ld\n", "numPoint", res->numPoint);
+    printf("%-30s %jd\n", "numPoint", res->numPoint);
 
     /* 2 */
     MAG(5, 7) = 50;
     radar_cfar2d_goca(res, magSpec2D, &cfg);
-    printf("%-30s %ld\n", "numPoint", res->numPoint);
+    printf("%-30s %jd\n", "numPoint", res->numPoint);
     ASSERT_EQ(res->point[0].idx0, 5);
     ASSERT_EQ(res->point[0].idx1, 7);
 

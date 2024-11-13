@@ -78,7 +78,7 @@ cfar2d_result_t *cfar2d_result_calloc_static(void *buffer, size_t size, size_t c
     size_t data_size = capacity * sizeof(cfar2d_point_t);
 
     res = (cfar2d_result_t *)ALIGN_ADDRESS(buffer, alignof(cfar2d_result_t));
-    pData = (cfar2d_point_t *)ALIGN_ADDRESS((void *)res + sizeof(cfar2d_result_t), alignof(cfar2d_point_t));
+    pData = (cfar2d_point_t *)ALIGN_ADDRESS((uint8_t *)res + sizeof(cfar2d_result_t), alignof(cfar2d_point_t));
 
     if ((uintptr_t)pData + data_size > (uintptr_t)buffer + size) {
         return NULL;

@@ -226,7 +226,7 @@ matrix3d_complex_int16_t *radar_matrix3d_complex_int16_alloc_static(void *buffer
     size_t data_size = 2 * n0 * n1 * n2 * sizeof(int16_t);
 
     m = (matrix3d_complex_int16_t *)align_ptr(buffer, alignof(matrix3d_complex_int16_t));
-    pData = (int16_t *)align_ptr((void *)m + sizeof(matrix3d_complex_int16_t), alignof(int16_t));
+    pData = (int16_t *)align_ptr((uint8_t *)m + sizeof(matrix3d_complex_int16_t), alignof(int16_t));
 
     // 检查缓冲区是否足够大
     if ((uintptr_t)pData + data_size > (uintptr_t)buffer + size) {
@@ -264,7 +264,7 @@ matrix2d_complex_int32_t *radar_matrix2d_complex_int32_alloc_static(void *buffer
     size_t data_size = 2 * n0 * n1 * sizeof(int32_t); // 复数数据，占两个int32_t（实部和虚部）
 
     m = (matrix2d_complex_int32_t *)align_ptr(buffer, alignof(matrix2d_complex_int32_t));
-    pData = (int32_t *)align_ptr((void *)m + sizeof(matrix2d_complex_int32_t), alignof(int32_t));
+    pData = (int32_t *)align_ptr((uint8_t *)m + sizeof(matrix2d_complex_int32_t), alignof(int32_t));
 
     // 检查缓冲区是否足够大
     if ((uintptr_t)pData + data_size > (uintptr_t)buffer + size) {
@@ -300,7 +300,7 @@ matrix2d_complex_int16_t *radar_matrix2d_complex_int16_alloc_static(void *buffer
     size_t data_size = 2 * n0 * n1 * sizeof(int16_t); // 复数数据，占两个int16_t（实部和虚部）
 
     m = (matrix2d_complex_int16_t *)align_ptr(buffer, alignof(matrix2d_complex_int16_t));
-    pData = (int16_t *)align_ptr((void *)m + sizeof(matrix2d_complex_int16_t), alignof(int16_t));
+    pData = (int16_t *)align_ptr((uint8_t *)m + sizeof(matrix2d_complex_int16_t), alignof(int16_t));
 
     // 检查缓冲区是否足够大
     if ((uintptr_t)pData + data_size > (uintptr_t)buffer + size) {
@@ -324,7 +324,7 @@ matrix2d_int32_t *radar_matrix2d_int32_alloc_static(void *buffer, size_t size, s
     size_t data_size = n0 * n1 * sizeof(int32_t); // 实数数据，占一个int32_t
 
     m = (matrix2d_int32_t *)align_ptr(buffer, alignof(matrix2d_int32_t));
-    pData = (int32_t *)align_ptr((void *)m + sizeof(matrix2d_int32_t), alignof(int32_t));
+    pData = (int32_t *)align_ptr((uint8_t *)m + sizeof(matrix2d_int32_t), alignof(int32_t));
 
     // 检查缓冲区是否足够大
     if ((uintptr_t)pData + data_size > (uintptr_t)buffer + size) {
@@ -348,7 +348,7 @@ matrix2d_int16_t *radar_matrix2d_int16_alloc_static(void *buffer, size_t size, s
     size_t data_size = n0 * n1 * sizeof(int16_t); // 实数数据，占一个int16_t
 
     m = (matrix2d_int16_t *)align_ptr(buffer, alignof(matrix2d_int16_t));
-    pData = (int16_t *)align_ptr((void *)m + sizeof(matrix2d_int16_t), alignof(int16_t));
+    pData = (int16_t *)align_ptr((uint8_t *)m + sizeof(matrix2d_int16_t), alignof(int16_t));
 
     // 检查缓冲区是否足够大
     if ((uintptr_t)pData + data_size > (uintptr_t)buffer + size) {
