@@ -17,21 +17,20 @@ namespace py = pybind11;
 void bind_measurements(pybind11::module_ &m)
 {
 
-    PYBIND11_NUMPY_DTYPE(radar_measurements_t, distance, velocity, azimuth, amp, snr);
-    pybind11::class_<radar_measurements_t>(m, "measurements")
+    PYBIND11_NUMPY_DTYPE(radar_measurements_fixed_t, distance, velocity, azimuth, sin_azimuth, amp, snr);
+    pybind11::class_<radar_measurements_fixed_t>(m, "measurements")
         .def(pybind11::init<>())
-        .def_readwrite("distance", &radar_measurements_t::distance)
-        .def_readwrite("velocity", &radar_measurements_t::velocity)
-        .def_readwrite("azimuth", &radar_measurements_t::azimuth)
-        .def_readwrite("amp", &radar_measurements_t::amp)
-        .def_readwrite("snr", &radar_measurements_t::snr)
-        .def(
-            "to_numpy",
-            [](radar_measurements_t &self) {
-                return array_c2numpy<radar_measurements_t>(&self, { 1 });
-            }
-        )
-        .def("__repr__", [](const radar_measurements_t &m) {
+        .def_readwrite("distance", &radar_measurements_fixed_t::distance)
+        .def_readwrite("velocity", &radar_measurements_fixed_t::velocity)
+        .def_readwrite("azimuth", &radar_measurements_fixed_t::azimuth)
+        .def_readwrite("sin_azimuth", &radar_measurements_fixed_t::sin_azimuth)
+        .def_readwrite("amp", &radar_measurements_fixed_t::amp)
+        .def_readwrite("snr", &radar_measurements_fixed_t::snr)
+        .def("to_numpy",
+             [](radar_measurements_fixed_t &self) {
+                 return array_c2numpy<radar_measurements_fixed_t>(&self, { 1 });
+             })
+        .def("__repr__", [](const radar_measurements_fixed_t &m) {
             return "<measurements(distance=" + std::to_string(m.distance) + ", velocity=" + std::to_string(m.velocity) +
                    ", azimuth=" + std::to_string(m.azimuth) + ", amp=" + std::to_string(m.amp) +
                    ", snr=" + std::to_string(m.snr) + ")>";
@@ -43,25 +42,21 @@ void bind_measurements(pybind11::module_ &m)
 
 void bind_measurements_list(pybind11::module_ &m)
 {
-    pybind11::class_<radar_measurement_list_t>(m, "RadarMeasurementList")
+    pybind11::class_<radar_measurement_list_fixed_t>(m, "RadarMeasurementList")
         .def(pybind11::init<>()) // 默认构造函数
-        .def_readwrite("num", &radar_measurement_list_t::num)
-        .def_readwrite("capacity", &radar_measurement_list_t::capacity)
+        .def_readwrite("num", &radar_measurement_list_fixed_t::num)
+        .def_readwrite("capacity", &radar_measurement_list_fixed_t::capacity)
         .def_property(
             "meas", //
-            [](radar_measurement_list_t &self) {
-                return array_c2numpy<radar_measurements_t>(self.meas, { self.capacity });
+            [](radar_measurement_list_fixed_t &self) {
+                return array_c2numpy<radar_measurements_fixed_t>(self.meas, { self.capacity });
             }, //
-            [](radar_measurement_list_t &self, py::array arr) {
-                array_numpy2c<radar_measurements_t>(self.meas, arr, { self.capacity });
+            [](radar_measurement_list_fixed_t &self, py::array arr) {
+                array_numpy2c<radar_measurements_fixed_t>(self.meas, arr, { self.capacity });
             } //
-        )
-        .def("getList", [](radar_measurement_list_t &self) {
-            pybind11::list list;
-            for (size_t i = 0; i < self.num; ++i) {
-                list.append(pybind11::cast(self.meas + i)); // 将 C 数组元素封装成 Python 对象
-            }
-            return list;
+            )
+        .def("getList", [](radar_measurement_list_fixed_t &self) {
+            return convert_cstyle_struct_array_to_pylist(self.meas, self.num);
         });
 }
 

@@ -10,22 +10,23 @@
  *
  */
 typedef struct {
-    rd_float_t distance; // 径向距离
-    rd_float_t velocity; // 径向速度
-    rd_float_t azimuth;  // 方位角
-    rd_float_t amp;
-    rd_float_t snr;
-} radar_measurements_t;
+    int32_t distance;    // 径向距离(mm)
+    int32_t velocity;    // 径向速度(mm/s)
+    int32_t azimuth;     // 方位角 (Q2.29)
+    int32_t sin_azimuth; // sin(azimuth) Q0.31
+    int32_t amp;
+    int32_t snr;
+} radar_measurements_fixed_t;
 
 /**
  * @brief 量测值，包含距离，速度，方位。CFAR检测结果作为补充
  *
  */
 typedef struct {
-    radar_measurements_t *meas;
+    radar_measurements_fixed_t *meas;
     size_t num;
     size_t capacity;
-} radar_measurement_list_t;
+} radar_measurement_list_fixed_t;
 
 /**
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
@@ -45,8 +46,8 @@ typedef struct {
     /* 以下参数位衍生参数，有上方参数计算得到，用于方便计算 */
     rd_float_t timeFrameVaild; // 单位:s 一帧的有效时间
     rd_float_t timeFrameTotal; // 单位:s 一帧的有效时间
-    rd_float_t resRange;       // 单位:m 距离分辨率
-    rd_float_t resVelocity;    // 单位:m/s 速度分辨率
+    int32_t resRange;          // 单位:m 距离分辨率
+    int32_t resVelocity;       // 单位:m/s 速度分辨率
 
 } radar_param_t;
 
@@ -74,7 +75,7 @@ typedef struct {
     radar_basic_data_t basic;
     radar_micromotion_handle_t micromotion;
     cfar2d_result_t *cfar;
-    radar_measurement_list_t meas;
+    radar_measurement_list_fixed_t *meas;
 } radar_handle_t;
 
 #ifdef __cplusplus
@@ -82,7 +83,7 @@ extern "C" {
 #endif
 
 int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param);
-radar_measurement_list_t *radar_measurement_list_alloc(size_t capacity);
+radar_measurement_list_fixed_t *radar_measurement_list_alloc(size_t capacity);
 
 #ifdef __cplusplus
 }

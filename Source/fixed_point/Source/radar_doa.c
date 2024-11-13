@@ -24,7 +24,7 @@ static inline int16_t radar_doa_calc_phasediff_i16(int16_t real0, int16_t imag0,
  * @param rdm  RDM数组
  * @return int
  */
-int radar_dual_channel_clac_angle(radar_measurement_list_t *meas, cfar2d_result_t *cfar, matrix3d_complex_int16_t *rdms)
+int radar_dual_channel_clac_angle(radar_measurement_list_fixed_t *meas, cfar2d_result_t *cfar, matrix3d_complex_int16_t *rdms)
 {
     return 0;
 }

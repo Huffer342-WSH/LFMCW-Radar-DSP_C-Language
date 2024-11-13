@@ -11,6 +11,7 @@ enum {
     RADAR_SUCCESS = 0,
     RADAR_ENOMEM,
     RADAR_EFREENULL,
+    RADAR_EOVRFLW
 
 };
 

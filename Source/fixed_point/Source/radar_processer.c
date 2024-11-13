@@ -1,3 +1,4 @@
+
 /**
  * @file lfmcw_radar_processer.c
  * @author Huffer342-WSH (718007138@qq.com)
@@ -41,8 +42,8 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
     radar->param.numChrip = param->numChrip;
     radar->param.timeFrameVaild = radar->param.numChrip * (radar->param.timeChrip + radar->param.timeChripGap);
     radar->param.timeFrameTotal = radar->param.timeFrameVaild + radar->param.timeFrameGap;
-    radar->param.resRange = 1449896229.0 / radar->param.bandwidth;
-    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild);
+    radar->param.resRange = 1449896229.0 / radar->param.bandwidth * 100;
+    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 100;
 
     radar_basic_data_init(&radar->basic, &radar->param);
     radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFrameTotal));
@@ -54,7 +55,14 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
     radar->config.cfarCfg.thAmp = 0;
     radar->config.cfarCfg.thSNR = 2.0;
 
+    radar->config.cfar_filter_cfg.range0 = 1;
+    radar->config.cfar_filter_cfg.range1 = 5;
+    radar->config.cfar_filter_cfg.shape1 = param->numChrip;
+    radar->config.cfar_filter_cfg.thSNR = 1.0;
+
     radar->cfar = cfar2d_result_alloc(param->numMaxCfarPoints);
+
+    radar->meas = radar_measurement_list_alloc(param->numMaxCfarPoints);
 
 
     return 0;
@@ -70,10 +78,7 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
  */
 int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rdms)
 {
-    RADAR_ASSERT(
-        rdms != NULL && rdms->size0 == radar->param.numChannel && rdms->size1 == radar->param.numRangeBin &&
-        rdms->size2 == radar->param.numChrip
-    );
+    RADAR_ASSERT(rdms != NULL && rdms->size0 == radar->param.numChannel && rdms->size1 == radar->param.numRangeBin && rdms->size2 == radar->param.numChrip);
 
     /*
     输入一帧RDM（2D-FFT后的产物）
@@ -91,11 +96,10 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 #if AMPLITUDE_SPECTRUM_CALCULATION_METHOD == AMP_SPEC_CLAC_METHOD_INSIDE
 
     /* 2. 计算幅度谱 */
-    radar_clac_magSpec2D(
-        radar->basic.magSpec2D,  // 幅度谱
-        radar->basic.rdms,       // RDM
-        radar->param.numChannel, // 需要累加的通道数
-        0                        // 起始RDM编号
+    radar_clac_magSpec2D(radar->basic.magSpec2D,  // 幅度谱
+                         radar->basic.rdms,       // RDM
+                         radar->param.numChannel, // 需要累加的通道数
+                         0                        // 起始RDM编号
     );
 
 
@@ -108,8 +112,9 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 
     /* 4. CFAR搜索点，最终输出的检测结果包含点的 */
     cfar2d_result_reset(radar->cfar);
+
     radar_cfar2d_goca(radar->cfar, radar->basic.magSpec2D, &radar->config.cfarCfg);
-#if 0
+
     /* 5. 点云凝聚： 删除CFAR结果中一些幅度较小的点 */
     /* 一个目标的信号往往会分散到多个单元中，部分单元中的能量较小，导致测角精度低，\
         进而导致点云聚类的时候不能很好的将这些点分到一个簇中，因此要提前把这些点删除掉 */
@@ -119,10 +124,12 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     /* 6. CFAR结果中的0速度点查询微动信息，删除不符合要求的点 */
     check_and_delete_static_point(radar);
 
+
     /* 7. 计算速度和距离 */
-    radar_clac_dis_and_velo(&radar->meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
+    radar_clac_dis_and_velo(radar->meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
+    // radar_clac_dis_and_velo(radar->meas, radar->cfar, radar->basic.magSpec2D, 100, 100);
 
-
+#if 0
     /* 8. 计算角度 */
     radar_dual_channel_clac_angle(&radar->meas, radar->cfar, radar->basic.rdms);
 

@@ -6,6 +6,7 @@ add_library(lfmcwradar_fixed STATIC)
 
 target_link_libraries(lfmcwradar_fixed PUBLIC
     CMSISDSP
+    stc
 )
 
 target_include_directories(lfmcwradar_fixed PUBLIC
