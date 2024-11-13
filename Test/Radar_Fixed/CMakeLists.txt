@@ -11,6 +11,13 @@ if(ENABLE_TEST_RADAR_CLAC_MAGSPEC2D)
     gtest_discover_tests(test_radar_clac_magSpec2D)
 endif()
 
+if(ENABLE_TEST_RADAR_MATH)
+    add_executable(test_radar_math test_radar_math.cc)
+    target_compile_options(test_radar_math PRIVATE ${ADDRESSSANITIZER_FLAGS})
+    target_link_libraries(test_radar_math lfmcwradar_fixed asan GTest::gtest_main)
+    gtest_discover_tests(test_radar_math)
+endif()
+
 if(ENABLE_TEST_RADAR_MATRIX)
     add_executable(test_radar_matrix test_radar_matrix.cc)
     target_compile_options(test_radar_matrix PRIVATE ${ADDRESSSANITIZER_FLAGS})

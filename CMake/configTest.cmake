@@ -8,4 +8,5 @@ option(ENABLE_TEST_PYTHON_MODULE "Enable pytest testing" ON)
 
 option(ENABLE_TEST_RADAR_CFAR "Enable test for radar_cfar" ON)
 option(ENABLE_TEST_RADAR_CLAC_MAGSPEC2D "Enable test for radar_clac_magSpec2D" ON)
+option(ENABLE_TEST_RADAR_MATH "Enable test for radar_math" ON)
 option(ENABLE_TEST_RADAR_MATRIX "Enable test for radar_matrix" ON)
