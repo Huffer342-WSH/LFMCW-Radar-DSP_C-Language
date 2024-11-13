@@ -12,8 +12,8 @@
 typedef struct {
     int32_t distance;    // 径向距离(mm)
     int32_t velocity;    // 径向速度(mm/s)
-    int32_t azimuth;     // 方位角 (Q2.29)
-    int32_t sin_azimuth; // sin(azimuth) Q0.31
+    int16_t azimuth;     // 方位角 (Q2.13)
+    int16_t sin_azimuth; // sin(azimuth) Q0.15
     int32_t amp;
     int32_t snr;
 } radar_measurements_fixed_t;

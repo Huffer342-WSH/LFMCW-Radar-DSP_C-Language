@@ -86,7 +86,7 @@ magSpec2D_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
 magSpec2DRef_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
 noise_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
 indicesList = []  # 每个元素代表一帧，帧为一个Nx2的矩阵，记录N个RDM中的坐标
-
+measList = []
 for i, frame in enumerate(rdms_list):
     print(f"第{i}帧", flush=True)
     set_matrix3d_complex_int16(rdms, frame)
@@ -99,6 +99,18 @@ for i, frame in enumerate(rdms_list):
     noise_list[i] = noise_buffer.data.copy()
     count = radar_handle.cfar.numPoint
     indicesList.append(np.column_stack((radar_handle.cfar.point[:count]["idx0"], radar_handle.cfar.point[:count]["idx1"])))
+    count = radar_handle.meas.num
+    measList.append(
+        np.column_stack(
+            (
+                radar_handle.meas.meas[:count]["distance"],
+                radar_handle.meas.meas[:count]["velocity"],
+                radar_handle.meas.meas[:count]["azimuth"],
+            )
+        )
+    )
+    # print(indicesList[-1])
+    # print(measList[-1])
 
 snr_list = magSpec2D_list / noise_list
 
@@ -113,11 +125,14 @@ dh.draw_2d_spectrumlist(snr_list[::100], title="幅度谱").show()
 # %%
 """ 绘制RDM的CFAR搜索结果 """
 listData = []
+resRange = float(radar_handle.param.resRange)
+resVelocity = float(radar_handle.param.resVelocity)
 for i in range(numFrame):
     data = list()
-    data.append(go.Scatter(x=indicesList[i][:, 0], y=indicesList[i][:, 1], mode="markers", name="Raw"))
+    data.append(go.Scatter(x=indicesList[i][:, 0], y=indicesList[i][:, 1], mode="markers", name="cfar"))
+    data.append(go.Scatter(x=measList[i][:, 0] / resRange, y=measList[i][:, 1] / resVelocity, mode="markers", name="超分辨率"))
     listData.append(data)
-fig = dh.draw_animation(listData[::100], title="RDM的 GOCA-2DCFAR 搜索结果")
+fig = dh.draw_animation(listData[::1], title="RDM的 GOCA-2DCFAR 搜索结果")
 fig.update_layout(
     xaxis=dict(range=[-1, numRangeBin + 1]),
     yaxis=dict(range=[-1, numChrip + 1]),
@@ -125,6 +140,31 @@ fig.update_layout(
 )
 fig.show()
 
+# %%
+"""计算二维平面点云"""
+pointCloudList = []
+for i in measList:
+    pointClouds = np.column_stack((i[:, 0] * np.cos(i[:, 2] / 2**13), i[:, 0] * np.sin(i[:, 2] / 2**13)))
+    pointClouds /= 1000
+    pointCloudList.append(pointClouds)
+
+
+# %%
+""" 绘制二维平面点云 """
+listData = []
+resRange = float(radar_handle.param.resRange)
+resVelocity = float(radar_handle.param.resVelocity)
+for i in range(numFrame):
+    data = list()
+    data.append(go.Scatter(x=pointCloudList[i][:, 0], y=pointCloudList[i][:, 1], mode="markers", name="cfar"))
+    listData.append(data)
+fig = dh.draw_animation(listData[::20], title="RDM的 GOCA-2DCFAR 搜索结果")
+fig.update_layout(
+    xaxis=dict(range=[0, 15]),
+    yaxis=dict(range=[-10, 10]),
+    title="点云",
+)
+fig.show()
 
 # %% 绘制一帧数据
 i = 176
