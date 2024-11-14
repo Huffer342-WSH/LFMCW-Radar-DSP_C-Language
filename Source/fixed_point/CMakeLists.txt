@@ -20,6 +20,7 @@ target_include_directories(lfmcwradar_fixed PRIVATE
 target_sources(lfmcwradar_fixed PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_assert.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_cfar.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_cluster.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_dis_velo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_doa.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_error.c

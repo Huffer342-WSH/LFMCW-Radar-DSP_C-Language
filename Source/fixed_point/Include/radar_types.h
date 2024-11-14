@@ -14,6 +14,7 @@ typedef struct {
     int32_t velocity;    // 径向速度(mm/s)
     int16_t azimuth;     // 方位角 (Q2.13)
     int16_t sin_azimuth; // sin(azimuth) Q0.15
+    int16_t cos_azimuth; // cos(azimuth) Q0.15
     int32_t amp;
     int32_t snr;
 } radar_measurements_fixed_t;
@@ -84,6 +85,7 @@ extern "C" {
 
 int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param);
 radar_measurement_list_fixed_t *radar_measurement_list_alloc(size_t capacity);
+void radar_measurement_list_free(radar_measurement_list_fixed_t *m);
 
 #ifdef __cplusplus
 }

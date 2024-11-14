@@ -26,3 +26,10 @@ radar_measurement_list_fixed_t *radar_measurement_list_alloc(size_t capacity)
     meas->capacity = capacity;
     return meas;
 }
+
+
+void radar_measurement_list_free(radar_measurement_list_fixed_t *m)
+{
+    free(m->meas);
+    free(m);
+}

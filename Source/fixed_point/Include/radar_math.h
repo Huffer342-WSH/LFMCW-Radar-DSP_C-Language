@@ -1,5 +1,7 @@
 #ifndef _RADAR_MATH_H_
 #define _RADAR_MATH_H_
+
+
 #include <stdint.h>
 #include <math.h>
 
@@ -29,6 +31,18 @@ static inline int32_t radar_sqrt_q31(int32_t x)
     arm_sqrt_q31(x, &y);
     return y;
 }
+
+static inline int16_t radar_cos_q15(int16_t x)
+{
+    return arm_cos_q15(x);
+}
+
+
+static inline int32_t radar_cos_q31(int32_t x)
+{
+    return arm_cos_q31(x);
+}
+
 
 static inline int16_t radar_atan2_q15(int16_t y, int16_t x)
 {

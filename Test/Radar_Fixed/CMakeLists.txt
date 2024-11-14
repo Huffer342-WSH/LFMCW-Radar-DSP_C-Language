@@ -13,6 +13,12 @@ if(ENABLE_TEST_RADAR_CLAC_MAGSPEC2D)
     gtest_discover_tests(test_radar_clac_magSpec2D)
 endif()
 
+if(ENABLE_TEST_RADAR_CLUSTER)
+    add_executable(test_radar_cluster test_radar_cluster.cc)
+    target_link_libraries(test_radar_cluster ${public_libraries})
+    gtest_discover_tests(test_radar_cluster)
+endif()
+
 if(ENABLE_TEST_RADAR_MATH)
     add_executable(test_radar_math test_radar_math.cc)
     target_link_libraries(test_radar_math ${public_libraries})
