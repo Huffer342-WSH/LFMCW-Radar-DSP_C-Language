@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.15)
 
 project(LFMCW-Radar-Processer-FixedPointEdition)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+
 add_library(lfmcwradar_fixed STATIC)
 
 target_link_libraries(lfmcwradar_fixed PUBLIC
