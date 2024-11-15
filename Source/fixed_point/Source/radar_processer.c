@@ -132,10 +132,10 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     /* 8. 计算角度 */
     radar_dual_channel_clac_angle(radar->meas, radar->cfar, radar->basic.rdms, ((int32_t)2 << 15));
 
-#if 0
+
     /* 9. 二维平面聚类(DBSCAN) */
 
-
+#if 0
     /*=========================================================================
         到此为止，信号处理已经结束，得到的是新一帧的目标检测结果
         接下来主要是完成目标跟踪，也就是把不同帧检测出来的结果前后关联起来，得到一个个目标的运动轨迹

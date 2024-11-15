@@ -3,12 +3,14 @@ cmake_minimum_required(VERSION 3.15)
 # 项目名称和语言
 project(pyradar_fixed)
 
+
 pybind11_add_module(pyradar_fixed
     bind.cc
-    source/pyradar_fixed_radar_types.cc
+    source/pyradar_fixed_radar_cfar.cc
+    source/pyradar_fixed_radar_cluster.cc
     source/pyradar_fixed_radar_matrix.cc
     source/pyradar_fixed_radar_processer.cc
-    source/pyradar_fixed_radar_cfar.cc
+    source/pyradar_fixed_radar_types.cc
 )
 
 target_include_directories(pyradar_fixed PRIVATE

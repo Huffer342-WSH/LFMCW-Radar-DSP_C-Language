@@ -13,7 +13,7 @@ TEST(RadarFixedTest, radar_cluster_calc_distance)
     const int N = 4;
     const double WR = 1.0;
     const double WV = 1.0;
-    double pos[][3] = { { 4330, 2500, 0 }, { 2500, 4330, 0 }, { 200, 100, 0 }, { 200, 200, 0 } };
+    double pos[][3] = { { 2000, 2000, 0 }, { 2000, -2000, 0 }, { -2000, 2000, 0 }, { -2000, -2000, 0 } };
     radar_measurement_list_fixed_t *m = radar_measurement_list_alloc(10);
 
     for (size_t i = 0; i < 4; i++) {
@@ -23,7 +23,10 @@ TEST(RadarFixedTest, radar_cluster_calc_distance)
     }
     m->num = N;
 
-    int32_t *D = radar_cluster_calc_distance(m, WR * 65536, WV * 65536);
+    dbscan_neighbors_t *nb = radar_cluster_dbscan_neighbors_create(m, WR * 65536, WV * 65536, 0.1);
+    int32_t *D = nb->D;
+
+
     for (size_t i = 1; i < N; i++) {
         for (size_t j = 0; j < i; j++) {
             printf("%6d ", D[i * (i - 1) / 2 + j]);
@@ -36,7 +39,9 @@ TEST(RadarFixedTest, radar_cluster_calc_distance)
         }
         printf("\n");
     }
-    free(D);
+
+
+    radar_cluster_dbscan_neighbors_free(nb);
     radar_measurement_list_free(m);
 }
 // 运行所有测试

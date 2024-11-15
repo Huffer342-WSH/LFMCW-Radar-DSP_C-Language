@@ -24,6 +24,7 @@ void bind_measurements(pybind11::module_ &m)
         .def_readwrite("velocity", &radar_measurements_fixed_t::velocity)
         .def_readwrite("azimuth", &radar_measurements_fixed_t::azimuth)
         .def_readwrite("sin_azimuth", &radar_measurements_fixed_t::sin_azimuth)
+        .def_readwrite("cos_azimuth", &radar_measurements_fixed_t::cos_azimuth)
         .def_readwrite("amp", &radar_measurements_fixed_t::amp)
         .def_readwrite("snr", &radar_measurements_fixed_t::snr)
         .def("to_numpy",
