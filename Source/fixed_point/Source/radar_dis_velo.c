@@ -52,7 +52,7 @@ int radar_clac_dis_and_velo(radar_measurement_list_fixed_t *meas, const cfar2d_r
         }
 
         int64_t distance = (idxR_q16 * resRange) >> 16;
-        int64_t velocity = (idxV * resVel);
+        int64_t velocity = resVel * (idxV >= mag->size1 / 2 ? idxV - mag->size1 : idxV);
 
         if (distance > INT32_MAX) {
             distance = INT32_MAX;
