@@ -160,4 +160,5 @@ int radar_measurements_list_copyout(measurements_t *dest, measurements_list_t *m
         dest->num += node->data->num;
         node = node->next;
     }
+    return 0;
 }

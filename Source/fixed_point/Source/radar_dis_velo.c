@@ -52,13 +52,12 @@ int radar_clac_dis_and_velo(measurements_t *meas, const cfar2d_result_t *cfar, c
         }
 
         int64_t distance = (idxR_q16 * resRange) >> 16;
-        int64_t velocity = resVel * (idxV >= mag->size1 / 2 ? idxV - mag->size1 : idxV);
-
+        int64_t velocity = (int64_t)resVel * ((idxV >= (int32_t)mag->size1 / 2) ? (idxV - (int32_t)mag->size1) : (idxV));
         if (distance > INT32_MAX) {
             distance = INT32_MAX;
             RADAR_ERROR("An overflow occurs when calculating distances using a fixed number of points", RADAR_EOVRFLW);
         }
-        if (velocity > INT32_MAX) {
+        if (velocity < -(int64_t)INT32_MAX || velocity > (int64_t)INT32_MAX) {
             velocity = INT32_MAX;
             RADAR_ERROR("An overflow occurs when the speed is calculated using a fixed number of points", RADAR_EOVRFLW);
         }

@@ -151,7 +151,7 @@ int radar_cfar2d_goca(cfar2d_result_t *res, const matrix2d_int32_t *magSepc2D, c
     const int train[2] = { cfg->numTrain[0], cfg->numTrain[1] };
     const int32_t thSNR = (int32_t)(cfg->thSNR * (1 << 16));
 
-    for (int idxR = 0; idxR < M; idxR++) {
+    for (int idxR = 1; idxR < M; idxR++) {
         int win_pos = 0;
         for (int idxV = N / 2; idxV < N * 3 / 2; idxV++) {
             int32_t s = A(idxR, idxV);
