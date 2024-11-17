@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-int radar_dual_channel_clac_angle(radar_measurement_list_fixed_t *meas, cfar2d_result_t *cfar, matrix3d_complex_int16_t *rdms, int32_t lambda_over_d_q15);
+int radar_dual_channel_clac_angle(measurements_t *meas, cfar2d_result_t *cfar, matrix3d_complex_int16_t *rdms, int32_t lambda_over_d_q15);
 
 #ifdef __cplusplus
 }

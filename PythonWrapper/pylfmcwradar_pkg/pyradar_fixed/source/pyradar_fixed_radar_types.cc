@@ -17,21 +17,19 @@ namespace py = pybind11;
 void bind_measurements(pybind11::module_ &m)
 {
 
-    PYBIND11_NUMPY_DTYPE(radar_measurements_fixed_t, distance, velocity, azimuth, sin_azimuth, amp, snr);
-    pybind11::class_<radar_measurements_fixed_t>(m, "measurements")
+    PYBIND11_NUMPY_DTYPE(measurement_t, distance, velocity, azimuth, amp, snr);
+    pybind11::class_<measurement_t>(m, "measurements")
         .def(pybind11::init<>())
-        .def_readwrite("distance", &radar_measurements_fixed_t::distance)
-        .def_readwrite("velocity", &radar_measurements_fixed_t::velocity)
-        .def_readwrite("azimuth", &radar_measurements_fixed_t::azimuth)
-        .def_readwrite("sin_azimuth", &radar_measurements_fixed_t::sin_azimuth)
-        .def_readwrite("cos_azimuth", &radar_measurements_fixed_t::cos_azimuth)
-        .def_readwrite("amp", &radar_measurements_fixed_t::amp)
-        .def_readwrite("snr", &radar_measurements_fixed_t::snr)
+        .def_readwrite("distance", &measurement_t::distance)
+        .def_readwrite("velocity", &measurement_t::velocity)
+        .def_readwrite("azimuth", &measurement_t::azimuth)
+        .def_readwrite("amp", &measurement_t::amp)
+        .def_readwrite("snr", &measurement_t::snr)
         .def("to_numpy",
-             [](radar_measurements_fixed_t &self) {
-                 return array_c2numpy<radar_measurements_fixed_t>(&self, { 1 });
+             [](measurement_t &self) {
+                 return array_c2numpy<measurement_t>(&self, { 1 });
              })
-        .def("__repr__", [](const radar_measurements_fixed_t &m) {
+        .def("__repr__", [](const measurement_t &m) {
             return "<measurements(distance=" + std::to_string(m.distance) + ", velocity=" + std::to_string(m.velocity) +
                    ", azimuth=" + std::to_string(m.azimuth) + ", amp=" + std::to_string(m.amp) +
                    ", snr=" + std::to_string(m.snr) + ")>";
@@ -43,22 +41,28 @@ void bind_measurements(pybind11::module_ &m)
 
 void bind_measurements_list(pybind11::module_ &m)
 {
-    pybind11::class_<radar_measurement_list_fixed_t>(m, "RadarMeasurementList")
+    pybind11::class_<measurements_t>(m, "RadarMeasurementList")
         .def(pybind11::init<>()) // 默认构造函数
-        .def_readwrite("num", &radar_measurement_list_fixed_t::num)
-        .def_readwrite("capacity", &radar_measurement_list_fixed_t::capacity)
+        .def_readwrite("num", &measurements_t::num)
+        .def_readwrite("capacity", &measurements_t::capacity)
         .def_property(
             "meas", //
-            [](radar_measurement_list_fixed_t &self) {
-                return array_c2numpy<radar_measurements_fixed_t>(self.meas, { self.capacity });
+            [](measurements_t &self) {
+                return array_c2numpy<measurement_t>(self.data, { self.capacity });
             }, //
-            [](radar_measurement_list_fixed_t &self, py::array arr) {
-                array_numpy2c<radar_measurements_fixed_t>(self.meas, arr, { self.capacity });
+            [](measurements_t &self, py::array arr) {
+                array_numpy2c<measurement_t>(self.data, arr, { self.capacity });
             } //
             )
-        .def("getList", [](radar_measurement_list_fixed_t &self) {
-            return convert_cstyle_struct_array_to_pylist(self.meas, self.num);
+        .def("getList", [](measurements_t &self) {
+            return convert_cstyle_struct_array_to_pylist(self.data, self.num);
         });
+}
+void bind_multi_frame_meas_fixed(pybind11::module_ &m)
+{
+    pybind11::class_<measurements_list_t>(m, "multi_frame_meas")
+        .def(pybind11::init<>()) // 默认构造函数
+        .def_readwrite("capacity", &measurements_list_t::capacity);
 }
 
 
@@ -118,6 +122,7 @@ void bind_radar_handle(pybind11::module_ &m)
         .def_readwrite("basic", &radar_handle_t::basic)
         .def_readwrite("cfar", &radar_handle_t::cfar)
         .def_readwrite("meas", &radar_handle_t::meas)
+        .def_readwrite("cluster_meas", &radar_handle_t::cluster_meas)
         .def(
             "getMagSpec2D",
             [](radar_handle_t &self) {
@@ -125,8 +130,24 @@ void bind_radar_handle(pybind11::module_ &m)
                 pybind11::array_t<int32_t> numpy_array = array_c2numpy<int32_t>(self.basic.magSpec2D->data, shape);
                 return numpy_array.attr("copy")();
             },
-            "Get a copy of the 2D magnitude spectrum."
-        );
+            "Get a copy of the 2D magnitude spectrum.")
+        .def(
+            "getMeasurements",
+            [](radar_handle_t &self) {
+                if (self.meas->head.next != NULL) {
+                    measurements_t *m = self.meas->head.next->data;
+                    return pybind11::array_t<measurement_t>({ static_cast<pybind11::ssize_t>(m->num) }, m->data);
+                }
+                return array_c2numpy<measurement_t>(nullptr, { 0 });
+            },
+            "Get a copy of the measurements.")
+
+        .def(
+            "getClusterMeasurements",
+            [](radar_handle_t &self) {
+                return pybind11::array_t<measurement_t>({ static_cast<pybind11::ssize_t>(self.cluster_meas->num) }, self.cluster_meas->data);
+            },
+            "Get a copy of the cluster measurements.");
 }
 
 
@@ -138,12 +159,10 @@ void bind_radar_basic_data_init(pybind11::module_ &m)
     );
 }
 
-void bind_radar_measurement_list_alloc(pybind11::module_ &m)
+void bind_radar_measurement_alloc(pybind11::module_ &m)
 {
-    m.def(
-        "radar_measurement_list_alloc", &radar_measurement_list_alloc, pybind11::return_value_policy::take_ownership,
-        "Allocate a new RadarMeasurementList with the specified capacity."
-    );
+    m.def("radar_measurement_alloc", &radar_measurement_alloc, pybind11::return_value_policy::take_ownership,
+          "Allocate a new RadarMeasurementList with the specified capacity.");
 }
 
 
@@ -151,10 +170,11 @@ void bind_radar_types(pybind11::module_ &m)
 {
     bind_measurements(m);
     bind_measurements_list(m);
+    bind_multi_frame_meas_fixed(m);
     bind_radar_param(m);
     bind_radar_config(m);
     bind_radar_basic_data(m);
     bind_radar_handle(m);
     bind_radar_basic_data_init(m);
-    bind_radar_measurement_list_alloc(m);
+    bind_radar_measurement_alloc(m);
 }

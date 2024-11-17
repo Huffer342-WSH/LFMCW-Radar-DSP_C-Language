@@ -18,7 +18,7 @@ void bind_radar_cluster_dbscan(pybind11::module_ &m)
 {
     m.def(
         "radar_cluster_dbscan",
-        [](radar_measurement_list_fixed_t *meas, int32_t wr, int32_t wv, int32_t eps, size_t min_samples) -> py::array_t<ssize_t> {
+        [](measurements_t *meas, int32_t wr, int32_t wv, int32_t eps, size_t min_samples) -> py::array_t<ssize_t> {
             // 获取输入的测量数据数组
 
             size_t *labels = new size_t[meas->num];

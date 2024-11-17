@@ -1,13 +1,13 @@
 from pylfmcwradar import pyradar_fixed as pyRadar
 import pytest
 
-meas_list = pyRadar.radar_measurement_list_alloc(10)
+meas_list = pyRadar.radar_measurement_alloc(10)
 
 
 def test_radar_measurement_list_initialization():
-    # Test initialization with radar_measurement_list_alloc
+    # Test initialization with radar_measurement_alloc
     capacity = 5
-    radar_list = pyRadar.radar_measurement_list_alloc(capacity)
+    radar_list = pyRadar.radar_measurement_alloc(capacity)
     assert radar_list.num == 0
     assert radar_list.capacity == capacity
 
@@ -15,7 +15,7 @@ def test_radar_measurement_list_initialization():
 def test_radar_measurement_list_meas_property():
     # Allocate radar measurement list
     capacity = 5
-    radar_list = pyRadar.radar_measurement_list_alloc(capacity)
+    radar_list = pyRadar.radar_measurement_alloc(capacity)
 
     # Create a sample measurement
     measurement = pyRadar.measurements()

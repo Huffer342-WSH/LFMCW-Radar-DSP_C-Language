@@ -18,13 +18,13 @@
  * @param resVel 速度分辨率
  * @return int
  */
-int radar_clac_dis_and_velo(radar_measurement_list_fixed_t *meas, const cfar2d_result_t *cfar, const matrix2d_int32_t *mag, int32_t resRange, int32_t resVel)
+int radar_clac_dis_and_velo(measurements_t *meas, const cfar2d_result_t *cfar, const matrix2d_int32_t *mag, int32_t resRange, int32_t resVel)
 {
 #define MAG(x, y) mag->data[(x) * mag->tda1 + (y)]
-    RADAR_ASSERT(meas->capacity >= cfar->capacity);
+    RADAR_ASSERT(meas->capacity >= cfar->numPoint);
     for (size_t i = 0; i < cfar->numPoint; i++) {
         const cfar2d_point_t *point = &cfar->point[i];
-        radar_measurements_fixed_t *m = &meas->meas[i];
+        measurement_t *m = &meas->data[i];
 
         int64_t idxR_q16;
         int32_t idxV = point->idx1;

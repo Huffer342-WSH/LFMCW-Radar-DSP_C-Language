@@ -16,6 +16,7 @@
 #include "radar_cfar.h"
 #include "radar_dis_velo.h"
 #include "radar_doa.h"
+#include "radar_cluster.h"
 
 #include "radar_assert.h"
 #include "radar_error.h"
@@ -26,6 +27,7 @@
 
 
 static void check_and_delete_static_point(radar_handle_t *radar);
+static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame);
 
 
 int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
@@ -42,8 +44,8 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
     radar->param.numChrip = param->numChrip;
     radar->param.timeFrameVaild = radar->param.numChrip * (radar->param.timeChrip + radar->param.timeChripGap);
     radar->param.timeFrameTotal = radar->param.timeFrameVaild + radar->param.timeFrameGap;
-    radar->param.resRange = 1449896229.0 / radar->param.bandwidth * 100;
-    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 100;
+    radar->param.resRange = 149896229.0 / radar->param.bandwidth * 1000;
+    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 1000;
 
     radar_basic_data_init(&radar->basic, &radar->param);
     radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFrameTotal));
@@ -56,13 +58,19 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
     radar->config.cfarCfg.thSNR = 2.0;
 
     radar->config.cfar_filter_cfg.range0 = 1;
-    radar->config.cfar_filter_cfg.range1 = 5;
+    radar->config.cfar_filter_cfg.range1 = 3;
     radar->config.cfar_filter_cfg.shape1 = param->numChrip;
-    radar->config.cfar_filter_cfg.thSNR = 1.0;
+    radar->config.cfar_filter_cfg.thSNR = 0.6;
+
+    radar->config.dbscan_cfg.wr = 1.0 * 65536;
+    radar->config.dbscan_cfg.wv = 0;
+    radar->config.dbscan_cfg.eps = 700;
+    radar->config.dbscan_cfg.min_samples = 3;
+
 
     radar->cfar = cfar2d_result_alloc(param->numMaxCfarPoints);
 
-    radar->meas = radar_measurement_list_alloc(param->numMaxCfarPoints);
+    radar->meas = radar_measurements_list_alloc(5);
 
 
     return 0;
@@ -126,14 +134,26 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 
 
     /* 7. 计算速度和距离 */
-    radar_clac_dis_and_velo(radar->meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
+    measurements_t *one_frame_meas = radar_measurement_alloc(radar->cfar->numPoint);
+    if (one_frame_meas == NULL) {
+        RADAR_ERROR("radar_measurement_alloc failed", RADAR_ENOMEM);
+        return -1;
+    }
+    radar_clac_dis_and_velo(one_frame_meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
 
 
     /* 8. 计算角度 */
-    radar_dual_channel_clac_angle(radar->meas, radar->cfar, radar->basic.rdms, ((int32_t)2 << 15));
+    radar_dual_channel_clac_angle(one_frame_meas, radar->cfar, radar->basic.rdms, ((int32_t)2 << 15));
 
 
     /* 9. 二维平面聚类(DBSCAN) */
+    /* 累计多帧数据再做聚类。 因为杂波点往往不会连续多次在小范围内出现，而目标信号可以。
+      合理设置聚类的簇最小点数，可以避免杂波点聚类成一个簇
+      另外当目标偶尔丢失时，累计多帧数据再做聚类，可以避免丢失
+    */
+    point_clouds_clustering(radar, one_frame_meas);
+    radar_measurements_free(one_frame_meas);
+
 
 #if 0
     /*=========================================================================
@@ -184,4 +204,40 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
  */
 static void check_and_delete_static_point(radar_handle_t *radar)
 {
+}
+
+
+/**
+ * @brief 聚类，输入当前帧的量测值和历史数据，输出当前帧的聚类结果
+ *        该函数会将当前帧的量测值和历史数据组合成一个大矩阵，然后对
+ *        该矩阵进行DBSCAN聚类，聚类的结果存储到radar->cluster_meas中
+ *
+ * @param radar   雷达句柄
+ * @param newFrame 当前帧的量测值
+ */
+static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame)
+{
+    radar_measurements_list_push(radar->meas, newFrame);
+
+    measurements_t *multi_frame_meas = radar_measurement_alloc(radar_measurements_list_get_meas_num(radar->meas));
+    radar_measurements_list_copyout(multi_frame_meas, radar->meas);
+    size_t *labels = malloc(multi_frame_meas->num * sizeof(size_t));
+
+    int num_cluster = radar_cluster_dbscan(labels, multi_frame_meas,            //
+                                           radar->config.dbscan_cfg.wr,         //
+                                           radar->config.dbscan_cfg.wv,         //
+                                           radar->config.dbscan_cfg.eps,        //
+                                           radar->config.dbscan_cfg.min_samples //
+
+    );
+    measurements_t *cluster_meas = radar_measurement_alloc(num_cluster);
+    radar_cluster_fusion(cluster_meas, num_cluster, labels, multi_frame_meas);
+
+    if (radar->cluster_meas != NULL) {
+        free(radar->cluster_meas);
+    }
+    radar->cluster_meas = cluster_meas;
+
+    free(labels);
+    radar_measurements_free(multi_frame_meas);
 }

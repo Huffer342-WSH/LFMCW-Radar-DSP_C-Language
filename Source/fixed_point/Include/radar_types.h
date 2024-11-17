@@ -3,31 +3,9 @@
 
 #include "radar_math_types.h"
 #include "radar_cfar.h"
+#include "radar_measurement.h"
 #include "radar_micromotion.h"
-
-/**
- * @brief 量测值，包含距离，速度，方位。CFAR检测结果作为补充
- *
- */
-typedef struct {
-    int32_t distance;    // 径向距离(mm)
-    int32_t velocity;    // 径向速度(mm/s)
-    int16_t azimuth;     // 方位角 (Q2.13)
-    int16_t sin_azimuth; // sin(azimuth) Q0.15
-    int16_t cos_azimuth; // cos(azimuth) Q0.15
-    int32_t amp;
-    int32_t snr;
-} radar_measurements_fixed_t;
-
-/**
- * @brief 量测值，包含距离，速度，方位。CFAR检测结果作为补充
- *
- */
-typedef struct {
-    radar_measurements_fixed_t *meas;
-    size_t num;
-    size_t capacity;
-} radar_measurement_list_fixed_t;
+#include "radar_cluster.h"
 
 /**
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
@@ -58,6 +36,7 @@ typedef struct {
 typedef struct {
     cfar2d_cfg_t cfarCfg;
     cfar2d_filter_cfg_t cfar_filter_cfg;
+    dbscan_cfg_t dbscan_cfg;
 } radar_config_t;
 
 typedef struct {
@@ -76,7 +55,8 @@ typedef struct {
     radar_basic_data_t basic;
     radar_micromotion_handle_t micromotion;
     cfar2d_result_t *cfar;
-    radar_measurement_list_fixed_t *meas;
+    measurements_list_t *meas;
+    measurements_t *cluster_meas;
 } radar_handle_t;
 
 #ifdef __cplusplus
@@ -84,8 +64,6 @@ extern "C" {
 #endif
 
 int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param);
-radar_measurement_list_fixed_t *radar_measurement_list_alloc(size_t capacity);
-void radar_measurement_list_free(radar_measurement_list_fixed_t *m);
 
 #ifdef __cplusplus
 }

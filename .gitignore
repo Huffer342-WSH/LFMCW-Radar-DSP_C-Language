@@ -8,3 +8,4 @@ build
 **/.pytest_cache
 
 data/RadarData_Simulate.mat
+clog.txt

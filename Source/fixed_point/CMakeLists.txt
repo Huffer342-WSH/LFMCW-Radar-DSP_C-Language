@@ -30,6 +30,7 @@ target_sources(lfmcwradar_fixed PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_mag.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_math.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_matrix.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_measurement.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_micromotion.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_processer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_types.c

@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-int radar_clac_dis_and_velo(radar_measurement_list_fixed_t *meas, const cfar2d_result_t *cfar, const matrix2d_int32_t *mag, int32_t resRange, int32_t resVel);
+int radar_clac_dis_and_velo(measurements_t *meas, const cfar2d_result_t *cfar, const matrix2d_int32_t *mag, int32_t resRange, int32_t resVel);
 
 
 #ifdef __cplusplus

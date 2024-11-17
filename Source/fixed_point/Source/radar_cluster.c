@@ -17,37 +17,10 @@
 #include "radar_cluster.h"
 
 #include "radar_error.h"
+#include "radar_assert.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdarg.h>
-
-
-void append_to_file(const char *format, ...)
-{
-    char filename[] = "/media/huffer/SanDisk/projects/x86/LFMCW-Radar-DSP_C-Language/clog.txt";
-    // 打开文件进行附加，如果文件不存在则创建新文件
-    FILE *file = fopen(filename, "a");
-
-    if (file == NULL) {
-        // 如果打开文件失败，输出错误信息
-        printf("Error opening file!\n");
-        return;
-    }
-
-    // 声明 va_list，用于访问可变参数
-    va_list args;
-    va_start(args, format);
-
-    // 使用 vfprintf 来格式化输出到文件
-    vfprintf(file, format, args);
-
-    // 结束可变参数的处理
-    va_end(args);
-
-    // 关闭文件
-    fclose(file);
-}
 
 
 /**
@@ -60,16 +33,29 @@ void append_to_file(const char *format, ...)
  * @param get_neighbors 回调函数，get_neighbors(&count, i, eps, param) 返回保存邻居的序号的数组，count 为邻居个数
  * @param param 回调函数的额外参数
  */
-void dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_get_neighbors_t get_neighbors, void *param)
+int dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_get_neighbors_t get_neighbors, void *param)
 {
     size_t *stack;
     size_t stack_top = 0;
     size_t *neighbors = NULL;
     size_t count = 0;
     size_t label_num = 0;
+    if (n == 0) {
+        return 0;
+    }
+    if (n == 1) {
+        if (min_samples == 0) {
+            labels[0] = 0;
+            return 1;
+        } else {
+            labels[0] = SIZE_MAX;
+            return 0;
+        }
+    }
     stack = (size_t *)malloc((n - 1) * sizeof(size_t));
     if (stack == NULL) {
         RADAR_ERROR("dbscan_core malloc stack failed", RADAR_ENOMEM);
+        return -1;
     }
 
 
@@ -89,6 +75,7 @@ void dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_g
             if (count >= min_samples) {
                 for (size_t k = 0; k < count; k++) {
                     size_t v = neighbors[k];
+                    if (v >= n) { }
                     if (labels[v] == SIZE_MAX) {
                         stack[stack_top++] = v;
                         labels[v] = label_num;
@@ -104,6 +91,7 @@ void dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_g
         label_num++;
     }
     free(stack);
+    return label_num;
 }
 
 /**
@@ -117,10 +105,10 @@ void dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_g
  *
  * @note 量测值的数值太大会导致溢出，实际应用中不会有这么大的数据
  */
-int32_t radar_cluster_meas_distance(radar_measurements_fixed_t *ma, radar_measurements_fixed_t *mb, int32_t wr, int32_t wv)
+int32_t radar_cluster_meas_distance(measurement_t *ma, measurement_t *mb, int32_t wr, int32_t wv)
 {
 
-    int32_t v = abs_diff(ma->sin_azimuth, mb->sin_azimuth);
+    int32_t v = abs_diff(ma->velocity, mb->velocity);
 
     // c^ = a^2 + b^2 - 2 * a * b * cos(theta)
     int32_t a = ma->distance;
@@ -162,14 +150,14 @@ int32_t radar_cluster_meas_distance(radar_measurements_fixed_t *ma, radar_measur
  *          ...
  *          即(i,j)对应序号为 i*(i-1)/2 + j
  */
-static void radar_calc_meas_distance(radar_measurement_list_fixed_t *meas, int32_t wr, int32_t wv, int32_t *D)
+static void radar_calc_meas_distance(measurements_t *meas, int32_t wr, int32_t wv, int32_t *D)
 {
     // d = sqrt( (c*wr)^2 + (v*wv)^2 )/(wr + wv)
     const size_t n = meas->num;
     for (size_t i = 1; i < n; i++) {
         const size_t offset = i * (i - 1) / 2;
         for (size_t j = 0; j < i; j++) {
-            D[offset + j] = radar_cluster_meas_distance(&meas->meas[i], &meas->meas[j], wr, wv);
+            D[offset + j] = radar_cluster_meas_distance(&meas->data[i], &meas->data[j], wr, wv);
         }
     }
 }
@@ -234,7 +222,7 @@ static void radar_calc_neighbors_info(size_t n, int32_t *D, int32_t eps, size_t 
  *
  * @note  该函数会分配内存，需要调用radar_cluster_dbscan_neighbors_free()来释放
  */
-dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(radar_measurement_list_fixed_t *meas, int32_t wr, int32_t wv, int32_t eps)
+dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(measurements_t *meas, int32_t wr, int32_t wv, int32_t eps)
 {
     dbscan_neighbors_t *nb = (dbscan_neighbors_t *)malloc(sizeof(dbscan_neighbors_t));
     size_t i;
@@ -340,13 +328,53 @@ size_t *radar_get_neighbors(size_t *count, size_t idx, int32_t eps, void *param)
  * @param eps DBSCAN的领域大小
  * @param min_samples DBSCAN的核心点需要的最小邻居数
  */
-void radar_cluster_dbscan(size_t *labels, radar_measurement_list_fixed_t *meas, int32_t wr, int32_t wv, int32_t eps, size_t min_samples)
+int radar_cluster_dbscan(size_t *labels, measurements_t *meas, int32_t wr, int32_t wv, int32_t eps, size_t min_samples)
 {
+    int num_cluster;
     dbscan_neighbors_t *nb = radar_cluster_dbscan_neighbors_create(meas, wr, wv, eps);
     if (nb == NULL) {
         RADAR_ERROR("radar_cluster_dbscan malloc dbscan_neighbors_t failed", RADAR_ENOMEM);
-        return;
+        return -1;
     }
-    dbscan_core(labels, meas->num, eps, min_samples, radar_get_neighbors, nb);
+    num_cluster = dbscan_core(labels, meas->num, eps, min_samples, radar_get_neighbors, nb);
     radar_cluster_dbscan_neighbors_free(nb);
+    return num_cluster;
+}
+
+
+/**
+ * @brief 对DBSCAN聚类结果进行融合，计算每个聚类的均值
+ *
+ * @param[out] clusters 保存聚类的均值结果
+ * @param num_cluster 聚类的数量
+ * @param labels 量测值的聚类标签
+ * @param meas 量测值列表
+ */
+int radar_cluster_fusion(measurements_t *clusters, size_t num_cluster, size_t *labels, measurements_t *meas)
+{
+    RADAR_ASSERT(clusters != NULL && clusters->capacity >= num_cluster);
+    for (size_t i = 0; i < num_cluster; i++) {
+        int64_t distance, velocity, azimuth, amp, snr;
+        int64_t cnt = 0;
+        amp = distance = velocity = azimuth = snr = 0;
+        for (size_t j = 0; j < meas->num; j++) {
+            if (labels[j] != i)
+                continue;
+            measurement_t *m = &meas->data[j];
+            amp += (int64_t)m->amp;
+            distance += (int64_t)m->distance;
+            velocity += (int64_t)m->velocity;
+            azimuth += (int64_t)m->azimuth;
+            snr += (int64_t)m->snr;
+            cnt++;
+        }
+        measurement_t *m = &clusters->data[i];
+        m->amp = amp / cnt;
+        m->distance = distance / cnt;
+        m->velocity = velocity / cnt;
+        m->azimuth = azimuth / cnt;
+        m->snr = snr / cnt;
+    }
+    clusters->num = num_cluster;
+    return 0;
 }
