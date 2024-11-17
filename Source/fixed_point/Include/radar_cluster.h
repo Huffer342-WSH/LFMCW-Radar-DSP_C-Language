@@ -14,13 +14,6 @@ typedef struct {
     size_t *n_neighbors;
 } dbscan_neighbors_t;
 
-typedef struct {
-    int32_t wr;
-    int32_t wv;
-    int32_t eps;
-    size_t min_samples;
-} dbscan_cfg_t;
-
 
 typedef size_t *(*cb_get_neighbors_t)(size_t *count, size_t idx, int32_t eps, void *param);
 

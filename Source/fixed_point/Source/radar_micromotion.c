@@ -2,18 +2,30 @@
 
 #include <stdlib.h>
 
-void radar_micromotion_handle_init(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity)
+#include "radar_error.h"
+
+int radar_micromotion_handle_init(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity)
 {
     mm->numRangeBin = numRangeBin;
     mm->capacity = capacity;
     mm->in = 0;
     mm->numFrame = 0;
     mm->prevFramePhase = radar_matrix2d_int16_alloc(numRangeBin, 1);
+    if (mm->prevFramePhase == NULL) {
+        RADAR_ERROR("radar_micromotion_handle_init() failed to allocate space for prevFramePhase", RADAR_ENOMEM);
+        return -1;
+    }
     mm->deltaPhase = radar_matrix2d_int16_alloc(numRangeBin, capacity);
+    if (mm->deltaPhase == NULL) {
+        free(mm->prevFramePhase);
+        RADAR_ERROR("radar_micromotion_handle_init() failed to allocate space for deltaPhase", RADAR_ENOMEM);
+        return -2;
+    }
+    return 0;
 }
 
 
-void radar_micromotion_handle_deinit(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity)
+void radar_micromotion_handle_deinit(radar_micromotion_handle_t *mm)
 {
     radar_matrix2d_int16_free(mm->prevFramePhase);
     radar_matrix2d_int16_free(mm->deltaPhase);

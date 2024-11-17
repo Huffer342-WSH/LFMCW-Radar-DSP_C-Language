@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-measurements_t *radar_measurement_alloc(size_t capacity)
+measurements_t *radar_measurements_alloc(size_t capacity)
 {
     measurements_t *meas = (measurements_t *)malloc(sizeof(measurements_t));
     meas->data = (measurement_t *)malloc(sizeof(measurement_t) * capacity);
@@ -81,7 +81,7 @@ void radar_measurements_list_push(measurements_list_t *m, measurements_t *frame)
         RADAR_ERROR("failed to allocate space for meas_node", RADAR_ENOMEM);
         return;
     }
-    node->data = radar_measurement_alloc(frame->num);
+    node->data = radar_measurements_alloc(frame->num);
     memcpy(node->data->data, frame->data, sizeof(measurement_t) * frame->num);
     node->data->num = frame->num;
     node->next = m->head.next;
@@ -149,6 +149,7 @@ int radar_measurements_list_copyout(measurements_t *dest, measurements_list_t *m
 {
     struct meas_node *node;
     node = m->head.next;
+    dest->num = 0;
     while (node != NULL) {
         size_t free_size = dest->capacity - dest->num;
         size_t copy_size = node->data->num;

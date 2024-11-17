@@ -21,19 +21,30 @@
 #include "radar_assert.h"
 #include "radar_error.h"
 
-#include <assert.h>
+
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 
 static void check_and_delete_static_point(radar_handle_t *radar);
 static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame);
 
-
-int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
+/**
+ * @brief 雷达句柄初始化
+ *
+ * @note 移植代码的时候自己实现，参数太多，一般还是选择手动设置结构体中的成员
+ *
+ * @param radar
+ * @param param
+ * @return int
+ */
+int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config_t *config)
 {
+    int status = 0;
     radar->cntFrame = 0;
 
+    /* 设置参数 */
     radar->param.wavelength = param->wavelength;
     radar->param.bandwidth = param->bandwidth;
     radar->param.timeChrip = param->timeChrip;
@@ -47,33 +58,81 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param)
     radar->param.resRange = 149896229.0 / radar->param.bandwidth * 1000;
     radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 1000;
 
-    radar_basic_data_init(&radar->basic, &radar->param);
-    radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFrameTotal));
+    /* 设置配置 */
+    memcpy(&radar->config, config, sizeof(radar_config_t));
 
-    radar->config.cfarCfg.numGuard[0] = 1;
-    radar->config.cfarCfg.numGuard[1] = 2;
-    radar->config.cfarCfg.numTrain[0] = 2;
-    radar->config.cfarCfg.numTrain[1] = 4;
-    radar->config.cfarCfg.thAmp = 0;
-    radar->config.cfarCfg.thSNR = 2.0;
+    /* 初始化基本数据 */
+    status = radar_basic_data_init(&radar->basic, &radar->param);
+    if (status != 0) {
+        status = 1;
+        goto RADARDSP_INIT_FAILED1;
+    }
 
-    radar->config.cfar_filter_cfg.range0 = 1;
-    radar->config.cfar_filter_cfg.range1 = 3;
-    radar->config.cfar_filter_cfg.shape1 = param->numChrip;
-    radar->config.cfar_filter_cfg.thSNR = 0.6;
+    /* 初始化微动检测 */
+    status = radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFrameTotal));
+    if (status != 0) {
+        status = 2;
+        goto RADARDSP_INIT_FAILED2;
+    }
 
-    radar->config.dbscan_cfg.wr = 1.0 * 65536;
-    radar->config.dbscan_cfg.wv = 0;
-    radar->config.dbscan_cfg.eps = 700;
-    radar->config.dbscan_cfg.min_samples = 3;
-
-
+    /* 初始化CFAR */
     radar->cfar = cfar2d_result_alloc(param->numMaxCfarPoints);
+    if (radar->cfar == NULL) {
+        status = 3;
+        goto RADARDSP_INIT_FAILED3;
+    }
 
-    radar->meas = radar_measurements_list_alloc(5);
+
+    /* 初始化聚类 */
+    status = radar_cluster_init(&radar->cluster, 5, 40, 10);
+    if (status != 0) {
+        status = 4;
+        goto RADARDSP_INIT_FAILED4;
+    }
+
+    /* 初始化钩子函数 */
+    status = radar_hook_init(&radar->hook);
+    if (status != 0) {
+        status = 5;
+        goto RADARDSP_INIT_FAILED5;
+    }
 
 
     return 0;
+
+RADARDSP_INIT_FAILED5:
+    radar_cluster_deinit(&radar->cluster);
+RADARDSP_INIT_FAILED4:
+    cfar2d_result_free(radar->cfar);
+RADARDSP_INIT_FAILED3:
+    radar_micromotion_handle_deinit(&radar->micromotion);
+RADARDSP_INIT_FAILED2:
+    radar_basic_data_deinit(&radar->basic);
+RADARDSP_INIT_FAILED1:
+
+    return status;
+}
+
+void radardsp_register_hook_cfar_raw(radar_handle_t *radar, void (*func)(const cfar2d_result_t *))
+{
+    radar->hook.hook_cfar_raw = func;
+}
+
+
+void radardsp_register_hook_cfar_filtered(radar_handle_t *radar, void (*func)(const cfar2d_result_t *))
+{
+    radar->hook.hook_cfar_filtered = func;
+}
+
+
+void radardsp_register_hook_point_clouds(radar_handle_t *radar, void (*func)(const measurements_t *))
+{
+    radar->hook.hook_point_clouds = func;
+}
+
+void radardsp_register_hook_clusters(radar_handle_t *radar, void (*func)(const measurements_t *))
+{
+    radar->hook.hook_clusters = func;
 }
 
 /**
@@ -119,9 +178,11 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 
 
     /* 4. CFAR搜索点，最终输出的检测结果包含点的 */
-    cfar2d_result_reset(radar->cfar);
-
     radar_cfar2d_goca(radar->cfar, radar->basic.magSpec2D, &radar->config.cfarCfg);
+
+    if (radar->hook.hook_cfar_raw != NULL) {
+        radar->hook.hook_cfar_raw(radar->cfar);
+    }
 
     /* 5. 点云凝聚： 删除CFAR结果中一些幅度较小的点 */
     /* 一个目标的信号往往会分散到多个单元中，部分单元中的能量较小，导致测角精度低，\
@@ -132,11 +193,14 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     /* 6. CFAR结果中的0速度点查询微动信息，删除不符合要求的点 */
     check_and_delete_static_point(radar);
 
+    if (radar->hook.hook_cfar_filtered != NULL) {
+        radar->hook.hook_cfar_filtered(radar->cfar);
+    }
 
     /* 7. 计算速度和距离 */
-    measurements_t *one_frame_meas = radar_measurement_alloc(radar->cfar->numPoint);
+    measurements_t *one_frame_meas = radar_measurements_alloc(radar->cfar->numPoint);
     if (one_frame_meas == NULL) {
-        RADAR_ERROR("radar_measurement_alloc failed", RADAR_ENOMEM);
+        RADAR_ERROR("radar_measurements_alloc failed", RADAR_ENOMEM);
         return -1;
     }
     radar_clac_dis_and_velo(one_frame_meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
@@ -144,7 +208,9 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 
     /* 8. 计算角度 */
     radar_dual_channel_clac_angle(one_frame_meas, radar->cfar, radar->basic.rdms, ((int32_t)2 << 15));
-
+    if (radar->hook.hook_point_clouds != NULL) {
+        radar->hook.hook_point_clouds(one_frame_meas);
+    }
 
     /* 9. 二维平面聚类(DBSCAN) */
     /* 累计多帧数据再做聚类。 因为杂波点往往不会连续多次在小范围内出现，而目标信号可以。
@@ -153,6 +219,9 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     */
     point_clouds_clustering(radar, one_frame_meas);
     radar_measurements_free(one_frame_meas);
+    if (radar->hook.hook_clusters != NULL) {
+        radar->hook.hook_clusters(radar->cluster.cluster_meas);
+    }
 
 
 #if 0
@@ -194,6 +263,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     */
 
 #endif
+    radar->cntFrame++;
     return 0;
 }
 
@@ -217,27 +287,36 @@ static void check_and_delete_static_point(radar_handle_t *radar)
  */
 static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame)
 {
-    radar_measurements_list_push(radar->meas, newFrame);
+    radar_cluster_t *cluster = &radar->cluster;
+    measurements_list_t *list = cluster->list;
 
-    measurements_t *multi_frame_meas = radar_measurement_alloc(radar_measurements_list_get_meas_num(radar->meas));
-    radar_measurements_list_copyout(multi_frame_meas, radar->meas);
-    size_t *labels = malloc(multi_frame_meas->num * sizeof(size_t));
+    /* 新一帧的量测值添加到队列 */
+    radar_measurements_list_push(list, newFrame);
 
-    int num_cluster = radar_cluster_dbscan(labels, multi_frame_meas,            //
+    /* 将多帧的量测值复制到一个measurements_t中 */
+    size_t num_meas = radar_measurements_list_get_meas_num(list);
+    if (cluster->multi_frame_meas->capacity < num_meas) {
+        radar_measurements_free(cluster->multi_frame_meas);
+        free(cluster->multi_frame_meas_labels);
+        cluster->multi_frame_meas = radar_measurements_alloc(num_meas);
+        cluster->multi_frame_meas_labels = malloc(sizeof(size_t) * num_meas);
+    }
+    radar_measurements_list_copyout(cluster->multi_frame_meas, list);
+
+    /* DBSCAN */
+    int num_cluster = radar_cluster_dbscan(cluster->multi_frame_meas_labels,    //
+                                           cluster->multi_frame_meas,           //
                                            radar->config.dbscan_cfg.wr,         //
                                            radar->config.dbscan_cfg.wv,         //
                                            radar->config.dbscan_cfg.eps,        //
                                            radar->config.dbscan_cfg.min_samples //
 
     );
-    measurements_t *cluster_meas = radar_measurement_alloc(num_cluster);
-    radar_cluster_fusion(cluster_meas, num_cluster, labels, multi_frame_meas);
 
-    if (radar->cluster_meas != NULL) {
-        free(radar->cluster_meas);
+    /* 点云融合 */
+    if (cluster->cluster_meas->capacity < num_cluster) {
+        radar_measurements_free(cluster->cluster_meas);
+        cluster->cluster_meas = radar_measurements_alloc(num_cluster);
     }
-    radar->cluster_meas = cluster_meas;
-
-    free(labels);
-    radar_measurements_free(multi_frame_meas);
+    radar_cluster_fusion(cluster->cluster_meas, num_cluster, cluster->multi_frame_meas_labels, cluster->multi_frame_meas);
 }

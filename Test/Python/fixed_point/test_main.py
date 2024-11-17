@@ -45,15 +45,8 @@ rdms_list.imag = rdms_list.imag.astype(np.int16)
 radar_init_param = pyRadar.radar_init_param()
 radar_handle = pyRadar.radar_handle()
 rdms = pyRadar.matrix3d_complex_int16_alloc(numChannel, numRangeBin, numChrip)
-cfar_cfg = pyRadar.cfar2d_cfg()
 noise_buffer = pyRadar.matrix2d_int32_alloc(numRangeBin, numChrip)
 
-cfar_cfg.numGuard[0] = 2
-cfar_cfg.numGuard[1] = 2
-cfar_cfg.numTrain[0] = 2
-cfar_cfg.numTrain[1] = 2
-cfar_cfg.thSNR - 2.0
-cfar_cfg.thAmp = 0
 
 radar_init_param.wavelength = wavelength
 radar_init_param.bandwidth = bandwidth
@@ -65,8 +58,26 @@ radar_init_param.numRangeBin = numRangeBin
 radar_init_param.numChrip = numChrip
 radar_init_param.numMaxCfarPoints = 20
 
+radar_config = pyRadar.radar_config()
+radar_config.cfarCfg.numGuard[0] = 1
+radar_config.cfarCfg.numGuard[1] = 1
+radar_config.cfarCfg.numTrain[0] = 2
+radar_config.cfarCfg.numTrain[1] = 3
+radar_config.cfarCfg.thAmp = 0
+radar_config.cfarCfg.thSNR = 2.0
+
+radar_config.cfar_filter_cfg.range0 = 1
+radar_config.cfar_filter_cfg.range1 = 3
+radar_config.cfar_filter_cfg.shape1 = numChrip
+radar_config.cfar_filter_cfg.thSNR = 0.6
+
+radar_config.dbscan_config.wr = int(1.0 * (1 << 16))
+radar_config.dbscan_config.wv = 0
+radar_config.dbscan_config.eps = 700
+radar_config.dbscan_config.min_samples = 2
+
 print(f"雷达初始化参数:\n{radar_init_param}")
-pyRadar.radardsp_init(radar_handle, radar_init_param)
+pyRadar.radardsp_init(radar_handle, radar_init_param, radar_config)
 
 
 # %% 输入一个帧
@@ -174,7 +185,7 @@ for i in range(numFrame):
     data.append(go.Scatter(x=pointCloudList[i][:, 0], y=pointCloudList[i][:, 1], mode="markers", name="cfar"))
     data.append(go.Scatter(x=targetList[i][:, 0], y=targetList[i][:, 1], mode="markers", name="dbscan"))
     listData.append(data)
-fig = dh.draw_animation(listData[::20], title="RDM的 GOCA-2DCFAR 搜索结果")
+fig = dh.draw_animation(listData[::5], title="RDM的 GOCA-2DCFAR 搜索结果")
 fig.update_layout(
     xaxis=dict(range=[0, 15]),
     yaxis=dict(range=[-10, 10]),

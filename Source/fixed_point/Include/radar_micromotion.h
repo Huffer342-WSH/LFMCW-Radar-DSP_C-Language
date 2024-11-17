@@ -30,7 +30,8 @@ typedef struct {
     uint32_t amplitude; // 微动幅度（最大值-最小值）
 } radar_micromotion_target_info_t;
 
-void radar_micromotion_handle_init(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity);
+int radar_micromotion_handle_init(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity);
+void radar_micromotion_handle_deinit(radar_micromotion_handle_t *mm);
 void radar_micromotion_add_frame(radar_micromotion_handle_t *mmhandle, matrix3d_complex_int16_t *rdms);
 
 #ifdef __cplusplus

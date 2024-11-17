@@ -14,7 +14,7 @@ TEST(RadarFixedTest, radar_cluster_calc_distance)
     const double WR = 1.0;
     const double WV = 1.0;
     double pos[][3] = { { 2000, 2000, 0 }, { 2000, -2000, 0 }, { -2000, 2000, 0 }, { -2000, -2000, 0 } };
-    measurements_t *m = radar_measurement_alloc(10);
+    measurements_t *m = radar_measurements_alloc(10);
 
     for (size_t i = 0; i < 4; i++) {
         m->data[i].distance = sqrt(pos[i][0] * pos[i][0] + pos[i][1] * pos[i][1]) + 0.5;

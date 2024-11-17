@@ -39,7 +39,7 @@ def test_dbscan():
     X, labels_true = make_blobs(n_samples=300, centers=centers, cluster_std=350)
     min_samples = 2
     eps = 500
-    meas = pyRadar.radar_measurement_alloc(len(X))
+    meas = pyRadar.radar_measurements_alloc(len(X))
     meas.meas["distance"] = np.linalg.norm(X, axis=1).astype(np.int32)
     meas.meas["azimuth"] = (np.atan2(X[:, 1], X[:, 0]) * (1 << 13)).astype(np.int16)
     meas.meas["velocity"] = 0
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     min_samples = 3
     eps = 500
 
-    meas = pyRadar.radar_measurement_alloc(len(X))
+    meas = pyRadar.radar_measurements_alloc(len(X))
     meas.meas["distance"] = np.linalg.norm(X, axis=1).astype(np.int32)
     meas.meas["azimuth"] = (np.atan2(X[:, 1], X[:, 0]) * (1 << 13)).astype(np.int16)
     meas.meas["velocity"] = 0

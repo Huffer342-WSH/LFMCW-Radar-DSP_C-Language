@@ -92,14 +92,30 @@ void bind_radar_param(pybind11::module_ &m)
         });
 }
 
+
+void bind_dbscan_config(pybind11::module_ &m)
+{
+    pybind11::class_<dbscan_cfg_t>(m, "dbscan_config")
+        .def(pybind11::init<>())                                  // 默认构造函数
+        .def_readwrite("wr", &dbscan_cfg_t::wr)                   // 绑定 wr 属性
+        .def_readwrite("wv", &dbscan_cfg_t::wv)                   // 绑定 wv 属性
+        .def_readwrite("eps", &dbscan_cfg_t::eps)                 // 绑定 eps 属性
+        .def_readwrite("min_samples", &dbscan_cfg_t::min_samples) // 绑定 min_samples 属性
+        .def("__repr__", [](const dbscan_cfg_t &cfg) {
+            return "<dbscan_config wr=" + std::to_string(cfg.wr) + ", wv=" + std::to_string(cfg.wv) + ", eps=" + std::to_string(cfg.eps) +
+                   ", min_samples=" + std::to_string(cfg.min_samples) + ">";
+        }); // 提供一个 __repr__ 方法以便更好地显示对象信息
+}
+
 void bind_radar_config(pybind11::module_ &m)
 {
-
     pybind11::class_<radar_config_t>(m, "radar_config")
         .def(pybind11::init<>())
         .def_readwrite("cfarCfg", &radar_config_t::cfarCfg)
-        .def_readwrite("cfar_filter_cfg", &radar_config_t::cfar_filter_cfg);
+        .def_readwrite("cfar_filter_cfg", &radar_config_t::cfar_filter_cfg)
+        .def_readwrite("dbscan_config", &radar_config_t::dbscan_cfg);
 }
+
 
 void bind_radar_basic_data(pybind11::module_ &m)
 {
@@ -107,10 +123,13 @@ void bind_radar_basic_data(pybind11::module_ &m)
         .def(pybind11::init<>())
         .def_readwrite("param", &radar_basic_data_t::param)
         .def_readwrite("rdms", &radar_basic_data_t::rdms)
+#if ENABLE_STATIC_CLUTTER_FILTERING == ON
         .def_readwrite("staticClutter", &radar_basic_data_t::staticClutter)
         .def_readwrite("staticClutterAccBuffer", &radar_basic_data_t::staticClutterAccBuffer)
+#endif
         .def_readwrite("magSpec2D", &radar_basic_data_t::magSpec2D);
 }
+
 
 void bind_radar_handle(pybind11::module_ &m)
 {
@@ -121,8 +140,6 @@ void bind_radar_handle(pybind11::module_ &m)
         .def_readwrite("config", &radar_handle_t::config)
         .def_readwrite("basic", &radar_handle_t::basic)
         .def_readwrite("cfar", &radar_handle_t::cfar)
-        .def_readwrite("meas", &radar_handle_t::meas)
-        .def_readwrite("cluster_meas", &radar_handle_t::cluster_meas)
         .def(
             "getMagSpec2D",
             [](radar_handle_t &self) {
@@ -134,8 +151,8 @@ void bind_radar_handle(pybind11::module_ &m)
         .def(
             "getMeasurements",
             [](radar_handle_t &self) {
-                if (self.meas->head.next != NULL) {
-                    measurements_t *m = self.meas->head.next->data;
+                if (self.cluster.list->head.next != NULL) {
+                    measurements_t *m = self.cluster.list->head.next->data;
                     return pybind11::array_t<measurement_t>({ static_cast<pybind11::ssize_t>(m->num) }, m->data);
                 }
                 return array_c2numpy<measurement_t>(nullptr, { 0 });
@@ -145,7 +162,7 @@ void bind_radar_handle(pybind11::module_ &m)
         .def(
             "getClusterMeasurements",
             [](radar_handle_t &self) {
-                return pybind11::array_t<measurement_t>({ static_cast<pybind11::ssize_t>(self.cluster_meas->num) }, self.cluster_meas->data);
+                return pybind11::array_t<measurement_t>({ static_cast<pybind11::ssize_t>(self.cluster.cluster_meas->num) }, self.cluster.cluster_meas->data);
             },
             "Get a copy of the cluster measurements.");
 }
@@ -159,9 +176,9 @@ void bind_radar_basic_data_init(pybind11::module_ &m)
     );
 }
 
-void bind_radar_measurement_alloc(pybind11::module_ &m)
+void bind_radar_measurements_alloc(pybind11::module_ &m)
 {
-    m.def("radar_measurement_alloc", &radar_measurement_alloc, pybind11::return_value_policy::take_ownership,
+    m.def("radar_measurements_alloc", &radar_measurements_alloc, pybind11::return_value_policy::take_ownership,
           "Allocate a new RadarMeasurementList with the specified capacity.");
 }
 
@@ -172,9 +189,10 @@ void bind_radar_types(pybind11::module_ &m)
     bind_measurements_list(m);
     bind_multi_frame_meas_fixed(m);
     bind_radar_param(m);
+    bind_dbscan_config(m);
     bind_radar_config(m);
     bind_radar_basic_data(m);
     bind_radar_handle(m);
     bind_radar_basic_data_init(m);
-    bind_radar_measurement_alloc(m);
+    bind_radar_measurements_alloc(m);
 }

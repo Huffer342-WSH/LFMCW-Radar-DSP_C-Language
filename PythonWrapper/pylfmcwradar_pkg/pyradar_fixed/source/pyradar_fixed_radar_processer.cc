@@ -48,9 +48,7 @@ void bind_radar_init_param(pybind11::module_ &m)
 void bind_radar_functions(pybind11::module_ &m)
 {
     // 绑定 radardsp_init 函数
-    m.def(
-        "radardsp_init", &radardsp_init, "Initialize the radar system", pybind11::arg("radar"), pybind11::arg("param")
-    );
+    m.def("radardsp_init", &radardsp_init, "Initialize the radar system", pybind11::arg("radar"), pybind11::arg("param"), pybind11::arg("config"));
 
     // 绑定 radardsp_input_new_frame 函数
     m.def(

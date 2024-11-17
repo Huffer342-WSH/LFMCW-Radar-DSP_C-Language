@@ -98,6 +98,7 @@ void bind_cfar2d_filter_cfg(pybind11::module_ &m)
         .def(pybind11::init<>()) // 默认构造函数
         .def_readwrite("range0", &cfar2d_filter_cfg_t::range0)
         .def_readwrite("range1", &cfar2d_filter_cfg_t::range1)
+        .def_readwrite("shape1", &cfar2d_filter_cfg_t::shape1)
         .def_readwrite("thSNR", &cfar2d_filter_cfg_t::thSNR);
 }
 

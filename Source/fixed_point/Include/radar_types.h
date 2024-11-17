@@ -1,6 +1,7 @@
 #ifndef _RADAR_TYPES_H_
 #define _RADAR_TYPES_H_
 
+#include "radar_config.h"
 #include "radar_math_types.h"
 #include "radar_cfar.h"
 #include "radar_measurement.h"
@@ -30,6 +31,13 @@ typedef struct {
 
 } radar_param_t;
 
+typedef struct {
+    int32_t wr;
+    int32_t wv;
+    int32_t eps;
+    size_t min_samples;
+} dbscan_cfg_t;
+
 /**
  * @brief 雷达配置，主要包含信号处理时可配置的参数，比如ROI、阈值等
  */
@@ -42,11 +50,27 @@ typedef struct {
 typedef struct {
     radar_param_t *param;
     matrix3d_complex_int16_t *rdms;
+#if ENABLE_STATIC_CLUTTER_FILTERING == ON
     matrix2d_complex_int32_t *staticClutter;
     matrix2d_complex_int32_t *staticClutterAccBuffer;
+#endif /* ENABLE_STATIC_CLUTTER_FILTERING == ON */
     matrix2d_int32_t *magSpec2D;
 } radar_basic_data_t;
 
+typedef struct {
+    measurements_list_t *list;
+    measurements_t *multi_frame_meas;
+    size_t *multi_frame_meas_labels;
+    measurements_t *cluster_meas;
+} radar_cluster_t;
+
+
+typedef struct {
+    void (*hook_cfar_raw)(const cfar2d_result_t *cfar);
+    void (*hook_cfar_filtered)(const cfar2d_result_t *cfar);
+    void (*hook_point_clouds)(const measurements_t *meas);
+    void (*hook_clusters)(const measurements_t *clusters);
+} radar_hook_t;
 
 typedef struct {
     uint32_t cntFrame;
@@ -55,8 +79,8 @@ typedef struct {
     radar_basic_data_t basic;
     radar_micromotion_handle_t micromotion;
     cfar2d_result_t *cfar;
-    measurements_list_t *meas;
-    measurements_t *cluster_meas;
+    radar_cluster_t cluster;
+    radar_hook_t hook;
 } radar_handle_t;
 
 #ifdef __cplusplus
@@ -64,6 +88,12 @@ extern "C" {
 #endif
 
 int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param);
+int radar_hook_init(radar_hook_t *hook);
+int radar_cluster_init(radar_cluster_t *cluster, size_t num_frame, size_t num_meas, size_t num_cluster);
+
+void radar_basic_data_deinit(radar_basic_data_t *basic);
+void radar_cluster_deinit(radar_cluster_t *cluster);
+
 
 #ifdef __cplusplus
 }

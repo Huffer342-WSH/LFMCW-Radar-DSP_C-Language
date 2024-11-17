@@ -37,7 +37,7 @@ typedef struct {
     size_t capacity;
 } measurements_list_t;
 
-measurements_t *radar_measurement_alloc(size_t capacity);
+measurements_t *radar_measurements_alloc(size_t capacity);
 void radar_measurements_free(measurements_t *m);
 
 measurements_list_t *radar_measurements_list_alloc(size_t capacity);
