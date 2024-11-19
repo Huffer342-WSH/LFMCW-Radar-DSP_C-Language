@@ -36,35 +36,35 @@ endif()
 
 include(BasicMathFunctions/Config.cmake)
 
-include(ComplexMathFunctions/Config.cmake)
+# include(ComplexMathFunctions/Config.cmake)
 
-include(QuaternionMathFunctions/Config.cmake)
+# include(QuaternionMathFunctions/Config.cmake)
 
-include(ControllerFunctions/Config.cmake)
+# include(ControllerFunctions/Config.cmake)
 
 include(FastMathFunctions/Config.cmake)
 
-include(FilteringFunctions/Config.cmake)
+# include(FilteringFunctions/Config.cmake)
 
-include(MatrixFunctions/Config.cmake)
+# include(MatrixFunctions/Config.cmake)
 
-include(StatisticsFunctions/Config.cmake)
+# include(StatisticsFunctions/Config.cmake)
 
-include(SupportFunctions/Config.cmake)
+# include(SupportFunctions/Config.cmake)
 
 include(TransformFunctions/Config.cmake)
 
 include(CommonTables/Config.cmake)
 
-include(SVMFunctions/Config.cmake)
+# include(SVMFunctions/Config.cmake)
 
-include(BayesFunctions/Config.cmake)
+# include(BayesFunctions/Config.cmake)
 
-include(DistanceFunctions/Config.cmake)
+# include(DistanceFunctions/Config.cmake)
 
-include(InterpolationFunctions/Config.cmake)
+# include(InterpolationFunctions/Config.cmake)
 
-include(WindowFunctions/Config.cmake)
+# include(WindowFunctions/Config.cmake)
 
 # ## Includes
 target_include_directories(CMSISDSP PUBLIC "${DSP}/Include")

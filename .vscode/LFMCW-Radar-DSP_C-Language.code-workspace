@@ -23,6 +23,9 @@
 	},
 	"settings": {
 		"cmake.generator": "Ninja",
+		"cmake.configureArgs": [
+			"-DCMAKE_TOOLCHAIN_FILE=CMake/toolchain-armclang.cmake"
+		],
 		"files.associations": {
 			"*.H": "c",
 			"*.v": "systemverilog",
