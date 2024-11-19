@@ -99,7 +99,7 @@ void bind_cfar2d_filter_cfg(pybind11::module_ &m)
         .def_readwrite("range0", &cfar2d_filter_cfg_t::range0)
         .def_readwrite("range1", &cfar2d_filter_cfg_t::range1)
         .def_readwrite("shape1", &cfar2d_filter_cfg_t::shape1)
-        .def_readwrite("thSNR", &cfar2d_filter_cfg_t::thSNR);
+        .def_readwrite("thSNR", &cfar2d_filter_cfg_t::th);
 }
 
 void bind_cfar2d_result_func(pybind11::module_ &m)

@@ -1,7 +1,7 @@
 /**
  * @file radar_cfar.c
  * @author Huffer342-WSH (718007138@qq.com)
- * @brief 2D-CFAR 程序，输入幅度谱输出点云
+ * @brief 2D-CFAR 输入幅度谱，输出检测结果的二维坐标以及信噪比
  * @version 0.1
  * @date 2024-11-05
  *
@@ -10,7 +10,6 @@
  */
 
 #include "radar_cfar.h"
-#include "radar_types.h"
 
 #include "radar_assert.h"
 #include "radar_error.h"
@@ -23,12 +22,6 @@
 static inline int unwrapper_neg(int x, int n);
 static inline int wrap_pos(int x, int n);
 
-
-int cfar2d_result_reset(cfar2d_result_t *cfar)
-{
-    cfar->numPoint = 0;
-    return 0;
-}
 
 /**
  * @brief 分配2D-CFAR检测结果并初始化
@@ -115,6 +108,18 @@ void cfar2d_result_free(cfar2d_result_t *result)
 }
 
 
+/**
+ * @brief 向2D-CFAR检测结果中添加一个点
+ *
+ * @param[in] result 2D-CFAR检测结果
+ * @param[in] idx0  distance维度
+ * @param[in] idx1  velocity维度
+ * @param[in] amp   幅度
+ * @param[in] snr   信噪比
+ * @return 0表示成功，否则表示失败
+ * @note 如果result->numPoint >= result->capacity，函数返回-1
+ *       否则，函数将新的点添加到result->point[result->numPoint]中，并将result->numPoint自增1
+ */
 int cfar2d_result_add_point(cfar2d_result_t *result, uint16_t idx0, uint16_t idx1, int32_t amp, int32_t snr)
 {
     if (result->numPoint >= result->capacity) {
@@ -127,8 +132,10 @@ int cfar2d_result_add_point(cfar2d_result_t *result, uint16_t idx0, uint16_t idx
     result->numPoint++;
     return 0;
 }
+
+
 /**
- * @brief 2D-CFAR
+ * @brief GOCA-2D-CFAR，训练单元为十字形状，取十字的四个分支中平均值最大的那个作为噪声水平
  *
  * @param[out] res  2D-CFAR检测结果
  * @param[in] magSepc2D  输入幅度谱
@@ -368,7 +375,7 @@ int radar_cfar_result_filtering(cfar2d_result_t *res, const cfar2d_filter_cfg_t 
     const size_t n = res->numPoint;
     cfar2d_point_t *p = res->point;
     cbits mask = cbits_with_size(n, true);
-    int32_t r_q16 = div_i32q16_i32q16(1 << 16, (int32_t)(cfg->thSNR * (1 << 16)));
+    int32_t r_q16 = div_i32q16_i32q16(1 << 16, (int32_t)(cfg->th * (1 << 16)));
     for (size_t i = 0; i < n; i++) {
         cfar2d_point_t *a = &p[i];
         int64_t ar_q16 = (int64_t)a->amp * r_q16;
