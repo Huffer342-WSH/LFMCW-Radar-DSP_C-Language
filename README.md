@@ -152,7 +152,7 @@ git pull最新的develop分支，然后新建并签出分支，分支命名格�
 
 
 
-## 3. 使用Python验证算法
+## 4. 使用Python验证算法
 
 激活工程中的虚拟环境后，使用以下代码导入模块
 
@@ -163,3 +163,39 @@ from pylfmcwradar import pyradar_fixed
 算法还在开发阶段，模块具体的使用方法请阅读C语言代码以及`PythonWrapper`文件夹下的模块封装代码。
 
 ...
+
+
+## 5. 在嵌入式项目中应用该算法
+
+### 添加源码
+
+可以选择直接将所需的版本复制到嵌入式项目中，比如将定点数版本`Source/fixed_point`复制到根目录下的`ThirdParty/lfmcwradar_fixed`文件夹
+
+然后使用移植该工程默认使用的第三方库
+- [STC - Smart Template Containers](https://github.com/stclib/STC)
+- [CMSIS-DSP](https://github.com/ARM-software/CMSIS-DSP)
+
+假如使用的是CMake，就使用`add_subdirectory(ThirdParty/lfmcwradar_fixed)`添加目录，然后使用`target_link_libraries()`添加`lfmcwradar_fixed`即可
+
+假如使用的是Keil，添加`Source`目录下的所有源文件，并将`Include`添加到`Option >> C/C++ >> Include Paths`中
+
+
+### 单独编译静态库
+
+
+`CMake/toolchain-armclang.cmake`文件提供了一个给Cortex-M0设备配置ARMClang工具链(Keil中的AC6)的例子，在CMake Configure时添加参数`-DCMAKE_TOOLCHAIN_FILE=CMake/toolchain-armclang.cmake`即可设置交叉编译。
+
+
+如何使用的是VSCode，可以将参数添加到`.vscode/LFMCW-Radar-DSP_C-Language.code-workspace`文件中的`"settings"`下的`"cmake.configureArgs"`来启用交叉编译
+
+```json
+	"settings": {
+		"cmake.configureArgs": [
+			"-DCMAKE_TOOLCHAIN_FILE=CMake/toolchain-armclang.cmake"
+		],
+  }
+```
+
+需要注意的是`CMake/toolchain-armclang.cmake`中设置了`set(CROSS_COMPILE ON)`，该参数使得根目录的CMakeLists.txt中指挥配置算法库的源代码而不过包括PythonWrapper和tests。
+
+编译会得到静态库`liblfmcwradar_fixed`，在需要使用雷达算法的项目中添加该静态库以及`Source/fixed_point/Include`下的头文件即可使用。

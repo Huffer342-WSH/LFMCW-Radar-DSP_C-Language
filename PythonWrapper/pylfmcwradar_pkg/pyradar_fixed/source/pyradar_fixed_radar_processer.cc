@@ -9,10 +9,7 @@
 void bind_radar_init_param(pybind11::module_ &m)
 {
 
-    PYBIND11_NUMPY_DTYPE(
-        radar_init_param_t, wavelength, bandwidth, timeChrip, timeChripGap, timeFrameGap, numChannel, numRangeBin,
-        numChrip
-    );
+    PYBIND11_NUMPY_DTYPE(radar_init_param_t, wavelength, bandwidth, timeChrip, timeChripGap, timeFrameGap, numChannel, numRangeBin, numChrip);
     pybind11::class_<radar_init_param_t>(m, "radar_init_param")
         .def(pybind11::init<>())
         .def_readwrite("wavelength", &radar_init_param_t::wavelength)
@@ -24,6 +21,9 @@ void bind_radar_init_param(pybind11::module_ &m)
         .def_readwrite("numRangeBin", &radar_init_param_t::numRangeBin)
         .def_readwrite("numChrip", &radar_init_param_t::numChrip)
         .def_readwrite("numMaxCfarPoints", &radar_init_param_t::numMaxCfarPoints)
+        .def_readwrite("numMaxCachedFrame", &radar_init_param_t::numMaxCachedFrame)
+        .def_readwrite("numInitialMultiMeas", &radar_init_param_t::numInitialMultiMeas)
+        .def_readwrite("numInitialCluster", &radar_init_param_t::numInitialCluster)
         .def("to_numpy",
              [](radar_init_param_t &self) {
                  return array_c2numpy<radar_init_param_t>(&self, { 1 });
@@ -51,10 +51,7 @@ void bind_radar_functions(pybind11::module_ &m)
     m.def("radardsp_init", &radardsp_init, "Initialize the radar system", pybind11::arg("radar"), pybind11::arg("param"), pybind11::arg("config"));
 
     // 绑定 radardsp_input_new_frame 函数
-    m.def(
-        "radardsp_input_new_frame", &radardsp_input_new_frame, "Input a new radar frame", pybind11::arg("radar"),
-        pybind11::arg("rdms")
-    );
+    m.def("radardsp_input_new_frame", &radardsp_input_new_frame, "Input a new radar frame", pybind11::arg("radar"), pybind11::arg("rdms"));
 }
 
 void bind_radar_processer(pybind11::module_ &m)

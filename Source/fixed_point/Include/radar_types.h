@@ -24,6 +24,7 @@ typedef struct {
     uint16_t numChrip;
 
     /* 以下参数位衍生参数，有上方参数计算得到，用于方便计算 */
+    rd_float_t timeChripFull;
     rd_float_t timeFrameVaild; // 单位:s 一帧的有效时间
     rd_float_t timeFrameTotal; // 单位:s 一帧的有效时间
     int32_t resRange;          // 单位:m 距离分辨率

@@ -53,7 +53,9 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
     radar->param.numChannel = param->numChannel;
     radar->param.numRangeBin = param->numRangeBin;
     radar->param.numChrip = param->numChrip;
-    radar->param.timeFrameVaild = radar->param.numChrip * (radar->param.timeChrip + radar->param.timeChripGap);
+
+    radar->param.timeChripFull = radar->param.timeChrip + radar->param.timeChripGap;
+    radar->param.timeFrameVaild = radar->param.numChrip * radar->param.timeChripFull;
     radar->param.timeFrameTotal = radar->param.timeFrameVaild + radar->param.timeFrameGap;
     radar->param.resRange = 149896229.0 / radar->param.bandwidth * 1000;
     radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 1000;
@@ -84,7 +86,7 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
 
 
     /* 初始化聚类 */
-    status = radar_cluster_init(&radar->cluster, 5, 40, 10);
+    status = radar_cluster_init(&radar->cluster, param->numMaxCachedFrame, param->numInitialMultiMeas, param->numInitialCluster);
     if (status != 0) {
         status = 4;
         goto RADARDSP_INIT_FAILED4;

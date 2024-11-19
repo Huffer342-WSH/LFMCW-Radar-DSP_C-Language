@@ -57,6 +57,9 @@ radar_init_param.numChannel = numChannel
 radar_init_param.numRangeBin = numRangeBin
 radar_init_param.numChrip = numChrip
 radar_init_param.numMaxCfarPoints = 20
+radar_init_param.numMaxCachedFrame = 8
+radar_init_param.numInitialMultiMeas = 40
+radar_init_param.numInitialCluster = 5
 
 radar_config = pyRadar.radar_config()
 radar_config.cfarCfg.numGuard[0] = 1

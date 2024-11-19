@@ -109,7 +109,7 @@ TEST_F(RadarFixedTest, radar_cfar_result_filtering)
     const uint16_t M = 25, N = 64;
     int32_t map[M][N];
     cfar2d_result_t *res = cfar2d_result_alloc(200);
-    cfar2d_filter_cfg_t cfg = { .range0 = 1, .range1 = 5, .shape1 = N, .thSNR = 0.78 };
+    cfar2d_filter_cfg_t cfg = { .range0 = 1, .range1 = 5, .shape1 = N, .th = 0.78 };
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int32_t> dis(40000, 60000);
@@ -155,7 +155,7 @@ TEST_F(RadarFixedTest, radar_cfar_result_filtering)
                 if (r0 <= cfg.range0 && r1 <= cfg.range1) {
                     printf("a: (%d,%d): %d\n", a->idx0, a->idx1, a->amp);
                     printf("b: (%d,%d): %d\n", b->idx0, b->idx1, b->amp);
-                    ASSERT_GT(a->amp, b->amp * cfg.thSNR);
+                    ASSERT_GT(a->amp, b->amp * cfg.th);
                 }
             }
         }
