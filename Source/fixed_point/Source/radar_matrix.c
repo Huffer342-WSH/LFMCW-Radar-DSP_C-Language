@@ -1,3 +1,13 @@
+/**
+ * @file radar_matrix.c
+ * @author Huffer342-WSH (718007138@qq.com)
+ * @brief 矩阵的分配和释放
+ * @version 0.1
+ * @date 2024-11-20
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
 #include "radar_matrix.h"
 
 #include "radar_error.h"

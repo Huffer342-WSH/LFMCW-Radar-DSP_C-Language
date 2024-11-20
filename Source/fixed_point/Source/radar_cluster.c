@@ -95,48 +95,6 @@ int dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_ge
 }
 
 /**
- * @brief 计算两个两侧值之间的距离（包含速度，视为三维空间）
- *
- * @param ma 量侧值a
- * @param mb 量测值b
- * @param wr 二位平面距离权重
- * @param wv 速度权重
- * @return int32_t 距离
- *
- * @note 量测值的数值太大会导致溢出，实际应用中不会有这么大的数据
- */
-int32_t radar_cluster_meas_distance(measurement_t *ma, measurement_t *mb, int32_t wr, int32_t wv)
-{
-
-    int32_t v = abs_diff(ma->velocity, mb->velocity);
-
-    // c^ = a^2 + b^2 - 2 * a * b * cos(theta)
-    int32_t a = ma->distance;
-    int32_t b = mb->distance;
-    int32_t theta_q13 = (int32_t)ma->azimuth - mb->azimuth;
-    if (theta_q13 < -PI_Q13) {
-        theta_q13 += 2 * PI_Q13;
-    } else if (theta_q13 > PI_Q13) {
-        theta_q13 = 2 * PI_Q13 - theta_q13;
-    }
-    int32_t norm_theta_q31 = (int32_t)((int64_t)theta_q13 * ((int64_t)1 << 30) / (PI_Q13));
-    int64_t c2;
-    c2 = (int64_t)a * radar_cos_q31(norm_theta_q31) >> 31;
-    c2 *= (int64_t)b * -2;
-    c2 += (int64_t)a * a + b * b;
-
-    int64_t sum;
-
-    int64_t wr2_q31 = ((int64_t)wr * wr) >> 1;
-    int64_t wv2_q31 = ((int64_t)wv * wv) >> 1;
-    sum = (wr2_q31 * c2 + wv2_q31 * v * v) >> 30; // 少右移一位，即乘以2，配合radar_sqrt_q31后面的右移16位抵消radar_sqrt_q31()多乘的sqrt(2^31)
-    if (sum < 0 || sum > INT32_MAX) {
-        RADAR_ERROR("radar_cluster_calc_distance overflow", RADAR_EOVRFLW);
-    }
-    return radar_sqrt_q31((int32_t)sum) >> 16;
-}
-
-/**
  * @brief  计算量测值列表任意两点之间的距离
  *
  * @param meas 量侧值列表
@@ -157,7 +115,7 @@ static void radar_calc_meas_distance(measurements_t *meas, int32_t wr, int32_t w
     for (size_t i = 1; i < n; i++) {
         const size_t offset = i * (i - 1) / 2;
         for (size_t j = 0; j < i; j++) {
-            D[offset + j] = radar_cluster_meas_distance(&meas->data[i], &meas->data[j], wr, wv);
+            D[offset + j] = radar_measure_distance(&meas->data[i], &meas->data[j], wr, wv);
         }
     }
 }

@@ -1,14 +1,20 @@
-
 /**
- * @file lfmcw_radar_processer.c
+ * @file radar_processer.c
  * @author Huffer342-WSH (718007138@qq.com)
  * @brief LFMCW雷达信号处理，当前版本RDM输入为 complex_int16_t 类型
+ *
+ * @note  应用算法步骤如下
+ *          1. radardsp_init()初始化参数并分配内存。
+ *          2. 调用 radardsp_register_hook_<type> 注册钩子函数，钩子函数会在信号处理个各个阶段依次调用，用于获取雷达算法的处理结果。
+ *          3. 然后每收到一帧数据就调用radardsp_input_new_frame()输入数据。
+ *
  * @version 0.1
- * @date 2024-10-14
+ * @date 2024-11-20
  *
  * @copyright Copyright (c) 2024
  *
  */
+
 
 #include "radar_processer.h"
 
@@ -30,14 +36,14 @@
 static void check_and_delete_static_point(radar_handle_t *radar);
 static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame);
 
+
 /**
  * @brief 雷达句柄初始化
  *
- * @note 移植代码的时候自己实现，参数太多，一般还是选择手动设置结构体中的成员
- *
  * @param radar
- * @param param
- * @return int
+ * @param param     雷达参数，描述雷达的基本性质，不影响算法的性能
+ * @param config    雷达配置，雷达算法各个步骤的配置
+ * @return int    0: 成功 -1: 失败
  */
 int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config_t *config)
 {
@@ -114,6 +120,7 @@ RADARDSP_INIT_FAILED1:
 
     return status;
 }
+
 
 void radardsp_register_hook_cfar_raw(radar_handle_t *radar, void (*func)(const cfar2d_result_t *))
 {

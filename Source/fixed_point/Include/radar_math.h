@@ -1,9 +1,16 @@
-#ifndef _RADAR_MATH_H_
-#define _RADAR_MATH_H_
-
+/**
+ * @file radar_math.h
+ * @author Huffer342-WSH (718007138@qq.com)
+ * @brief 数学函数, 可以自己实现，默认使用CMSIS-DSP库中的函数
+ * @version 0.1
+ * @date 2024-11-20
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+#pragma once
 
 #include <stdint.h>
-#include <math.h>
 
 #include "radar_math_types.h"
 
@@ -94,4 +101,3 @@ static inline int32_t div_i32q16_i32q16(int32_t a, int32_t b)
 #ifdef __cplusplus
 }
 #endif
-#endif /* _RADAR_MATH_H_ */

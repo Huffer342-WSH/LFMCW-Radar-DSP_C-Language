@@ -1,16 +1,27 @@
+/**
+ * @file radar_doa.c
+ * @author Huffer342-WSH (718007138@qq.com)
+ * @brief 根据CFAR结果和RDM计算目标角度
+ * @version 0.1
+ * @date 2024-11-20
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+
 #include "radar_doa.h"
 #include "radar_cfar.h"
 
 /**
  * @brief 输入两个复数，返回相位差
  *
- * @param real0 复数0-实部
- * @param imag0 复数0-虚部
- * @param real1 复数1-实部
- * @param imag1 复数1-虚部
- * @return int16_t
- * 
- * @details 可以先算
+ * @param real0     复数0-实部
+ * @param imag0     复数0-虚部
+ * @param real1     复数1-实部
+ * @param imag1     复数1-虚部
+ * @return int16_t  相位差
+ *
  */
 static inline int16_t radar_doa_calc_phasediff_i16(int16_t real0, int16_t imag0, int16_t real1, int16_t imag1)
 {
@@ -27,9 +38,10 @@ static inline int16_t radar_doa_calc_phasediff_i16(int16_t real0, int16_t imag0,
 /**
  * @brief  双通道雷达测角。 计算cfar结果中每一个点对应的角度，并保存到量测值列表中
  *
- * @param meas 量测值列表
- * @param cfar CFAR结果
- * @param rdm  RDM数组
+ * @param[out]  meas                量测值列表，保存计算结果
+ * @param[in]   cfar                CFAR结果，输入待测角点的坐标
+ * @param[in]   rdm                 RDM数组，用与查询信号，计算角度
+ * @param[in]   lambda_over_d_q15   波长/天线间距,Q16.15定点数
  * @return int
  */
 int radar_dual_channel_clac_angle(measurements_t *meas, cfar2d_result_t *cfar, matrix3d_complex_int16_t *rdms, int32_t lambda_over_d_q15)

@@ -50,3 +50,6 @@ add_subdirectory(PythonWrapper)
 
 # 构建测试
 add_subdirectory(Test)
+
+
+add_subdirectory(Doc)

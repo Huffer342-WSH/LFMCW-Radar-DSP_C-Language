@@ -1,5 +1,17 @@
+/**
+ * @file radar_mag.c
+ * @author Huffer342-WSH (718007138@qq.com)
+ * @brief 从RDM计算二维幅度谱
+ * @version 0.1
+ * @date 2024-11-20
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+
 #include "radar_mag.h"
-#include "radar_math.h"
+
 #include "radar_assert.h"
 
 #include <string.h>
@@ -7,14 +19,14 @@
 /**
  * @brief 幅度谱计算，累加数个通道的RDM的幅度谱
  *
- * @param[out] mag  输出矩阵，幅度谱  mag = sqrt(real*real + imag*imag) * sqrt(2^25)
- * @param[in] rdms  输入矩阵，RDM
- * @param numChannel  累加的通道数
- * @param offsetChannel  通道数偏移
+ * @details mag是 rdms[offsetChannel]到rdms[offsetChannel + numChannel - 1]的幅度谱累加的结果
+ *
+ * @param[out]  mag            幅度谱  mag = sqrt(real*real + imag*imag) * sqrt(2^25)
+ * @param[in]   rdms           多个通道的RDM, 2DFFT后的产物
+ * @param[in]   numChannel     累加的通道数
+ * @param[in]   offsetChannel  通道数偏移
+ *
  * @return int  0 - success
- *
- * @details 输入
- *
  */
 int radar_clac_magSpec2D(matrix2d_int32_t *mag, matrix3d_complex_int16_t *rdms, uint16_t numChannel, uint16_t offsetChannel)
 {

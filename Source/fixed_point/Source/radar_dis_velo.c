@@ -1,10 +1,25 @@
+/**
+ * @file radar_dis_velo.c
+ * @author Huffer342-WSH (718007138@qq.com)
+ * @brief 根据CFAR结果计算距离与速度
+ * @version 0.1
+ * @date 2024-11-20
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+
 #include "radar_dis_velo.h"
+
 #include "radar_assert.h"
 #include "radar_error.h"
+
+
 /**
  * @brief 计算速度与距离
  *
- * @details 根据目标点向量点的幅度，加权计算距离，实现超分辨率
+ * @details 根据目标点与相邻点的幅度，加权计算距离，实现超分辨率测距
  *
  * @details idxR = a + b/(r+1)
  *          a = idxR,

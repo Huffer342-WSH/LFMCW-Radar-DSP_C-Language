@@ -35,7 +35,7 @@ void radar_micromotion_handle_deinit(radar_micromotion_handle_t *mm)
 /**
  * @brief 添加一帧信息
  *
- * @param mm
+ * @param mmhandle
  * @param rdms
  * @return int
  *
@@ -50,7 +50,7 @@ void radar_micromotion_add_frame(radar_micromotion_handle_t *mmhandle, matrix3d_
 /**
  * @brief 查询一个距离单元的微动信息
  *
- * @param queue
+ * @param mmhandle
  * @param rangeBin
  * @return radar_micromotion_target_info_t
  *

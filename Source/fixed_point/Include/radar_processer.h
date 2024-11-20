@@ -1,3 +1,13 @@
+/**
+ * @file radar_processer.h
+ * @author Huffer342-WSH (718007138@qq.com)
+ * @brief 雷达信号处理流程的具体实现
+ * @version 0.1
+ * @date 2024-11-20
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
 #pragma once
 
 #include "radar_types.h"

@@ -22,10 +22,13 @@ extern "C" {
 #endif
 
 /** @brief 返回一个大于等于ptr且是alignment的倍数的指针 */
-// #define ALIGN_ADDRESS(ptr, alignment) (((uintptr_t)(ptr) + alignment - 1) / alignment * alignment)
 #define ALIGN_ADDRESS(ptr, alignment) (((uintptr_t)(ptr) + alignment - 1) & (~((uintptr_t)alignment - 1)))
 
 
+/**
+ * @brief 返回矩阵在静态分配时，内存需要对齐的字节数
+ *
+ */
 #define MATRIX_STATIC_BUFFER_ALIGN(mat_type, elm_type) (alignof(mat_type) > alignof(elm_type) ? alignof(mat_type) : alignof(elm_type))
 
 
