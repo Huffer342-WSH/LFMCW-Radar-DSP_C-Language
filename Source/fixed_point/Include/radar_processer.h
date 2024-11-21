@@ -40,6 +40,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 void radardsp_register_hook_cfar_raw(radar_handle_t *radar, void (*func)(const cfar2d_result_t *));
 void radardsp_register_hook_cfar_filtered(radar_handle_t *radar, void (*func)(const cfar2d_result_t *));
 void radardsp_register_hook_point_clouds(radar_handle_t *radar, void (*func)(const measurements_t *));
+void radardsp_register_hook_point_clouds_filtered(radar_handle_t *radar, void (*func)(const measurements_t *));
 void radardsp_register_hook_clusters(radar_handle_t *radar, void (*func)(const measurements_t *));
 
 

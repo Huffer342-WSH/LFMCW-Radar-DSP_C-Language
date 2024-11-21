@@ -69,6 +69,19 @@ size_t radar_measurements_list_get_meas_num(measurements_list_t *m);
 
 int32_t radar_measure_distance(measurement_t *ma, measurement_t *mb, int32_t wr, int32_t wv);
 
+
+/**
+ * @brief  删除被遮挡的量测值
+ *
+ * @param[out]  meas  量测值列表
+ * @param[in]   r     量测值半径
+ * @return int
+ *
+ * @details  被遮挡的量测值将被删除，水平安装雷达时可以使用
+ *
+ */
+int radar_measure_delete_obscured(measurements_t *meas, int32_t r);
+
 #ifdef __cplusplus
 }
 #endif

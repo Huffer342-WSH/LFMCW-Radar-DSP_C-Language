@@ -45,6 +45,7 @@ typedef struct {
 typedef struct {
     cfar2d_cfg_t cfarCfg;
     cfar2d_filter_cfg_t cfar_filter_cfg;
+    int32_t occlusion_radius;
     dbscan_cfg_t dbscan_cfg;
 } radar_config_t;
 
@@ -70,6 +71,7 @@ typedef struct {
     void (*hook_cfar_raw)(const cfar2d_result_t *cfar);
     void (*hook_cfar_filtered)(const cfar2d_result_t *cfar);
     void (*hook_point_clouds)(const measurements_t *meas);
+    void (*hook_point_clouds_filtered)(const measurements_t *meas);
     void (*hook_clusters)(const measurements_t *clusters);
 } radar_hook_t;
 

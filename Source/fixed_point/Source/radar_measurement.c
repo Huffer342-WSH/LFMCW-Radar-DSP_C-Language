@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stc/cbits.h>
+
 /**
  * @brief 分配一个量测值列表，可容纳capacity个量测值
  *
@@ -233,4 +235,57 @@ int32_t radar_measure_distance(measurement_t *ma, measurement_t *mb, int32_t wr,
         RADAR_ERROR("radar_cluster_calc_distance overflow", RADAR_EOVRFLW);
     }
     return radar_sqrt_q31((int32_t)sum) >> 16;
+}
+
+
+/**
+ * @brief  删除被遮挡的量测值
+ *
+ * @param[out]  meas  量测值列表
+ * @param[in]   r     量测值半径
+ * @return int
+ *
+ * @details  被遮挡的量测值将被删除，水平安装雷达时可以使用
+ *
+ */
+int radar_measure_delete_obscured(measurements_t *meas, int32_t r)
+{
+    if (r == 0) {
+        return 0;
+    }
+    r = abs(r);
+
+    const size_t n = meas->num;
+    cbits mask = cbits_with_size(n, true);
+
+    for (size_t i = 0; i < n; i++) {
+        int32_t occluded_angle_range = INT32_MAX;
+        measurement_t *a = &meas->data[i];
+        for (size_t j = 0; j < n; j++) {
+            if (j == i)
+                continue;
+            measurement_t *b = &meas->data[j];
+            if (a->distance < b->distance && b->velocity == 0) {
+                if (occluded_angle_range == INT32_MAX) {
+                    occluded_angle_range = radar_atan2_q31(r, a->distance) >> 16;
+                }
+                int32_t angle_diff = (int32_t)a->azimuth - (int32_t)b->azimuth;
+                angle_diff = abs(angle_diff);
+                if (occluded_angle_range > angle_diff) {
+                    cbits_reset(&mask, j);
+                }
+            }
+        }
+    }
+    size_t numPoint = 0;
+    for (size_t i = 0; i < n; i++) {
+        if (cbits_test(&mask, i)) {
+            if (numPoint != i)
+                meas->data[numPoint] = meas->data[i];
+            numPoint++;
+        }
+    }
+    meas->num = numPoint;
+    cbits_drop(&mask);
+    return 0;
 }

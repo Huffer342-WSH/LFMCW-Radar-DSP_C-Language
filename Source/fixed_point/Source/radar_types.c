@@ -27,6 +27,7 @@ int radar_hook_init(radar_hook_t *hook)
     hook->hook_cfar_raw = NULL;
     hook->hook_cfar_filtered = NULL;
     hook->hook_point_clouds = NULL;
+    hook->hook_point_clouds_filtered = NULL;
     hook->hook_clusters = NULL;
     return 0;
 }

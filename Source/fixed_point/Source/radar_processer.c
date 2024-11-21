@@ -139,6 +139,12 @@ void radardsp_register_hook_point_clouds(radar_handle_t *radar, void (*func)(con
     radar->hook.hook_point_clouds = func;
 }
 
+void radardsp_register_hook_point_clouds_filtered(radar_handle_t *radar, void (*func)(const measurements_t *))
+{
+    radar->hook.hook_point_clouds_filtered = func;
+}
+
+
 void radardsp_register_hook_clusters(radar_handle_t *radar, void (*func)(const measurements_t *))
 {
     radar->hook.hook_clusters = func;
@@ -219,6 +225,13 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     radar_dual_channel_clac_angle(one_frame_meas, radar->cfar, radar->basic.rdms, ((int32_t)2 << 15));
     if (radar->hook.hook_point_clouds != NULL) {
         radar->hook.hook_point_clouds(one_frame_meas);
+    }
+
+
+    /* 删除被遮挡的点 */
+    radar_measure_delete_obscured(one_frame_meas, radar->config.occlusion_radius);
+    if (radar->hook.hook_point_clouds_filtered != NULL) {
+        radar->hook.hook_point_clouds_filtered(one_frame_meas);
     }
 
     /* 9. 二维平面聚类(DBSCAN) */

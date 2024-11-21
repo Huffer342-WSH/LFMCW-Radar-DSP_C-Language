@@ -113,6 +113,7 @@ void bind_radar_config(pybind11::module_ &m)
         .def(pybind11::init<>())
         .def_readwrite("cfarCfg", &radar_config_t::cfarCfg)
         .def_readwrite("cfar_filter_cfg", &radar_config_t::cfar_filter_cfg)
+        .def_readwrite("occlusion_radius", &radar_config_t::occlusion_radius)
         .def_readwrite("dbscan_config", &radar_config_t::dbscan_cfg);
 }
 
