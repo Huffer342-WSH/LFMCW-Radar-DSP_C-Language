@@ -7,7 +7,9 @@
 // This Source Code Form is subject to the terms of the Mozilla
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
+//
+// Modify:64 fixed macros for armclang:  "#ifdef __GNUC__" -> "#if  defined( __GNUC__) && !defined(__clang__) "
+//
 #ifndef EIGEN_MACROS_H
 #define EIGEN_MACROS_H
 
@@ -59,7 +61,7 @@
 //------------------------------------------------------------------------------------------
 
 /// \internal EIGEN_COMP_GNUC set to 1 for all compilers compatible with GCC
-#ifdef __GNUC__
+#if  defined( __GNUC__) && !defined(__clang__) 
   #define EIGEN_COMP_GNUC (__GNUC__*10+__GNUC_MINOR__)
 #else
   #define EIGEN_COMP_GNUC 0
