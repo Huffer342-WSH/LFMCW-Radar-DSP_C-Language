@@ -16,6 +16,10 @@ endif()
 # STC测试
 add_subdirectory(STC)
 
+add_subdirectory(Eigen)
+
+add_subdirectory(algorithm)
+
 # 雷达信号处理库测试
 add_subdirectory(Radar_Fixed)
 
