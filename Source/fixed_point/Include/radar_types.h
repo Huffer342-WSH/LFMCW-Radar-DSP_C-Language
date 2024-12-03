@@ -7,6 +7,7 @@
 #include "radar_measurement.h"
 #include "radar_micromotion.h"
 #include "radar_cluster.h"
+#include "track.h"
 
 /**
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
@@ -50,6 +51,7 @@ typedef struct {
     int16_t channel_mag_diff_threshold;   ///< 通道间幅度差阈值，使用Q0.15定点数，取值范围[0,1)； 并表示两个通道幅度的 abs(A-B) / (A+B)
     int32_t occlusion_radius;             ///< 遮挡半径，单位mm
     dbscan_cfg_t dbscan_cfg;
+    tracker_config_t tracker_cfg;
 } radar_config_t;
 
 typedef struct {
@@ -87,6 +89,9 @@ typedef struct {
     cfar2d_result_t *cfar;
     radar_cluster_t cluster;
     radar_hook_t hook;
+    tracker_handel_t *tracker;
+    tracked_targets_list_t *tracked_targets;
+    tracked_targets_list_t *unconfirmed_targets;
 } radar_handle_t;
 
 #ifdef __cplusplus

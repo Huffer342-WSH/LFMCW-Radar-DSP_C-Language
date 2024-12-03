@@ -60,6 +60,29 @@ rdms_list.imag = rdms_list.imag.astype(np.int16)
 # rdms_list.real = rdms_list.real.astype(np.int16)
 # rdms_list.imag = rdms_list.imag.astype(np.int16)
 
+# mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData_运动人体_长方形轨迹.mat")
+mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData 2024-11-20 17-12-26.mat")
+
+c = scipy.constants.c
+frequency = 24.125e9
+wavelength = c / frequency
+bandwidth = 245e6
+timeChrip = mat["timeChrip"][0, 0]
+timeChripGap = mat["timeChripGap"][0, 0]
+timeFrameGap = mat["timeFrameGap"][0, 0]
+numPoint = mat["numSample"][0, 0]
+numRangeBin = mat["numRangeBin"][0, 0]
+numChrip = mat["numChrip"][0, 0]
+numChannel = mat["numChannel"][0, 0]
+numFrame = len(mat["RDM"])
+
+timeFrameFull = (timeChrip + timeChripGap) * numChrip + timeFrameGap
+
+
+rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
+rdms_list.real = rdms_list.real.astype(np.int16)
+rdms_list.imag = rdms_list.imag.astype(np.int16)
+
 # %% 初始化雷达算法
 radar_init_param = pyRadar.radar_init_param()
 radar_handle = pyRadar.radar_handle()
@@ -103,14 +126,20 @@ radar_config.dbscan_config.wv = 0
 radar_config.dbscan_config.eps = 800
 radar_config.dbscan_config.min_samples = 4
 
+radar_config.tracker_cfg.velocity_noise_coef = 1.2
+radar_config.tracker_cfg.sigma_phi = 0.1
+radar_config.tracker_cfg.sigma_r = 0.5
+radar_config.tracker_cfg.sigma_r_dot = 0.1
+radar_config.tracker_cfg.missed_distance = 4
+
 print(f"雷达初始化参数:\n{radar_init_param}")
 pyRadar.radardsp_init(radar_handle, radar_init_param, radar_config)
 
 
 # %% 输入一个帧
-def add_one_frame(frame):
+def add_one_frame(frame, timestamp: int):
     set_matrix3d_complex_int16(rdms, rdms_list[0])
-    pyRadar.radardsp_input_new_frame(radar_handle, rdms)
+    pyRadar.radardsp_input_new_frame(radar_handle, rdms, timestamp)
     pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
     mag = radar_handle.getMagSpec2D()
     count = radar_handle.cfar.numPoint
@@ -126,10 +155,13 @@ noise_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
 indicesList = []  # 每个元素代表一帧，帧为一个Nx2的矩阵，记录N个RDM中的坐标
 measList = []
 clusterList = []
+timestamp = 0
 for i, frame in enumerate(rdms_list):
     print(f"第{i}帧", flush=True)
+    timestamp = int(i * timeFrameFull * 1000)
     set_matrix3d_complex_int16(rdms, frame)
-    pyRadar.radardsp_input_new_frame(radar_handle, rdms)
+    pyRadar.radardsp_input_new_frame(radar_handle, rdms, timestamp)
+    print(f"第{i}帧输入完成", flush=True)
 
     pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
 
@@ -232,3 +264,6 @@ fig.show()
 # go.Figure(data=[go.Surface(z=magSpec2DRef_list[i])]).show()
 # go.Figure(data=[go.Surface(z=noise_list[i])]).show()
 # go.Figure(data=[go.Surface(z=snr_list[i])]).show()
+
+
+# %%

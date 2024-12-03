@@ -26,6 +26,7 @@
 		"cmake.configureArgs": [
 			// "-DCMAKE_TOOLCHAIN_FILE=CMake/toolchain-armclang.cmake"
 		],
+		"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
 		"files.associations": {
 			"*.H": "c",
 			"*.v": "systemverilog",

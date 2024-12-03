@@ -52,7 +52,8 @@ void bind_radar_functions(pybind11::module_ &m)
     m.def("radardsp_init", &radardsp_init, "Initialize the radar system", pybind11::arg("radar"), pybind11::arg("param"), pybind11::arg("config"));
 
     // 绑定 radardsp_input_new_frame 函数
-    m.def("radardsp_input_new_frame", &radardsp_input_new_frame, "Input a new radar frame", pybind11::arg("radar"), pybind11::arg("rdms"));
+    m.def("radardsp_input_new_frame", &radardsp_input_new_frame, "Input a new radar frame", pybind11::arg("radar"), pybind11::arg("rdms"),
+          pybind11::arg("timestamp_ms"));
 }
 
 void bind_radar_processer(pybind11::module_ &m)

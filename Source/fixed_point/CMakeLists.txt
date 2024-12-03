@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(LFMCW-Radar-Processer-FixedPointEdition)
+project(LFMCW-Radar-Processer-FixedPointEdition C CXX)
 
 # 设置默认路径为当前源目录下的 "Portable" 文件夹
 set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Portable" CACHE STRING "Path to RadarConfig.h")
@@ -24,6 +24,7 @@ add_library(lfmcwradar_fixed STATIC)
 target_link_libraries(lfmcwradar_fixed PUBLIC
     CMSISDSP
     stc
+    Eigen3::Eigen
 )
 
 target_include_directories(lfmcwradar_fixed PUBLIC
@@ -49,4 +50,13 @@ target_sources(lfmcwradar_fixed PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_micromotion.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_processer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_types.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_target.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_associator.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_deleter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_initiator.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_kalman.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_model.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_tracking.cc
 )

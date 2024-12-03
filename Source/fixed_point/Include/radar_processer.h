@@ -36,7 +36,7 @@ typedef struct {
 
 int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config_t *config);
 
-int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rdms);
+int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rdms, uint32_t timestamp_ms);
 
 void radardsp_register_hook_cfar_raw(radar_handle_t *radar, void (*func)(const cfar2d_result_t *));
 void radardsp_register_hook_cfar_filtered(radar_handle_t *radar, void (*func)(const cfar2d_result_t *));

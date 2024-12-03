@@ -117,7 +117,8 @@ void bind_radar_config(pybind11::module_ &m)
         .def_readwrite("channel_phase_diff_threshold", &radar_config_t::channel_phase_diff_threshold)
         .def_readwrite("channel_mag_diff_threshold", &radar_config_t::channel_mag_diff_threshold)
         .def_readwrite("occlusion_radius", &radar_config_t::occlusion_radius)
-        .def_readwrite("dbscan_config", &radar_config_t::dbscan_cfg);
+        .def_readwrite("dbscan_config", &radar_config_t::dbscan_cfg)
+        .def_readwrite("tracker_cfg", &radar_config_t::tracker_cfg);
 }
 
 

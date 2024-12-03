@@ -11,6 +11,8 @@ pybind11_add_module(pyradar_fixed
     source/pyradar_fixed_radar_matrix.cc
     source/pyradar_fixed_radar_processer.cc
     source/pyradar_fixed_radar_types.cc
+    source/pyradar_fixed_track_target.cc
+    source/pyradar_fixed_track.cc
 )
 
 target_include_directories(pyradar_fixed PRIVATE
