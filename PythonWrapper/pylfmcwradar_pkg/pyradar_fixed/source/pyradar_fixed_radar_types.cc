@@ -87,6 +87,7 @@ void bind_radar_param(pybind11::module_ &m)
         .def_readwrite("timeFrameVaild", &radar_param_t::timeFrameVaild)
         .def_readwrite("resRange", &radar_param_t::resRange)
         .def_readwrite("resVelocity", &radar_param_t::resVelocity)
+        .def_readwrite("lambda_over_d_q15", &radar_param_t::lambda_over_d_q15)
         .def("to_numpy", [](radar_param_t &self) {
             return array_c2numpy<radar_param_t>(&self, { 1 });
         });
@@ -113,6 +114,8 @@ void bind_radar_config(pybind11::module_ &m)
         .def(pybind11::init<>())
         .def_readwrite("cfarCfg", &radar_config_t::cfarCfg)
         .def_readwrite("cfar_filter_cfg", &radar_config_t::cfar_filter_cfg)
+        .def_readwrite("channel_phase_diff_threshold", &radar_config_t::channel_phase_diff_threshold)
+        .def_readwrite("channel_mag_diff_threshold", &radar_config_t::channel_mag_diff_threshold)
         .def_readwrite("occlusion_radius", &radar_config_t::occlusion_radius)
         .def_readwrite("dbscan_config", &radar_config_t::dbscan_cfg);
 }

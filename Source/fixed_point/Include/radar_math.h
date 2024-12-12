@@ -32,6 +32,8 @@ extern "C" {
 #define PI_Q13 25736
 #endif
 
+#define LIGHT_SPEED (299792458)
+
 static inline int32_t radar_sqrt_q31(int32_t x)
 {
     int32_t y;
@@ -97,6 +99,7 @@ static inline int32_t div_i32q16_i32q16(int32_t a, int32_t b)
 
 
 #define abs_diff(a, b) ((a) > (b) ? (a) - (b) : (b) - (a))
+
 
 #ifdef __cplusplus
 }

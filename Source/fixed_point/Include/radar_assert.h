@@ -8,6 +8,9 @@
 #define RADAR_ASSERT(expression)                                                             \
     if (!(expression)) {                                                                     \
         printf("Assertion failed: %s, file %s, line %d\n", #expression, __FILE__, __LINE__); \
+        while (1) {                                                                          \
+            ;                                                                                \
+        }                                                                                    \
     }
 
 #ifdef __cplusplus

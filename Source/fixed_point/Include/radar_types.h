@@ -12,24 +12,25 @@
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
  */
 typedef struct {
-    rd_float_t wavelength;   // 单位:m 雷达波长，24GHz雷达波长为 12.42663038e-3
-    rd_float_t bandwidth;    // 单位:Hz 雷达有效带宽
-    rd_float_t timeChrip;    // 单位:s
-    rd_float_t timeChripGap; // 单位:s
-    rd_float_t timeFrameGap; // 单位:s
+    rd_float_t wavelength;   ///< 单位:m 雷达波长，24GHz雷达波长为 12.42663038e-3
+    rd_float_t bandwidth;    ///< 单位:Hz 雷达有效带宽
+    rd_float_t timeChrip;    ///< 单位:s
+    rd_float_t timeChripGap; ///< 单位:s
+    rd_float_t timeFrameGap; ///< 单位:s
 
-    uint16_t numChannel;
-    uint16_t numSample;
-    uint16_t numRangeBin;
-    uint16_t numChrip;
+    uint16_t numChannel;  ///< 雷达通道数
+    uint16_t numSample;   ///< 采样点数
+    uint16_t numRangeBin; ///< 距离单元数量
+    uint16_t numChrip;    ///< Chrip数
+
 
     /* 以下参数位衍生参数，有上方参数计算得到，用于方便计算 */
     rd_float_t timeChripFull;
-    rd_float_t timeFrameVaild; // 单位:s 一帧的有效时间
-    rd_float_t timeFrameTotal; // 单位:s 一帧的有效时间
-    int32_t resRange;          // 单位:m 距离分辨率
-    int32_t resVelocity;       // 单位:m/s 速度分辨率
-
+    rd_float_t timeFrameVaild; ///< 单位:s 一帧的有效时间
+    rd_float_t timeFrameTotal; ///< 单位:s 一帧的有效时间
+    int32_t resRange;          ///< 单位:m 距离分辨率
+    int32_t resVelocity;       ///< 单位:m/s 速度分辨率
+    int32_t lambda_over_d_q15; ///< 波长/天线间距,Q16.15定点数
 } radar_param_t;
 
 typedef struct {
@@ -45,7 +46,9 @@ typedef struct {
 typedef struct {
     cfar2d_cfg_t cfarCfg;
     cfar2d_filter_cfg_t cfar_filter_cfg;
-    int32_t occlusion_radius;
+    int16_t channel_phase_diff_threshold; ///< 通道间相位差阈值，使用Q2.13弧度，取值范围[0,PI]
+    int16_t channel_mag_diff_threshold;   ///< 通道间幅度差阈值，使用Q0.15定点数，取值范围[0,1)； 并表示两个通道幅度的 abs(A-B) / (A+B)
+    int32_t occlusion_radius;             ///< 遮挡半径，单位mm
     dbscan_cfg_t dbscan_cfg;
 } radar_config_t;
 

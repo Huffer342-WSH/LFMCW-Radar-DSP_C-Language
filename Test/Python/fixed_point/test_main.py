@@ -20,45 +20,45 @@ def set_matrix3d_complex_int16(m: pyRadar.matrix3d_complex_int16, complexMat: np
 
 # %% 加载数据
 
-# mat = scipy.io.loadmat(file_name="../../../Data/RadarData_Simulate.mat")
-
-# c = scipy.constants.c
-# frequency = mat["frequency"][0, 0]
-# wavelength = c / frequency
-# bandwidth = mat["bandwidth"][0, 0]
-# timeChrip = mat["timeChrip"][0, 0]
-# timeChripGap = mat["timeChripGap"][0, 0]
-# timeFrameGap = mat["timeFrameGap"][0, 0]
-# numPoint = mat["numPoint"][0, 0]
-# numRangeBin = 25
-# numChrip = mat["numChrip"][0, 0]
-# numChannel = mat["numChannel"][0, 0]
-# numFrame = len(mat["radarDataCube"])
-
-# rdms_list = fft(fft(mat["radarDataCube"], axis=-1)[:, :, :, :numRangeBin], axis=-2).transpose(0, 1, 3, 2)
-# rdms_list = rdms_list * (2**15 - 1) / np.max(np.abs(rdms_list))
-# rdms_list.real = rdms_list.real.astype(np.int16)
-# rdms_list.imag = rdms_list.imag.astype(np.int16)
-
-# mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData_运动人体_长方形轨迹.mat")
-mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData 2024-11-20 17-12-26.mat")
+mat = scipy.io.loadmat(file_name="../../../Data/RadarData_Simulate.mat")
 
 c = scipy.constants.c
-frequency = 24.125e9
+frequency = mat["frequency"][0, 0]
 wavelength = c / frequency
-bandwidth = 245e6
+bandwidth = mat["bandwidth"][0, 0]
 timeChrip = mat["timeChrip"][0, 0]
 timeChripGap = mat["timeChripGap"][0, 0]
 timeFrameGap = mat["timeFrameGap"][0, 0]
-numPoint = mat["numSample"][0, 0]
-numRangeBin = mat["numRangeBin"][0, 0]
+numPoint = mat["numPoint"][0, 0]
+numRangeBin = 25
 numChrip = mat["numChrip"][0, 0]
 numChannel = mat["numChannel"][0, 0]
-numFrame = len(mat["RDM"])
+numFrame = len(mat["radarDataCube"])
 
-rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
+rdms_list = fft(fft(mat["radarDataCube"], axis=-1)[:, :, :, :numRangeBin], axis=-2).transpose(0, 1, 3, 2)
+rdms_list = rdms_list * (2**15 - 1) / np.max(np.abs(rdms_list))
 rdms_list.real = rdms_list.real.astype(np.int16)
 rdms_list.imag = rdms_list.imag.astype(np.int16)
+
+# mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData_运动人体_长方形轨迹.mat")
+
+
+# c = scipy.constants.c
+# frequency = 24.125e9
+# wavelength = c / frequency
+# bandwidth = 245e6
+# timeChrip = mat["timeChrip"][0, 0]
+# timeChripGap = mat["timeChripGap"][0, 0]
+# timeFrameGap = mat["timeFrameGap"][0, 0]
+# numPoint = mat["numSample"][0, 0]
+# numRangeBin = mat["numRangeBin"][0, 0]
+# numChrip = mat["numChrip"][0, 0]
+# numChannel = mat["numChannel"][0, 0]
+# numFrame = len(mat["RDM"])
+
+# rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
+# rdms_list.real = rdms_list.real.astype(np.int16)
+# rdms_list.imag = rdms_list.imag.astype(np.int16)
 
 # %% 初始化雷达算法
 radar_init_param = pyRadar.radar_init_param()
@@ -69,6 +69,7 @@ noise_buffer = pyRadar.matrix2d_int32_alloc(numRangeBin, numChrip)
 
 radar_init_param.wavelength = wavelength
 radar_init_param.bandwidth = bandwidth
+radar_init_param.rx_antenna_spacing = 6.25e-3
 radar_init_param.timeChrip = timeChrip
 radar_init_param.timeChripGap = timeChripGap
 radar_init_param.timeFrameGap = timeFrameGap
@@ -85,13 +86,17 @@ radar_config.cfarCfg.numGuard[0] = 1
 radar_config.cfarCfg.numGuard[1] = 1
 radar_config.cfarCfg.numTrain[0] = 2
 radar_config.cfarCfg.numTrain[1] = 3
-radar_config.cfarCfg.thAmp = int(10e6)
+radar_config.cfarCfg.thAmp = int(2e6)
 radar_config.cfarCfg.thSNR = 2.0
 
 radar_config.cfar_filter_cfg.range0 = 1
 radar_config.cfar_filter_cfg.range1 = 3
 radar_config.cfar_filter_cfg.shape1 = numChrip
 radar_config.cfar_filter_cfg.thSNR = 0.6
+
+radar_config.channel_phase_diff_threshold = int(3.14 * (1 << 13))
+radar_config.channel_mag_diff_threshold = int(0.4 * (1 << 15))
+radar_config.occlusion_radius = int(0.5 * 1000)
 
 radar_config.dbscan_config.wr = int(1.0 * (1 << 16))
 radar_config.dbscan_config.wv = 0
@@ -163,9 +168,10 @@ print("幅度谱均方误差：", mese)
 
 # %%
 stride = int(numFrame / 50)
-dh.draw_2d_spectrumlist(magSpec2D_list[::stride], title="幅度谱").show()
-dh.draw_2d_spectrumlist(magSpec2DRef_list[::stride], title="幅度谱").show()
-dh.draw_2d_spectrumlist(snr_list[::stride], title="幅度谱").show()
+# dh.draw_2d_spectrumlist(magSpec2D_list[::stride], title="幅度谱").show()
+# dh.draw_2d_spectrumlist(magSpec2DRef_list[::stride], title="幅度谱").show()
+# dh.draw_2d_spectrumlist(noise_list[::stride], title="噪声水平").show()
+# dh.draw_2d_spectrumlist(snr_list[::stride], title="信噪比").show()
 
 # %%
 """ 绘制RDM的CFAR搜索结果 """
@@ -207,11 +213,13 @@ for i in range(numFrame):
     data = list()
     # _targets = targetList[i]
     _targets = targetList[i][targetList[i][:, 2] != 0]
-    data.append(go.Scatter(x=pointCloudList[i][:, 0], y=pointCloudList[i][:, 1], mode="markers", name="cfar"))
-    data.append(go.Scatter(x=_targets[:, 0], y=_targets[:, 1], mode="markers", name="dbscan"))
+    data.append(go.Scatter(x=pointCloudList[i][:, 0], y=pointCloudList[i][:, 1], mode="markers", name="cfar", showlegend=True))
+    data.append(go.Scatter(x=_targets[:, 0], y=_targets[:, 1], mode="markers", name="dbscan", showlegend=True))
     listData.append(data)
-fig = dh.draw_animation(listData[::5], title="RDM的 GOCA-2DCFAR 搜索结果")
+fig = dh.draw_animation(listData[::5])
 fig.update_layout(
+    showlegend=True,
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5, title_text=""),
     xaxis=dict(range=[0, 15]),
     yaxis=dict(range=[-10, 10]),
     title="点云",
@@ -224,10 +232,3 @@ fig.show()
 # go.Figure(data=[go.Surface(z=magSpec2DRef_list[i])]).show()
 # go.Figure(data=[go.Surface(z=noise_list[i])]).show()
 # go.Figure(data=[go.Surface(z=snr_list[i])]).show()
-
-
-# %%
-
-dh.save_plotly_animation_as_video(fig, fps=30)
-
-# %%

@@ -65,6 +65,7 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
     radar->param.timeFrameTotal = radar->param.timeFrameVaild + radar->param.timeFrameGap;
     radar->param.resRange = 149896229.0 / radar->param.bandwidth * 1000;
     radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 1000;
+    radar->param.lambda_over_d_q15 = radar->param.wavelength / param->rx_antenna_spacing * ((int32_t)1 << 15);
 
     /* 设置配置 */
     memcpy(&radar->config, config, sizeof(radar_config_t));
@@ -212,17 +213,24 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
         radar->hook.hook_cfar_filtered(radar->cfar);
     }
 
-    /* 7. 计算速度和距离 */
+
     measurements_t *one_frame_meas = radar_measurements_alloc(radar->cfar->numPoint);
     if (one_frame_meas == NULL) {
         RADAR_ERROR("radar_measurements_alloc failed", RADAR_ENOMEM);
         return -1;
     }
+    printf("radar_measurements_alloc ok\n");
+
+    /* 7. 计算角度，删除一部分可能导致角度模糊的点 */
+    radar_dual_channel_clac_angle(one_frame_meas, radar->cfar, radar->basic.rdms, radar->param.lambda_over_d_q15, radar->config.channel_phase_diff_threshold,
+                                  radar->config.channel_mag_diff_threshold);
+
+    RADAR_ASSERT(radar->cfar->numPoint == one_frame_meas->num);
+
+    /* 8. 计算速度和距离 */
     radar_clac_dis_and_velo(one_frame_meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
 
 
-    /* 8. 计算角度 */
-    radar_dual_channel_clac_angle(one_frame_meas, radar->cfar, radar->basic.rdms, ((int32_t)2 << 15));
     if (radar->hook.hook_point_clouds != NULL) {
         radar->hook.hook_point_clouds(one_frame_meas);
     }
