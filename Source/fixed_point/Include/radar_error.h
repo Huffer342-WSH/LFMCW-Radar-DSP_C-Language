@@ -1,6 +1,6 @@
-#ifndef _RADAR_ERROR_H_
-#define _RADAR_ERROR_H_
+#pragma once
 
+#include "radar_log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,4 +25,3 @@ void radar_error(const char *reason, const char *file, int line, int error_code)
 #ifdef __cplusplus
 }
 #endif
-#endif /* _RADAR_ERROR_H_ */

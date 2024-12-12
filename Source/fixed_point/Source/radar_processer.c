@@ -219,7 +219,6 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
         RADAR_ERROR("radar_measurements_alloc failed", RADAR_ENOMEM);
         return -1;
     }
-    printf("radar_measurements_alloc ok\n");
 
     /* 7. 计算角度，删除一部分可能导致角度模糊的点 */
     radar_dual_channel_clac_angle(one_frame_meas, radar->cfar, radar->basic.rdms, radar->param.lambda_over_d_q15, radar->config.channel_phase_diff_threshold,

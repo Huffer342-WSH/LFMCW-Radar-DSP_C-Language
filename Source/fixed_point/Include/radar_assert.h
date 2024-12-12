@@ -1,17 +1,46 @@
-#ifndef _RADAR_ASSERT_H_
-#define _RADAR_ASSERT_H_
+#pragma once
 
-#include <stdio.h>
-#include <assert.h>
+#include <stdlib.h>
+
+#include "radar_log.h"
 
 
-#define RADAR_ASSERT(expression)                                                             \
-    if (!(expression)) {                                                                     \
-        printf("Assertion failed: %s, file %s, line %d\n", #expression, __FILE__, __LINE__); \
-        while (1) {                                                                          \
-            ;                                                                                \
-        }                                                                                    \
+#define RADAR_ASSERT(expression)                 \
+    if (!(expression)) {                         \
+        RD_ASSERT("expected %s\n", #expression); \
+        exit(114514);                            \
     }
+
+#define RADAR_ASSERT_EQ(a, b)                                                                            \
+    if (!((a) == (b))) {                                                                                 \
+        RD_ASSERT("expected '%s == %s'\n, but actual '%lf == %lf'\n", #a, #b, (double)(a), (double)(b)); \
+    }
+
+#define RADAR_ASSERT_NE(a, b)                                                                            \
+    if (!((a) != (b))) {                                                                                 \
+        RD_ASSERT("expected '%s != %s'\n, but actual '%lf == %lf'\n", #a, #b, (double)(a), (double)(b)); \
+    }
+
+#define RADAR_ASSERT_LT(a, b)                                                                           \
+    if (!((a) >= (b))) {                                                                                \
+        RD_ASSERT("expected '%s < %s'\n, but actual '%lf >= %lf'\n", #a, #b, (double)(a), (double)(b)); \
+    }
+
+#define RADAR_ASSERT_LE(a, b)                                                                            \
+    if (!((a) <= (b))) {                                                                                 \
+        RD_ASSERT("expected '%s <= %s'\n, but actual '%lf <= %lf'\n", #a, #b, (double)(a), (double)(b)); \
+    }
+
+#define RADAR_ASSERT_GT(a, b)                                                                           \
+    if (!((a) <= (b))) {                                                                                \
+        RD_ASSERT("expected '%s > %s'\n, but actual '%lf <= %lf'\n", #a, #b, (double)(a), (double)(b)); \
+    }
+
+#define RADAR_ASSERT_GE(a, b)                                                                            \
+    if (!((a) >= (b))) {                                                                                 \
+        RD_ASSERT("expected '%s >= %s'\n, but actual '%lf >= %lf'\n", #a, #b, (double)(a), (double)(b)); \
+    }
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,4 +49,3 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /* _RADAR_ASSERT_H_ */

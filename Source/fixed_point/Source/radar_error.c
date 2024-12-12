@@ -7,5 +7,5 @@
 
 void radar_error(const char *reason, const char *file, int line, int error_code)
 {
-    printf("Radar error: %s, file %s, line %d\n", reason, file, line);
+    RADAR_LOG_PRINTF("Radar error: %s, file %s, line %d\n", reason, file, line);
 }
