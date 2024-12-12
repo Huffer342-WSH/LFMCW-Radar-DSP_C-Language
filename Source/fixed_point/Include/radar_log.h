@@ -1,5 +1,7 @@
 #pragma once
 
+#include "radar_config.h"
+
 #include <stdarg.h>
 
 
@@ -7,6 +9,7 @@
  * @brief  默认的日志打印函数
  */
 #ifndef RADAR_LOG_PRINTF
+#warning RADAR_LOG_PRINTF is not defined
 
 #include <stdio.h>
 

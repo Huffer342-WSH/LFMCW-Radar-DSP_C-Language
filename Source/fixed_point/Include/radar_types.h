@@ -2,7 +2,7 @@
 #define _RADAR_TYPES_H_
 
 #include "radar_config.h"
-#include "radar_math_types.h"
+#include "radar_math.h"
 #include "radar_cfar.h"
 #include "radar_measurement.h"
 #include "radar_micromotion.h"
