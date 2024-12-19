@@ -49,12 +49,15 @@ int radar_clac_dis_and_velo(measurements_t *meas, const cfar2d_result_t *cfar, c
         int64_t denominator;
 
         a = point->idx0;
-        if (a == 0 || MAG(a - 1, idxV) < MAG(a + 1, idxV)) {
-            b_q32 = (int64_t)1 << 32;
-            denominator = MAG(a + 1, idxV);
+        if (a == 0) {
+            a = 1;
+            b_q32 = -((int64_t)1 << 32);
         } else if (a + 1 == mag->size0 || MAG(a - 1, idxV) > MAG(a + 1, idxV)) {
             b_q32 = -((int64_t)1 << 32);
             denominator = MAG(a - 1, idxV);
+        } else if (MAG(a - 1, idxV) < MAG(a + 1, idxV)) {
+            b_q32 = (int64_t)1 << 32;
+            denominator = MAG(a + 1, idxV);
         } else {
             b_q32 = 0;
             denominator = MAG(a, idxV);
