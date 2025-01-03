@@ -1,36 +1,37 @@
 #pragma once
 
-
-#include <Eigen/Dense>
+#include "radar_assert.h"
 #include "radar_math.h"
+
 
 class TransitionModel
 {
 private:
-    double q; // 过程噪声系数
+    rd_float_t q; // 过程噪声系数
 public:
-    TransitionModel(double q);
+    TransitionModel(rd_float_t q)
+        : q(q) {};
     ~TransitionModel() { };
 
     size_t ndim_state;
-    void function(Eigen::Vector4d &predict_state_vector, Eigen::Vector4d &state_vector, double *deltatime);
-    void matrix(Eigen::Matrix4d &F, double *deltatime);
-    void covar(Eigen::Matrix4d *Q, float deltatime);
+    void function(Vector4r &predict_state_vector, Vector4r &state_vector, rd_float_t deltatime);
+    void matrix(Matrix44r &F, rd_float_t deltatime);
+    void covar(Matrix44r &Q, rd_float_t deltatime);
 };
 
 class MeasurementModel
 {
 private:
-    Eigen::Matrix3d R;
+    Matrix33r R;
 
 public:
-    MeasurementModel(double sigma_phi, double sigma_r, double sigma_r_dot);
+    MeasurementModel(rd_float_t sigma_phi, rd_float_t sigma_r, rd_float_t sigma_r_dot);
     ~MeasurementModel() { };
 
     size_t ndim_state;
     size_t ndim_meas;
 
-    void function(Eigen::Vector3d &meas_vector, Eigen::Vector4d &stata_vector);
-    void matrix(Eigen::Matrix<double, 3, 4> &H, Eigen::Vector4d &stata_vector);
-    void covar(Eigen::Matrix3d &R);
+    void function(Vector3r &meas_vector, const Vector4r &state_vector);
+    void matrix(Matrix34r &H, const Vector4r &state_vector);
+    void covar(Matrix33r &R);
 };

@@ -15,10 +15,6 @@ else()
     endif()
 endif()
 
-
-
-
-
 add_library(lfmcwradar_fixed STATIC)
 
 target_link_libraries(lfmcwradar_fixed PUBLIC

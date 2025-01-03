@@ -8,18 +8,18 @@ class Associator
 {
 private:
 public:
-    double missed_distance;
+    rd_float_t missed_distance;
     KalmanPredictor &predictor;
     KalmanUpdater &updater;
 
-    Associator(KalmanPredictor &predictor, KalmanUpdater &updater, double missed_distance)
+    Associator(KalmanPredictor &predictor, KalmanUpdater &updater, rd_float_t missed_distance)
         : predictor(predictor)
         , updater(updater)
-        , missed_distance(missed_distance) { };
+        , missed_distance(missed_distance) {};
     ~Associator() { };
 
 
-    double distance(Hypothesis &hypothesis, Eigen::Vector3d &measurement);
+    rd_float_t distance(Hypothesis &hypothesis, Vector3r &measurement);
 
 
     void hypotheses_init(std::vector<Hypothesis> &hypotheses, TrackedTargets &targets, uint32_t timestamp_ms);
@@ -34,7 +34,7 @@ public:
      * @param[in,out]   measurements        测量值；未关联的测量值会移动到measurements头部
      * @param           timestamp_ms        时间戳
      */
-    void associate(std::vector<Hypothesis> &hypotheses, std::vector<Eigen::Vector3d> &measurements, uint32_t timestamp_ms);
+    void associate(std::vector<Hypothesis> &hypotheses, std::vector<Vector3r> &measurements, uint32_t timestamp_ms);
 
 
     /**

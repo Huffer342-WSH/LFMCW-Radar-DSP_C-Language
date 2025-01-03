@@ -15,13 +15,13 @@ gaussian_state_t *gaussian_state_alloc(size_t ndim_state)
 {
     gaussian_state_t *state = (gaussian_state_t *)malloc(sizeof(gaussian_state_t));
     state->ndim_state = ndim_state;
-    state->state_vector = (double *)malloc(ndim_state * sizeof(double));
-    state->covar = (double *)malloc(ndim_state * ndim_state * sizeof(double));
+    state->state_vector = (rd_float_t *)malloc(ndim_state * sizeof(rd_float_t));
+    state->covar = (rd_float_t *)malloc(ndim_state * ndim_state * sizeof(rd_float_t));
     return state;
 }
 
 
-tracked_target_t *tracked_target_alloc(size_t ndim_state, double *z, uint32_t timestamp_ms)
+tracked_target_t *tracked_target_alloc(size_t ndim_state, rd_float_t *z, uint32_t timestamp_ms)
 {
     tracked_target_t *target = (tracked_target_t *)malloc(sizeof(tracked_target_t));
     target->state = gaussian_state_alloc(ndim_state);
@@ -31,14 +31,14 @@ tracked_target_t *tracked_target_alloc(size_t ndim_state, double *z, uint32_t ti
     target->state->timestamp_ms = timestamp_ms;
 
     // 初始化状态向量
-    double phi = z[0], r = z[1], v = z[2];
+    rd_float_t phi = z[0], r = z[1], v = z[2];
     target->state->state_vector[0] = r * cos(phi);
     target->state->state_vector[1] = v * cos(phi);
     target->state->state_vector[2] = r * sin(phi);
     target->state->state_vector[3] = v * sin(phi);
 
     // 初始化误差协方差矩阵
-    memset(target->state->covar, 0, ndim_state * ndim_state * sizeof(double));
+    memset(target->state->covar, 0, ndim_state * ndim_state * sizeof(rd_float_t));
     target->state->covar[0] = 0.5;
     target->state->covar[5] = 0.1;
     target->state->covar[10] = 0.5;
@@ -79,7 +79,7 @@ tracked_targets_list_t *tracked_targets_list_new()
  * @param z               测量值
  * @param timestamp_ms    时间戳
  */
-void tracked_targets_list_emplace_front(tracked_targets_list_t *list, size_t ndim_state, double *z, uint32_t timestamp_ms)
+void tracked_targets_list_emplace_front(tracked_targets_list_t *list, size_t ndim_state, rd_float_t *z, uint32_t timestamp_ms)
 {
     tracked_targets_node_t *node = (tracked_targets_node_t *)malloc(sizeof(tracked_targets_node_t));
     node->data = tracked_target_alloc(ndim_state, z, timestamp_ms);

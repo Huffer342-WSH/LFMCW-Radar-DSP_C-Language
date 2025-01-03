@@ -38,6 +38,6 @@ int main(int argc, char **argv)
     int64_t num = solve_rectangular_linear_sum_assignment(nr, nc, (double *)cost, 0, a, b);
 
     for (size_t i = 0; i < num; i++) {
-        printf("[%3d %3d]\n", a[i], b[i]);
+        printf("[%3jd %3jd]\n", a[i], b[i]);
     }
 }

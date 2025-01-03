@@ -24,7 +24,7 @@ void Associator::hypotheses_init(std::vector<Hypothesis> &hypotheses, TrackedTar
  * @param[in,out]   measurements    测量值；未关联的测量值会移动到measurements头部
  * @param           timestamp_ms    时间戳
  */
-void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Eigen::Vector3d> &measurements, uint32_t timestamp_ms)
+void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Vector3r> &measurements, uint32_t timestamp_ms)
 {
 
     /* 预测状态向量： 将预测状态写入到假设中 */
@@ -44,9 +44,9 @@ void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Eige
     /* 生成距离矩阵 */
     RD_DEBUG("[数据关联] 生成距离矩阵");
     size_t M = hypotheses.size(), N = measurements.size();
-    std::vector<double> distance_matrix(M * (M + N), INFINITY);
+    std::vector<rd_float_t> distance_matrix(M * (M + N), INFINITY);
     for (size_t i = 0; i < M; i++) {
-        double *row = &distance_matrix[i * (N + M)];
+        rd_float_t *row = &distance_matrix[i * (N + M)];
         for (size_t j = 0; j < measurements.size(); j++) {
             row[j] = distance(hypotheses[i], measurements[j]);
         }
@@ -67,9 +67,9 @@ void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Eige
  *
  * @param hypothesis 假设
  * @param measurement 测量值
- * @return double
+ * @return rd_float_t
  */
-double Associator::distance(Hypothesis &hypothesis, Eigen::Vector3d &measurement)
+rd_float_t Associator::distance(Hypothesis &hypothesis, Vector3r &measurement)
 {
     return 0;
 }

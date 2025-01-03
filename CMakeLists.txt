@@ -8,7 +8,7 @@ option(CROSS_COMPILE "Cross compile" OFF)
 # 设置 C++ 标准
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 98)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 # 设置输出路径

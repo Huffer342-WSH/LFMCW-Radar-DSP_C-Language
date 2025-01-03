@@ -26,7 +26,16 @@ typedef float rd_float_t;
 #include "radar_matrix.h"
 
 #ifdef __cplusplus
+#include <Eigen/Dense>
+typedef Eigen::Matrix<rd_float_t, 3, 1> Vector3r;
+typedef Eigen::Matrix<rd_float_t, 3, 3> Matrix33r;
+typedef Eigen::Matrix<rd_float_t, 3, 4> Matrix34r;
+typedef Eigen::Matrix<rd_float_t, 4, 1> Vector4r;
+typedef Eigen::Matrix<rd_float_t, 4, 3> Matrix43r;
+typedef Eigen::Matrix<rd_float_t, 4, 4> Matrix44r;
+
 extern "C" {
+
 #endif
 
 #ifdef __cplusplus

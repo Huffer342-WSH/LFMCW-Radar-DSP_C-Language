@@ -43,6 +43,7 @@
 
 
 #ifdef __cplusplus
+#define eigen_assert(X) RADAR_ASSERT(X)
 extern "C" {
 #endif
 

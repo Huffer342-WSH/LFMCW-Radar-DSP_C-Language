@@ -11,13 +11,10 @@
 
 #include "track_tracking.hh"
 #include "track_target.hh"
+#include "radar_math.h"
 
-
-#include "radar_log.h"
 #include <vector>
 #include <algorithm>
-
-#include <Eigen/Dense>
 
 
 /**
@@ -28,7 +25,7 @@
  * @param measurements          测量值
  * @param timestamp_ms          时间戳，单位毫秒(ms)
  */
-void Tracker::track(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Eigen::Vector3d> &measurements, uint32_t timestamp_ms)
+void Tracker::track(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms)
 {
 
 
@@ -101,10 +98,10 @@ void tracker_run(tracker_handel_t *tracker_handel, tracked_targets_list_t *track
     /* 转换测量值 */
     RD_DEBUG("初始化测量向量");
     size_t num_measurements = measurements->num;
-    std::vector<Eigen::Vector3d> meas_vectors(num_measurements);
+    std::vector<Vector3r> meas_vectors(num_measurements);
     for (size_t i = 0; i < num_measurements; i++) {
         measurement_t *m = &measurements->data[i];
-        meas_vectors[i] << (double)m->azimuth / (8192.0), (double)m->distance / 1000.0, (double)m->velocity / 1000.0;
+        meas_vectors[i] << (rd_float_t)m->azimuth / (8192.0), (rd_float_t)m->distance / 1000.0, (rd_float_t)m->velocity / 1000.0;
     }
 
     /* 转换跟踪目标 */

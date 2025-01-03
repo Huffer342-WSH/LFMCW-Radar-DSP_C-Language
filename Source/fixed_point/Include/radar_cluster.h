@@ -1,11 +1,11 @@
 #pragma once
 
+#include "radar_math.h"
+#include "radar_measurement.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "radar_math.h"
-#include "radar_measurement.h"
 
 /**
  * @brief 保存DBSCAN邻居信息的结构体

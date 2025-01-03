@@ -10,13 +10,12 @@
  */
 #pragma once
 
-#include "track_target.h"
-
 #include "radar_log.h"
+#include "track_target.h"
+#include "radar_math.h"
 
 
 #include <vector>
-#include <Eigen/Dense>
 
 
 // C++ 封装类
@@ -91,7 +90,7 @@ public:
      * @param measurement    测量值
      * @param timestamp_ms   时间戳
      */
-    void emplace_front(Eigen::Vector3d measurement, uint32_t timestamp_ms)
+    void emplace_front(Vector3r measurement, uint32_t timestamp_ms)
     {
         tracked_targets_list_emplace_front(list, 4, measurement.data(), timestamp_ms);
     }

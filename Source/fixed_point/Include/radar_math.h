@@ -11,7 +11,7 @@
 #pragma once
 
 #include <stdint.h>
-
+#include "radar_log.h"
 #include "radar_math_types.h"
 
 #ifdef __cplusplus
@@ -80,8 +80,8 @@ static inline int32_t radar_atan2_q31(int32_t y, int32_t x)
 static inline int16_t radar_asin_q15(int16_t x)
 {
     int32_t x_q31 = ((int32_t)x << 16);
-    int32_t xx_q31 = ((int32_t)x * x) << 1;
-    int32_t y_q31 = (int32_t)radar_sqrt_q31(((int32_t)1 << 31) - xx_q31);
+    uint32_t xx_q31 = (uint32_t)((int32_t)x * x) << 1;
+    int32_t y_q31 = (int32_t)radar_sqrt_q31((int32_t)(((uint32_t)1 << 31) - xx_q31));
     int32_t theta_q29 = radar_atan2_q31(x_q31, y_q31);
     return theta_q29 >> 16;
 }

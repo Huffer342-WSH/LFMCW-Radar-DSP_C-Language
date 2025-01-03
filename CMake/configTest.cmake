@@ -11,3 +11,6 @@ option(ENABLE_TEST_RADAR_CLAC_MAGSPEC2D "Enable test for radar_clac_magSpec2D" O
 option(ENABLE_TEST_RADAR_CLUSTER "Enable test for radar_cluster" ON)
 option(ENABLE_TEST_RADAR_MATH "Enable test for radar_math" ON)
 option(ENABLE_TEST_RADAR_MATRIX "Enable test for radar_matrix" ON)
+
+
+option(ENABLE_TEST_TRACK_KALMAN "Enable test for track_kalman" ON)

@@ -21,11 +21,11 @@ extern "C" {
 #endif
 
 typedef struct {
-    double velocity_noise_coef;
-    double sigma_phi;
-    double sigma_r;
-    double sigma_r_dot;
-    double missed_distance;
+    rd_float_t velocity_noise_coef;
+    rd_float_t sigma_phi;
+    rd_float_t sigma_r;
+    rd_float_t sigma_r_dot;
+    rd_float_t missed_distance;
 } tracker_config_t;
 
 typedef struct {

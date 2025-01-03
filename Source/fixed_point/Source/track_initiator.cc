@@ -3,8 +3,7 @@
 #include "track_kalman.hh"
 
 
-void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Eigen::Vector3d> &measurements,
-                         uint32_t timestamp_ms)
+void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms)
 {
 
     std::vector<Hypothesis> hypotheses; // 在子代码块中的局部变量会在代码块结束后被销毁
@@ -48,7 +47,7 @@ void Initiator::move_confirmed_targets(TrackedTargets &tracked_targets, TrackedT
 }
 
 
-void Initiator::creat_targets(TrackedTargets &unconfirmed_targets, std::vector<Eigen::Vector3d> &measurements, uint32_t timestamp_ms)
+void Initiator::creat_targets(TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms)
 {
     return;
 }
