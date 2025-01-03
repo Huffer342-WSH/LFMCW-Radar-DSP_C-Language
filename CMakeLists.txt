@@ -2,18 +2,23 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0123 NEW)
 project(LFMCWRadarProcesser)
 
+# 可修改选项
 option(CROSS_COMPILE "Cross compile" OFF)
 
 # 设置 C++ 标准
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 98)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 # 设置输出路径
 set(TATGET_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/.output/${CMAKE_BUILD_TYPE})
+
 set(EXECUTABLE_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/bin)
 set(LIBRARY_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/lib)
 set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
 
+# 添加 CMake 模块
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
 # ==============================================================================
@@ -31,13 +36,17 @@ enable_testing()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-include(configPython) # 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
+# 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
+include(configPython)
 
-include(configAddressSanitizer) # 包含 AddressSanitizer 配置文件
+# 包含 AddressSanitizer 配置文件
+include(configAddressSanitizer)
 
-include(configTest) # 配置测试
+# 设置 MSVC 编译选项
+include(msvc_compile_options)
 
-include(msvc_compile_options) # 设置 MSVC 编译选项
+# 配置测试
+include(configTest) # 可修改
 
 # 编译依赖库
 add_subdirectory(ThirdParty)
@@ -51,5 +60,5 @@ add_subdirectory(PythonWrapper)
 # 构建测试
 add_subdirectory(Test)
 
-
+# 构建文档
 add_subdirectory(Doc)

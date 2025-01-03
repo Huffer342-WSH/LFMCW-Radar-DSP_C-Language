@@ -79,6 +79,18 @@ python setup_venv.py
 
 ### 2.2 CMake Configure
 
+---
+**可配置参数于文件**
+
+- **RADAR_CONFIG_FILE_DIRECTORY**：该变量指定`RadarConfig.h`文件所在路径。`RadarConfig.h`头文件用于配置雷达算法。该变量作用于`Source/fixed_point/CMakeLists.txt`
+
+
+- `CMake/configTest.cmake` 内涵多个`option()`，用于配置是否编译测试案例
+
+
+---
+
+
 ```shell
 cmake -S . -B build
 ```
