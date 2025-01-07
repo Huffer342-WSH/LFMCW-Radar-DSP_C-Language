@@ -9,6 +9,8 @@ AlignEscapedNewlines: Left # 续行符（\）对齐方向。
 AlignOperands: Align # 是否对齐多行表达式中的操作数。
 AlignTrailingComments: true # 是否对齐行尾注释。
 
+AlignArrayOfStructures: Left  # 对数组中的结构体进行对齐
+
 AllowAllParametersOfDeclarationOnNextLine: false # 是否允许所有函数参数放在下一行。
 AllowShortBlocksOnASingleLine: Empty # 是否允许单行显示短代码块（如 { int x; }）。
 AllowShortCaseLabelsOnASingleLine: false # 是否允许单行显示短的 switch case 标签。

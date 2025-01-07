@@ -26,6 +26,8 @@ private:
 
 public:
     MeasurementModel(rd_float_t sigma_phi, rd_float_t sigma_r, rd_float_t sigma_r_dot);
+    MeasurementModel(Matrix33r &R)
+        : R(R) {};
     ~MeasurementModel() { };
 
     size_t ndim_state;

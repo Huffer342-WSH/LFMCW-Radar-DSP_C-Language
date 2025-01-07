@@ -72,6 +72,36 @@ int test_assignment_add()
     return 0;
 }
 
+int test_assignment_init()
+{
+    static double a[2][3] = { { 1, 2, 3 }, { 4, 5, 6 } };
+
+    // 使用 Eigen::Map 将数组 a 映射为 Eigen 矩阵
+    Eigen::Matrix<double, 2, 3> mat = Eigen::Map<Eigen::Matrix<double, 2, 3, Eigen::RowMajor>>(&a[0][0]);
+
+    // 输出矩阵
+    std::cout << "Eigen matrix:\n" << mat << std::endl;
+    return 0;
+}
+
+int test_assignment_typeconvert()
+{
+    // 定义一个 float 类型的矩阵
+    Eigen::Matrix<float, 2, 3> matFloat;
+    matFloat << 1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f;
+
+    // 定义一个 double 类型的矩阵
+    Eigen::Matrix<double, 2, 3> matDouble;
+
+    // 自动类型转换赋值
+    matDouble = matFloat.cast<double>();
+
+    // 输出两个矩阵
+    std::cout << "Float matrix:\n" << matFloat << std::endl;
+    std::cout << "Double matrix (after assignment):\n" << matDouble << std::endl;
+
+    return 0;
+}
 int main(int argc, char const *argv[])
 {
     void *p = malloc(4);
@@ -79,6 +109,8 @@ int main(int argc, char const *argv[])
     printf("Heap Address: %p\n", p);
     free(p);
 
+    test_assignment_typeconvert();
+    test_assignment_init();
     test_function_return();
     test_assignment_add();
     return 0;

@@ -68,10 +68,12 @@ void KalmanUpdater::predict_measurement(GaussianMeasurementPrediction &measureme
  * @param[out] post         滤波后
  * @param[ in] hypothesis   假设，内部包含预测值和测量值
  */
-void KalmanUpdater::update(GaussianState &post, Hypothesis &hypothesis)
+void KalmanUpdater::update(GaussianState &post, Hypothesis &hypothesis, bool need_pred_meas)
 {
     // 预测测量值
+    if (need_pred_meas) { }
     predict_measurement(hypothesis.measurement_prediction, hypothesis.prediction);
+
 
     // 提取必要的矩阵和向量
     const Matrix33r &S = hypothesis.measurement_prediction.covar;
@@ -92,4 +94,6 @@ void KalmanUpdater::update(GaussianState &post, Hypothesis &hypothesis)
 
     // 更新后验状态向量 x = x_pred + K * (z - z_pred)
     post.state_vector = x_pred + K * (z - z_pred);
+
+    post.timestamp_ms = hypothesis.prediction.timestamp_ms;
 }

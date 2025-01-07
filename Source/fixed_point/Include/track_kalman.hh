@@ -62,6 +62,11 @@ public:
 
     Hypothesis(rd_float_t prior_state_vector[4], rd_float_t prior_state_covar[16], uint32_t timestamp_ms)
         : prior_state(prior_state_vector, prior_state_covar, timestamp_ms) {};
+
+    Hypothesis(GaussianState &prior_state)
+        : prior_state(prior_state) {};
+
+    ~Hypothesis() {};
 };
 
 
@@ -86,9 +91,12 @@ public:
         : measurement_model(sigma_phi, sigma_r, sigma_r_dot)
     {
     }
+    KalmanUpdater(Matrix33r &R)
+        : measurement_model(R) {};
+
     ~KalmanUpdater() { };
 
 
-    void update(GaussianState &post, Hypothesis &hypothesis);
+    void update(GaussianState &post, Hypothesis &hypothesis, bool need_pred_meas);
     void predict_measurement(GaussianMeasurementPrediction &measurement_prediction, const GaussianState &predicted_state);
 };

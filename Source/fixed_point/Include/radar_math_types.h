@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef float rd_float_t;
+typedef double rd_float_t;
 
 
 #include "radar_matrix.h"

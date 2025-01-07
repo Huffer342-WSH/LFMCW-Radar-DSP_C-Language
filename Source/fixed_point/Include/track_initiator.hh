@@ -22,7 +22,7 @@ public:
 
     void initiate(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms);
 
-    void update_lifecycle(TrackedTargets &targets, std::vector<Hypothesis> hypotheses);
+    void update_lifecycle(TrackedTargets &targets, std::vector<Hypothesis> &hypotheses);
 
 
     void move_confirmed_targets(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets);

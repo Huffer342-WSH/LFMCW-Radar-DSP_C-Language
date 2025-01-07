@@ -34,7 +34,7 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
 }
 
 
-void Initiator::update_lifecycle(TrackedTargets &targets, std::vector<Hypothesis> hypotheses)
+void Initiator::update_lifecycle(TrackedTargets &targets, std::vector<Hypothesis> &hypotheses)
 {
 
     return;

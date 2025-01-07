@@ -12,3 +12,10 @@ add_executable(test_eigen_assignment
 )
 
 target_link_libraries(test_eigen_assignment Eigen3::Eigen)
+
+# EIGEN矩阵大小测试
+add_executable(test_eigen_size
+    test_eigen_size.cc
+)
+
+target_link_libraries(test_eigen_size Eigen3::Eigen)

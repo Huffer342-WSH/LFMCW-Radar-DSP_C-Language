@@ -12,5 +12,5 @@ public:
 
     ~Deleter() { };
 
-    void delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothesis> hypotheses);
+    void delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses);
 };

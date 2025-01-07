@@ -106,8 +106,8 @@ void MeasurementModel::matrix(Matrix34r &H, const Vector4r &state_vector)
     H(1, 2) = H(2, 3) = y / r; // dr/dy and drdot/dvy
 
 
-    H(2, 0) = (y * (x * vy - y * vx)) / r3; // drdot/dx
-    H(2, 2) = (x * (y * vx - x * vy)) / r3; // drdot/dy
+    H(2, 0) = (y * (-x * vy + y * vx)) / r3; // drdot/dx
+    H(2, 2) = (x * (x * vy - y * vx)) / r3;  // drdot/dy
 }
 
 void MeasurementModel::covar(Matrix33r &R)
