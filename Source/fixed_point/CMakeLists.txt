@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(LFMCW-Radar-Processer-FixedPointEdition C CXX)
+project(LFMCW-Radar-Processer-FixedPointEdition
+    VERSION 1.1
+    DESCRIPTION "定点数优化版本，信号处理部分使用定点数，目标跟踪部分使用浮点数(alpha-20250107)"
+    LANGUAGES C CXX
+)
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/CMake/template/version.h.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/Include/version.h
+)
 
 # 设置默认路径为当前源目录下的 "Portable" 文件夹
 set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Portable" CACHE STRING "Path to RadarConfig.h")

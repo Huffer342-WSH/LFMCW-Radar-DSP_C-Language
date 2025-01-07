@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0123 NEW)
-project(LFMCWRadarProcesser)
+project(LFMCWRadarProcesser VERSION 0.2.0
+    DESCRIPTION "适用于LFMCW雷达的数据处理算法库，最终希望提供一个可移植的C语言库，输入2D-FFT后的雷达中频信号，输出目标跟踪结果"
+)
 
 # 可修改选项
 option(CROSS_COMPILE "Cross compile" OFF)
@@ -20,6 +22,8 @@ set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
 
 # 添加 CMake 模块
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+
+include(configGitInfo)
 
 # ==============================================================================
 # 交叉编译
