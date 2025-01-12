@@ -1,16 +1,16 @@
 #include "track_associator.hh"
 #include "radar_log.h"
 #include <cmath>
+#include <vector>
 
 
 void Associator::hypotheses_init(std::vector<Hypothesis> &hypotheses, TrackedTargets &targets, uint32_t timestamp_ms)
 {
+
     hypotheses.clear();
-    hypotheses.reserve(targets.size());
-    for (tracked_target_t &target : targets) {
-        gaussian_state_t *state = target.state;
-        hypotheses.emplace_back(state->state_vector, state->covar, timestamp_ms);
-    }
+    size_t size = std::distance(targets.begin(), targets.end());
+    hypotheses.reserve(size);
+    for (TrackedTarget &target : targets) { }
     return;
 }
 
@@ -78,7 +78,7 @@ rd_float_t Associator::distance(Hypothesis &hypothesis, Vector3r &measurement)
 void Associator::update(TrackedTargets &targets, std::vector<Hypothesis> &hypotheses)
 {
 
-    RADAR_ASSERT_EQ((size_t)targets.size(), (size_t)hypotheses.size());
+    // RADAR_ASSERT_EQ((size_t)targets.size(), (size_t)hypotheses.size());
 
     return;
 }

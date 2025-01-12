@@ -105,13 +105,13 @@ void tracker_run(tracker_handel_t *tracker_handel, tracked_targets_list_t *track
     }
 
     /* 转换跟踪目标 */
-    TrackedTargets cxx_tracked_targets(tracked_targets);
-    TrackedTargets cxx_unconfirmed_targets(unconfirmed_targets);
+    TrackedTargets *cxx_tracked_targets = reinterpret_cast<TrackedTargets *>(tracked_targets);
+    TrackedTargets *cxx_unconfirmed_targets = reinterpret_cast<TrackedTargets *>(unconfirmed_targets);
 
 
     RD_DEBUG("运行C++ 跟踪器");
 
-    tracker->track(cxx_tracked_targets, cxx_unconfirmed_targets, meas_vectors, timestamp_ms);
+    tracker->track(*cxx_tracked_targets, *cxx_unconfirmed_targets, meas_vectors, timestamp_ms);
 }
 
 

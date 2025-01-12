@@ -3,6 +3,7 @@
 #include "track_target.hh"
 #include "track_kalman.hh"
 
+#include <vector>
 
 class Deleter
 {

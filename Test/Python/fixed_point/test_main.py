@@ -35,6 +35,8 @@ numChrip = mat["numChrip"][0, 0]
 numChannel = mat["numChannel"][0, 0]
 numFrame = len(mat["radarDataCube"])
 
+timeFrameFull = (timeChrip + timeChripGap) * numChrip + timeFrameGap
+
 rdms_list = fft(fft(mat["radarDataCube"], axis=-1)[:, :, :, :numRangeBin], axis=-2).transpose(0, 1, 3, 2)
 rdms_list = rdms_list * (2**15 - 1) / np.max(np.abs(rdms_list))
 rdms_list.real = rdms_list.real.astype(np.int16)
@@ -61,27 +63,27 @@ rdms_list.imag = rdms_list.imag.astype(np.int16)
 # rdms_list.imag = rdms_list.imag.astype(np.int16)
 
 # mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData_运动人体_长方形轨迹.mat")
-mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData 2024-11-20 17-12-26.mat")
+# mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData 2024-11-20 17-12-26.mat")
 
-c = scipy.constants.c
-frequency = 24.125e9
-wavelength = c / frequency
-bandwidth = 245e6
-timeChrip = mat["timeChrip"][0, 0]
-timeChripGap = mat["timeChripGap"][0, 0]
-timeFrameGap = mat["timeFrameGap"][0, 0]
-numPoint = mat["numSample"][0, 0]
-numRangeBin = mat["numRangeBin"][0, 0]
-numChrip = mat["numChrip"][0, 0]
-numChannel = mat["numChannel"][0, 0]
-numFrame = len(mat["RDM"])
+# c = scipy.constants.c
+# frequency = 24.125e9
+# wavelength = c / frequency
+# bandwidth = 245e6
+# timeChrip = mat["timeChrip"][0, 0]
+# timeChripGap = mat["timeChripGap"][0, 0]
+# timeFrameGap = mat["timeFrameGap"][0, 0]
+# numPoint = mat["numSample"][0, 0]
+# numRangeBin = mat["numRangeBin"][0, 0]
+# numChrip = mat["numChrip"][0, 0]
+# numChannel = mat["numChannel"][0, 0]
+# numFrame = len(mat["RDM"])
 
-timeFrameFull = (timeChrip + timeChripGap) * numChrip + timeFrameGap
+# timeFrameFull = (timeChrip + timeChripGap) * numChrip + timeFrameGap
 
 
-rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
-rdms_list.real = rdms_list.real.astype(np.int16)
-rdms_list.imag = rdms_list.imag.astype(np.int16)
+# rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
+# rdms_list.real = rdms_list.real.astype(np.int16)
+# rdms_list.imag = rdms_list.imag.astype(np.int16)
 
 # %% 初始化雷达算法
 radar_init_param = pyRadar.radar_init_param()

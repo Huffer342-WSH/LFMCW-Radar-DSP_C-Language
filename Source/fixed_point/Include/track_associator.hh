@@ -2,7 +2,7 @@
 
 #include "track_kalman.hh"
 #include "track_target.hh"
-
+#include <vector>
 
 class Associator
 {

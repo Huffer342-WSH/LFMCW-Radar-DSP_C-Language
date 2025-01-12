@@ -56,7 +56,7 @@ target_sources(lfmcwradar_fixed PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_processer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/radar_types.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_target.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_target.cc
 
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_associator.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_deleter.cc
