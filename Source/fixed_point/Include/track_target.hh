@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <list>
 
+#define CXX_LIST_NODE_TTPE std::__detail::_List_node_base
 
 class LifeCycle
 {
@@ -23,6 +24,8 @@ public:
     {
     }
     ~TrackedTarget() = default;
+
+    static TrackedTarget *cast_from_c(tracked_targets_list_node_t target);
 };
 
 
@@ -31,28 +34,14 @@ class TrackedTargets : public std::list<TrackedTarget>
 public:
     TrackedTargets() = default;
     ~TrackedTargets() = default;
+
+    static TrackedTargets *cast_from_c(tracked_targets_list_t *targets)
+    {
+        return (reinterpret_cast<TrackedTargets *>(targets));
+    }
+
+    tracked_targets_list_t *cast_to_c()
+    {
+        return reinterpret_cast<tracked_targets_list_t *>(this);
+    }
 };
-
-
-/**
- * @brief  强制转化  'tracked_targets_list_t *'  -> 'TrackedTargets *'
- *
- * @param list 被跟踪目标链表
- * @return TrackedTargets*
- */
-static inline TrackedTargets *cast_from_tracked_targets_list(tracked_targets_list_t *list)
-{
-    return reinterpret_cast<TrackedTargets *>(list);
-}
-
-
-/**
- * @brief 强制转化  'tracked_target_t *'  -> 'TrackedTarget *'
- *
- * @param target 被跟踪目标
- * @return TrackedTarget*
- */
-static inline TrackedTarget *cast_from_tracked_target(tracked_target_t *target)
-{
-    return &(*std::list<TrackedTarget>::iterator(reinterpret_cast<std::__detail::_List_node_base *>(target)));
-}
