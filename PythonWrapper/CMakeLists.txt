@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(pythonwrapper VERSION 0.1)
-
 # 设置生成的python包名称
 set(PYTHON_PACKAGE_NAME pylfmcwradar)
 

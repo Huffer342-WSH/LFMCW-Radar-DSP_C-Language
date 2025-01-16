@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
-project(Test_CMSIS-DSP)
+
 
 if(ENABLE_TEST_ARM_CFFT_Q15)
     add_executable(test_arm_cfft_q15 test_arm_cfft_q15.cc)

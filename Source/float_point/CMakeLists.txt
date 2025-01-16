@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(LFMCW-Radar-Processer-FloatPointEdition)
-
 add_library(lfmcwradar_float STATIC)
 
 target_include_directories(lfmcwradar_float PUBLIC

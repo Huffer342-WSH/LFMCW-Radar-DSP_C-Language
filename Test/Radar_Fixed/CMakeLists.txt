@@ -1,6 +1,7 @@
 set(public_libraries lfmcwradar_fixed GTest::gtest_main ${ADDRESSSANITIZER_LINKER_FLAGS})
 
-message("public_libraries:${public_libraries}")
+
+
 if(ENABLE_TEST_RADAR_CFAR)
     add_executable(test_radar_cfar test_radar_cfar.cc)
     target_link_libraries(test_radar_cfar ${public_libraries})

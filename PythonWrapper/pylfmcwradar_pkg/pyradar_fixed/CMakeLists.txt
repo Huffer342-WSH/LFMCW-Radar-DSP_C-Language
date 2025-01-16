@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-# 项目名称和语言
-project(pyradar_fixed)
-
-
 pybind11_add_module(pyradar_fixed
     bind.cc
     source/pyradar_fixed_radar_cfar.cc
@@ -37,7 +33,6 @@ add_custom_command(TARGET pyradar_fixed POST_BUILD
     COMMENT "Generating .pyi file for pyRadar"
     VERBATIM
 )
-
 
 add_custom_command(TARGET pyradar_fixed POST_BUILD
 

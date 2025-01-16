@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-# 项目名称和语言
-project(pyradar_float)
-
 pybind11_add_module(pyradar_float
     pyradar_float_processer.cc
 )
@@ -29,7 +26,6 @@ add_custom_command(TARGET pyradar_float POST_BUILD
     COMMENT "Generating .pyi file for pyRadar"
     VERBATIM
 )
-
 
 add_custom_command(TARGET pyradar_float POST_BUILD
 

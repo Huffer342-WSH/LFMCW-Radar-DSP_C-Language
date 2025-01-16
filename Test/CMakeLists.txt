@@ -20,4 +20,6 @@ add_subdirectory(algorithm)
 # 雷达信号处理库测试
 add_subdirectory(Radar_Fixed)
 
-add_subdirectory(Python)
+if(BUILD_PythonWrapper)
+    add_subdirectory(Python)
+endif()

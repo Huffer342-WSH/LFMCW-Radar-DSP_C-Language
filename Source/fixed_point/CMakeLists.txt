@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(LFMCW-Radar-Processer-FixedPointEdition
-    VERSION 1.1
-    DESCRIPTION "定点数优化版本，信号处理部分使用定点数，目标跟踪部分使用浮点数(alpha-20250107)"
-    LANGUAGES C CXX
-)
-
 configure_file(
-    ${CMAKE_SOURCE_DIR}/CMake/template/version.h.in
+    ${CMAKE_CURRENT_SOURCE_DIR}../../../CMake/template/version.h.in
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/version.h
 )
 
@@ -15,7 +9,7 @@ configure_file(
 set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Portable" CACHE STRING "Path to RadarConfig.h")
 
 if(RADAR_CONFIG_FILE_DIRECTORY STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/Portable")
-    message(WARNING "Default RADAR_CONFIG_FILE_DIRECTORY is used")
+    message(WARNING "Default RADAR_CONFIG_FILE_DIRECTORY is used\n" "在CMake中使用RADAR_CONFIG_FILE_DIRECTORY变量指定 RadarConfig.h 文件所在路径，该文件用于配置雷达算法。")
 else()
     if(EXISTS "${RADAR_CONFIG_FILE_DIRECTORY}/RadarConfig.h")
         message(STATUS "Using RADAR_CONFIG_FILE_DIRECTORY: ${RADAR_CONFIG_FILE_DIRECTORY}")

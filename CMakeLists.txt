@@ -5,7 +5,16 @@ project(LFMCWRadarProcesser VERSION 0.2.0
 )
 
 # 可修改选项
-option(CROSS_COMPILE "Cross compile" OFF)
+option(CROSS_COMPILE "使能交叉编译" OFF)
+option(BUILD_DOCUMENT "生成文档" OFF)
+
+if(CROSS_COMPILE)
+    option(BUILD_TEST "编译测试" OFF)
+    option(BUILD_PythonWrapper "编译Python封装" OFF)
+else()
+    option(BUILD_TEST "编译测试" ON)
+    option(BUILD_PythonWrapper "编译Python封装" ON)
+endif()
 
 # 设置 C++ 标准
 set(CMAKE_C_STANDARD 11)
@@ -21,36 +30,15 @@ set(LIBRARY_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/lib)
 set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
 
 # 添加 CMake 模块
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 
 include(configGitInfo)
 
-# ==============================================================================
-# 交叉编译
-# ==============================================================================
-if(CROSS_COMPILE)
-    include(configCrossCompile)
-    return()
-endif()
-
-# ==============================================================================
-# 本地编译
-# ==============================================================================
-enable_testing()
-
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
-include(configPython)
-
 # 包含 AddressSanitizer 配置文件
-include(configAddressSanitizer)
+include(configAddressSanitizer) # 测试中使用了AddressSanitizer
 
 # 设置 MSVC 编译选项
-include(msvc_compile_options)
-
-# 配置测试
-include(configTest) # 可修改
+include(msvc_compile_options) # 解决CMake使用MSVC的Bug
 
 # 编译依赖库
 add_subdirectory(ThirdParty)
@@ -58,11 +46,31 @@ add_subdirectory(ThirdParty)
 # 编译雷达信号处理库
 add_subdirectory(Source)
 
-# 构建Python模块
-add_subdirectory(PythonWrapper)
+if(BUILD_PythonWrapper)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# 构建测试
-add_subdirectory(Test)
+    # 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
+    include(configPython)
+
+    add_subdirectory(ThirdParty/pybind11-2.13.6)
+
+    # 构建Python模块
+    add_subdirectory(PythonWrapper)
+endif()
+
+if(BUILD_TEST)
+    enable_testing()
+
+    # 配置测试
+    include(configTest) # 可修改
+
+    add_subdirectory(ThirdParty/googletest-1.15.2)
+
+    # 构建测试
+    add_subdirectory(Test)
+endif()
 
 # 构建文档
+if(BUILD_DOCUMENT)
 add_subdirectory(Doc)
+endif()

@@ -2,7 +2,7 @@
 function(get_git_hash git_hash)
     execute_process(
         COMMAND git rev-parse --short HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         RESULT_VARIABLE git_result
         OUTPUT_VARIABLE git_hash_temp
         ERROR_VARIABLE git_error
@@ -20,7 +20,7 @@ endfunction()
 function(get_git_commit_time git_commit_time)
     execute_process(
         COMMAND git log -1 --format=%cd
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         RESULT_VARIABLE git_result_time
         OUTPUT_VARIABLE git_commit_time_temp
         ERROR_VARIABLE git_error_time
