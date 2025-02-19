@@ -40,7 +40,6 @@ pseudocode described in pages 1685-1686 of:
 Author: PM Larsen
 */
 
-
 #include <cmath>
 #include <vector>
 #include <numeric>
@@ -213,7 +212,6 @@ static int solve(intptr_t nr, intptr_t nc, double *cost, bool maximize, int64_t 
         }
     }
 
-
     if (transpose) {
         intptr_t i = 0;
         for (auto v : argsort_iter(col4row)) {
@@ -221,12 +219,10 @@ static int solve(intptr_t nr, intptr_t nc, double *cost, bool maximize, int64_t 
             b[i] = v;
             i++;
         }
-        return i;
     } else {
         for (intptr_t i = 0; i < nr; i++) {
             a[i] = i;
             b[i] = col4row[i];
-            return nr;
         }
     }
 

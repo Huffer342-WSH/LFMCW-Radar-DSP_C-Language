@@ -55,13 +55,17 @@ class Hypothesis
 {
 private:
 public:
+    bool has_meas_pred = false;
+    bool has_meas = false;
     Vector3r measurement;
     GaussianState prior_state;
     GaussianState prediction;
     GaussianMeasurementPrediction measurement_prediction;
 
     Hypothesis(rd_float_t prior_state_vector[4], rd_float_t prior_state_covar[16], uint32_t timestamp_ms)
-        : prior_state(prior_state_vector, prior_state_covar, timestamp_ms) {};
+        : has_meas_pred(false)
+        , has_meas(false)
+        , prior_state(prior_state_vector, prior_state_covar, timestamp_ms) { };
 
     Hypothesis(GaussianState &prior_state)
         : prior_state(prior_state) {};

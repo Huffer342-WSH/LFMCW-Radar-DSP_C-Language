@@ -7,7 +7,7 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
 {
 
     std::vector<Hypothesis> hypotheses; // 在子代码块中的局部变量会在代码块结束后被销毁
-    this->associator.hypotheses_init(hypotheses, unconfirmed_targets, timestamp_ms);
+    this->associator.hypotheses_init(hypotheses, unconfirmed_targets);
 
     /* 数据关联 */
     RD_DEBUG("[目标跟踪] 数据关联");

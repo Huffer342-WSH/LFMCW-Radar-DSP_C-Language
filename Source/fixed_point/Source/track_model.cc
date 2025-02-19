@@ -57,7 +57,12 @@ void MeasurementModel::function(Vector3r &meas_vector, const Vector4r &state_vec
     rd_float_t x = state_vector(0);
     rd_float_t y = state_vector(2);
     rd_float_t rho = hypot(x, y);
-    rd_float_t rho_rate = (x * state_vector(1) + y * state_vector(3)) / rho;
+    rd_float_t rho_rate;
+    if (rho == 0) {
+        rho_rate = hypot(state_vector(1), state_vector(3));
+    } else {
+        rho_rate = (x * state_vector(1) + y * state_vector(3)) / rho;
+    }
     meas_vector(0) = atan2(y, x);
     meas_vector(1) = rho;
     meas_vector(2) = rho_rate;

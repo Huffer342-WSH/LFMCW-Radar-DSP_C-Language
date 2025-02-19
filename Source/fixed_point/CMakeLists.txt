@@ -24,6 +24,7 @@ target_link_libraries(lfmcwradar_fixed PUBLIC
     CMSISDSP
     stc
     Eigen3::Eigen
+    scipy
 )
 
 target_include_directories(lfmcwradar_fixed PUBLIC
@@ -59,3 +60,7 @@ target_sources(lfmcwradar_fixed PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_model.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/Source/track_tracking.cc
 )
+
+if(BUILD_PythonWrapper)
+    target_compile_options(lfmcwradar_fixed PUBLIC -fPIC)
+endif()

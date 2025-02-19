@@ -33,8 +33,7 @@ void Tracker::track(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed
     {
         RD_DEBUG("[目标跟踪] 初始化假设");
         /* 为每一个目标初始化假设 */
-        std::vector<Hypothesis> hypotheses; // 在子代码块{} 1中的局部变量会在代码块结束后被销毁
-        this->associator.hypotheses_init(hypotheses, tracked_targets, timestamp_ms);
+        std::vector<Hypothesis> hypotheses = this->associator.hypotheses_new(tracked_targets);
 
         /* 数据关联 */
         RD_DEBUG("[目标跟踪] 数据关联");

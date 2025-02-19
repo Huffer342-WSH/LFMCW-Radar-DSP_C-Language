@@ -15,3 +15,4 @@ option(ENABLE_TEST_RADAR_MATRIX "Enable test for radar_matrix" ON)
 
 option(ENABLE_TEST_TRACK_KALMAN "Enable test for track_kalman" ON)
 option(ENABLE_TEST_TRACK_TARGETS "Enable test for track_target" ON)
+option(ENABLE_TEST_TRACK_ASSOCIATOR "Enable test for track_associator" ON)
