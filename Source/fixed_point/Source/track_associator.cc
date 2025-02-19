@@ -170,9 +170,16 @@ rd_float_t Associator::distance(Hypothesis &hypothesis, Vector3r &measurement, r
     return dis;
 }
 
-
+/**
+ * @brief  更新器
+ *
+ * @param hypotheses 假设
+ * @param targets 目标
+ * @return 测量的预测值
+ */
 void Associator::update(TrackedTargets &targets, std::vector<Hypothesis> &hypotheses)
 {
+    
 
     // RADAR_ASSERT_EQ((size_t)targets.size(), (size_t)hypotheses.size());
 

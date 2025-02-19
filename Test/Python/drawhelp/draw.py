@@ -1,7 +1,7 @@
 import numpy as np
 import plotly.graph_objects as go
 from joblib import Parallel, delayed
-from moviepy.editor import ImageSequenceClip
+# from moviepy.editor import ImageSequenceClip
 import os
 import tkinter as tk
 from tkinter import filedialog
