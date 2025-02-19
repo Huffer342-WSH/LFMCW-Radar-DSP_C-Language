@@ -66,8 +66,8 @@ TEST(RadarFixedTest, TrackedTargets)
         auto t = it;
         it++;
         if (binaryVector[cnt] == 0) {
-            cxx_targets->erase(t);
             cout << "erase target,UUID: " << (*t).uuid << ", target num: " << cxx_targets->size() << " it:" << (*(it)).uuid << endl;
+            cxx_targets->erase(t);
         }
     }
 
