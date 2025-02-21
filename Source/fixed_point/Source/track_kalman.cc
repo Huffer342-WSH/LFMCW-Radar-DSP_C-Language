@@ -32,6 +32,9 @@ void KalmanPredictor::predict(GaussianState &predict_state, GaussianState &state
 /**
  * @brief 卡尔曼测量预测
  *
+ * @note 该函数是update的子函数，但是在目标跟踪中需要先预测测量值用于数据关联，随意分离出一个函数，
+ *       仅需要卡尔曼滤波功能调用update即可
+ *
  * @param measurement_prediction  测量预测
  * @param predicted_state         预测状态
  */
@@ -68,12 +71,19 @@ void KalmanUpdater::predict_measurement(GaussianMeasurementPrediction &measureme
  * @param[out] post         滤波后
  * @param[ in] hypothesis   假设，内部包含预测值和测量值
  */
-void KalmanUpdater::update(GaussianState &post, Hypothesis &hypothesis, bool need_pred_meas)
+void KalmanUpdater::update(GaussianState &post, Hypothesis &hypothesis)
 {
-    // 预测测量值
-    if (need_pred_meas) { }
-    predict_measurement(hypothesis.measurement_prediction, hypothesis.prediction);
 
+    // 假设中不包含测量值（关联失败），则后验状态设置为预测值
+    if (!hypothesis.has_meas) {
+        post = hypothesis.prediction;
+        return;
+    }
+
+    // 预测测量值
+    if (!hypothesis.has_meas_pred) {
+        predict_measurement(hypothesis.measurement_prediction, hypothesis.prediction);
+    }
 
     // 提取必要的矩阵和向量
     const Matrix33r &S = hypothesis.measurement_prediction.covar;
@@ -96,4 +106,6 @@ void KalmanUpdater::update(GaussianState &post, Hypothesis &hypothesis, bool nee
     post.state_vector = x_pred + K * (z - z_pred);
 
     post.timestamp_ms = hypothesis.prediction.timestamp_ms;
+
+    return;
 }

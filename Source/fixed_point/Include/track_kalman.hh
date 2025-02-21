@@ -71,6 +71,13 @@ public:
         : prior_state(prior_state) {};
 
     ~Hypothesis() {};
+
+
+    void set_measurement(const Vector3r &measurement)
+    {
+        this->measurement = measurement;
+        this->has_meas = true;
+    };
 };
 
 
@@ -101,6 +108,6 @@ public:
     ~KalmanUpdater() { };
 
 
-    void update(GaussianState &post, Hypothesis &hypothesis, bool need_pred_meas);
+    void update(GaussianState &post, Hypothesis &hypothesis);
     void predict_measurement(GaussianMeasurementPrediction &measurement_prediction, const GaussianState &predicted_state);
 };

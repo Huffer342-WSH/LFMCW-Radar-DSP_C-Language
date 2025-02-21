@@ -31,8 +31,8 @@ TEST(RadarFixedTest, KalmanFilter)
     for (size_t i = 0; i < N; i++) {
         predictor.predict(hypothesis.prediction, hypothesis.prior_state, timestamps[i]);
         updater.predict_measurement(hypothesis.measurement_prediction, hypothesis.prediction);
-        hypothesis.measurement = Eigen::Map<Eigen::Matrix<double, 3, 1>>((double *)_z_list[i]).cast<rd_float_t>();
-        updater.update(hypothesis.prior_state, hypothesis, true);
+        hypothesis.set_measurement(Eigen::Map<Eigen::Matrix<double, 3, 1>>((double *)_z_list[i]).cast<rd_float_t>());
+        updater.update(hypothesis.prior_state, hypothesis);
 
         cout << "第 " << i << " 帧  " << "时间戳:" << timestamps[i] << endl;
         cout << "预测:" << endl;

@@ -92,8 +92,7 @@ void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Vect
     for (int i = 0; i < M; i++) {
         if (b[i] < N) {
             Hypothesis &h = hypotheses[a[i]];
-            h.measurement = measurements[b[i]];
-            h.has_meas = true;
+            h.set_measurement(measurements[b[i]]);
         }
     }
 
@@ -176,12 +175,18 @@ rd_float_t Associator::distance(Hypothesis &hypothesis, Vector3r &measurement, r
  * @param hypotheses 假设
  * @param targets 目标
  * @return 测量的预测值
+ *
+ * @attention targets 和 hypotheses 中的元素必须是一一对应的关系
  */
 void Associator::update(TrackedTargets &targets, std::vector<Hypothesis> &hypotheses)
 {
-    
+    RADAR_ASSERT_EQ((size_t)targets.size(), (size_t)hypotheses.size());
 
-    // RADAR_ASSERT_EQ((size_t)targets.size(), (size_t)hypotheses.size());
-
+    // 对每一个目标执行卡尔曼更新
+    std::vector<Hypothesis>::iterator h = hypotheses.begin();
+    for (TrackedTarget &target : targets) {
+        this->updater.update(target.state, *h);
+        h++;
+    }
     return;
 }
