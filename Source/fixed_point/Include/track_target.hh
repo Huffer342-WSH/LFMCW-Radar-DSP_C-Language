@@ -3,7 +3,6 @@
 #include "track_kalman.hh"
 #include "track_target.h"
 #include "radar_measurement.h"
-
 #include <cstdint>
 #include <list>
 

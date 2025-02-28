@@ -33,12 +33,16 @@ public:
     Deleter deleter;
     Initiator initiator;
 
+    std::array<rd_float_t, 2> fov;
+    std::array<rd_float_t, 2> radius_range;
+    
+
     Tracker(tracker_config_t *cfg)
         : updater(cfg->sigma_phi, cfg->sigma_r, cfg->sigma_r_dot)
         , predictor(cfg->velocity_noise_coef)
         , associator(predictor, updater, cfg->missed_distance)
-        , deleter()
-        , initiator(associator)
+        , deleter(cfg->unassociated_time, cfg->missed_probability, fov, radius_range)
+        , initiator(associator, cfg->unassociated_time, cfg->keep_motion_time, cfg->keep_static_time, cfg->speed_threshold, cfg->missed_distance)
     {
     }
 

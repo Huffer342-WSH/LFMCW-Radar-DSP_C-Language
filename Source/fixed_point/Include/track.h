@@ -26,6 +26,15 @@ typedef struct {
     rd_float_t sigma_r;
     rd_float_t sigma_r_dot;
     rd_float_t missed_distance;
+    rd_float_t unassociated_time;//目标关联失败超时时间
+    rd_float_t keep_motion_time;//目标是连续运动时，多少时间关联成功
+    rd_float_t keep_static_time;// 目标是连续静止时，多少时间关联成功
+    rd_float_t speed_threshold;// 速度阈值
+
+
+    rd_float_t missed_probability;
+
+
 } tracker_config_t;
 
 typedef struct {

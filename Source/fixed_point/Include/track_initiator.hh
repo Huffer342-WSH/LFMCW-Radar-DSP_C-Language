@@ -1,9 +1,9 @@
 #pragma once
 
-#include "track_target.hh"
+#include "radar_math.h"
 #include "track_associator.hh"
 #include "track_kalman.hh"
-#include "radar_math.h"
+#include "track_target.hh"
 
 #include <vector>
 
@@ -11,30 +11,34 @@ class Initiator
 {
 private:
 public:
-    
-    Associator &associator;
-    rd_float_t unassociated_time;//目标关联失败超时时间
-    rd_float_t keep_motion_time;//目标是连续运动时，多少时间关联成功
-    rd_float_t keep_static_time;// 目标是连续静止时，多少时间关联成功
-    rd_float_t speed_threshold;// 速度阈值
-    rd_float_t missed_distance;
-    uint32_t initial_score;
-    uint32_t max_score;
+    static const int32_t initial_score = 1000;
+    static const int32_t max_score = 3000;
 
-    uint32_t unassociated_score = uint32_t(-this->initial_score / this->unassociated_time);
-    uint32_t score = this->max_score - this->initial_score;
-    uint32_t motion_score = uint32_t(this->score / this->keep_motion_time);
-    uint32_t static_score = uint32_t(this->score / this->keep_static_time);
-    Initiator(Associator &associator)
+    Associator &associator;
+    rd_float_t unassociated_time; // 目标关联失败超时时间
+    rd_float_t keep_motion_time;  // 目标是连续运动时，多少时间关联成功
+    rd_float_t keep_static_time;  // 目标是连续静止时，多少时间关联成功
+    rd_float_t speed_threshold;   // 速度阈值
+    rd_float_t missed_distance;
+
+
+    int32_t unassociated_score;
+    int32_t motion_score;
+    int32_t static_score;
+
+    Initiator(Associator &associator, rd_float_t unassociated_time, rd_float_t keep_motion_time, rd_float_t keep_static_time, rd_float_t speed_threshold,
+              rd_float_t missed_distance)
         : associator(associator)
-        , unassociated_time(2.0f)
-        , keep_motion_time(2.0f)
-        , keep_static_time(8.0f)
-        , speed_threshold(0.1f)
-        , missed_distance(5.0f)
-        , initial_score(1000)
-        , max_score(3000)
+        , unassociated_time(unassociated_time)
+        , keep_motion_time(keep_motion_time)
+        , keep_static_time(keep_static_time)
+        , speed_threshold(speed_threshold)
+        , missed_distance(missed_distance)
     {
+        unassociated_score = (int32_t)(-this->initial_score / this->unassociated_time);
+        int32_t score = this->max_score - this->initial_score; // 不用当成员变量，写在构造函数里，这种算出来得到的变量
+        motion_score = (int32_t)(score / this->keep_motion_time);
+        static_score = (int32_t)(score / this->keep_static_time);
         return;
     };
 
@@ -42,7 +46,7 @@ public:
 
     void initiate(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms);
 
-    void update_lifecycle(std::vector<Hypothesis> &hypotheses,LifeCycle &life_cycle);
+    void update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses);
 
 
     void move_confirmed_targets(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets);

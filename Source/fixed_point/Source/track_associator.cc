@@ -165,7 +165,7 @@ rd_float_t Associator::distance(Hypothesis &hypothesis, Vector3r &measurement, r
     rd_float_t dr2 = r0 * r0 + r1 * r1 - 2.0f * r0 * r1 * cos(theta);
     rd_float_t dv = (a[2] - b[2]) * wv;
     rd_float_t dis = sqrt(dr2 * wr * wr + dv * dv);
-    printf("原始坐标:[%f %f %f] [%f %f %f] 距离:%f\n", a[0], a[1], a[2], b[0], b[1], b[2], dis);
+    RD_DEBUG("原始坐标:[%f %f %f] [%f %f %f] 距离:%f\n", a[0], a[1], a[2], b[0], b[1], b[2], dis);
     return dis;
 }
 

@@ -2,6 +2,16 @@
 
 #include "track_kalman.hh"
 
+#include "radar_log.h"
+
+
+#undef RD_DEBUG
+#if LOG_LEVEL <= LOG_LEVEL_DEBUG
+#define RD_DEBUG(format, ...) RADAR_LOG_PRINTF(format, ##__VA_ARGS__)
+#else
+#define RD_DEBUG(format, ...)
+#endif
+
 
 void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms)
 {
@@ -20,7 +30,7 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
 
 
     /*  更新生命周期 */
-    //this->update_lifecycle(unconfirmed_targets, hypotheses);
+    // this->update_lifecycle(unconfirmed_targets, hypotheses);
 
 
     /* 将起始成功的目标移动到已跟踪目标列表 */
@@ -34,35 +44,61 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
 }
 
 
-void Initiator::update_lifecycle(std::vector<Hypothesis> &hypotheses,LifeCycle &life_cycle)
+void Initiator::update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses)
 {
-    int32_t score = 0;
-    uint32_t speed = 0;
-    for(int i = 0; i < hypotheses.size(); i++) {
-        rd_float_t dt = (hypotheses[0].prediction.timestamp_ms - hypotheses[0].prior_state.timestamp_ms) / 1000; //计算时间戳差的秒数
-    Vector3r empty_measurement = Vector3r::Zero();
-    if (hypotheses[0].measurement == empty_measurement) {
-        //关联失败，超时了，扣除一半分数
-        if (life_cycle.unassociated_time > this->unassociated_time) {
-            score -= life_cycle.score >> 1;// 用右移代替除以2
-            score += int32_t(this->unassociated_time * dt); //加上未关联时间乘时间差
-            life_cycle.unassociated_time += dt;
-        }
-    }else {
-        score -= life_cycle.unassociated_time * this->unassociated_score /2;
-        speed = std::abs(hypotheses[0].measurement[3]);
-        if (speed > this->speed_threshold) {
-            score += int32_t(this->motion_score * dt);
-        }else {
-            score += this->static_score * dt;
-        }
-        life_cycle.unassociated_time = 0;
-    }
-    life_cycle.score += int32_t(score);     
-    }
-    return; 
-}
 
+    std::vector<Hypothesis>::iterator h = hypotheses.begin();
+
+    for (TrackedTarget &target : tracked_targets) {
+        int32_t score = 0;
+        uint32_t speed = 0;
+        LifeCycle &l = target.life_cycle;
+        RD_DEBUG("score:%d\n", score);
+        RD_DEBUG("lifecycle_score:%d\n", l.score);
+        RD_DEBUG("unassociated_time:%f\n", l.unassociated_time);
+        rd_float_t dt = (h->prediction.timestamp_ms - h->prior_state.timestamp_ms) / 1000; // 计算时间戳差的秒数
+        RD_DEBUG("dt:%f\n", dt);
+
+        if (!(h->has_meas)) {
+            // 关联失败，超时了，扣除一半分数
+            if (l.unassociated_time > this->unassociated_time) {
+                RD_DEBUG("enter unassociated\n");
+                score -= l.score / 2; // 改用有符号数表示score，不用右移代替除以2
+
+                RD_DEBUG("score:%d\n", score);
+                RD_DEBUG("unassociated_time:%f\n", l.unassociated_time);
+            }
+            score += int32_t(this->unassociated_score * dt); // 加上未关联时间乘时间差
+            RD_DEBUG("unassociated_score:%d\n", this->unassociated_score);
+            l.unassociated_time += dt;
+            RD_DEBUG("score:%d\n", score);
+            RD_DEBUG("unassociated_time:%f\n", l.unassociated_time);
+        } else {
+            RD_DEBUG("enter associated\n");
+            score -= l.unassociated_time * this->unassociated_score / 2; 
+            RD_DEBUG("score:%d\n", score);
+            speed = std::abs(h->measurement[2]);
+            if (speed > this->speed_threshold) {
+                RD_DEBUG("enter move\n");
+                score += (int32_t)(this->motion_score * dt);
+                RD_DEBUG("motion_score:%d\n", this->motion_score);
+                RD_DEBUG("score:%d\n", score);
+            } else {
+                RD_DEBUG("enter static\n");
+                score += (int32_t)(this->static_score * dt);
+                RD_DEBUG("static_score:%d\n", this->static_score);
+                RD_DEBUG("score:%d\n", score);
+            }
+            l.unassociated_time = 0;
+        }
+        l.score += score;
+        RD_DEBUG("score:%d\n", score);
+        RD_DEBUG("lifecycle_score:%d\n", l.score);
+        RD_DEBUG("unassociated_time:%f\n", l.unassociated_time);
+
+        h++;
+    }
+}
 
 void Initiator::move_confirmed_targets(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets)
 {
