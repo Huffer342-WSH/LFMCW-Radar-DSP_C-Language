@@ -20,7 +20,8 @@ public:
     rd_float_t keep_static_time;  // 目标是连续静止时，多少时间关联成功
     rd_float_t speed_threshold;   // 速度阈值
     rd_float_t missed_distance;
-
+    Eigen::Matrix<double, 4, 4> init_covar = Eigen::Matrix<double, 4, 4>::Zero();
+    
 
     int32_t unassociated_score;
     int32_t motion_score;
@@ -39,6 +40,9 @@ public:
         int32_t score = this->max_score - this->initial_score; // 不用当成员变量，写在构造函数里，这种算出来得到的变量
         motion_score = (int32_t)(score / this->keep_motion_time);
         static_score = (int32_t)(score / this->keep_static_time);
+        for (int i = 0; i < 4; ++i) {
+            init_covar(i, i) = 0.1 * 0.1;
+        }
         return;
     };
 
@@ -48,9 +52,7 @@ public:
 
     void update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses);
 
-
     void move_confirmed_targets(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets);
-
 
     void creat_targets(TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms);
 };

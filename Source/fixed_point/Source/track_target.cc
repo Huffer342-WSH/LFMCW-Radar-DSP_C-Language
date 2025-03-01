@@ -10,6 +10,7 @@
  */
 #include "track_target.hh"
 
+uint32_t TrackedTarget::next_uuid = 0; 
 
 /**
  * @brief C语言接口

@@ -1,14 +1,25 @@
+// Deleter.cpp
 #include "track_deleter.hh"
 
-
-
+void Deleter::delete_invalid_targets(TrackedTargets &tracked_targets)
+{
+    for (TrackedTargets::iterator it = tracked_targets.begin(); it != tracked_targets.end();) {
+        if ((*it).life_cycle.score <= 0) {
+            it = tracked_targets.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
 void Deleter::delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses)
 {
 
+    update_lifecycle(tracked_targets, hypotheses);
+
+    delete_invalid_targets(tracked_targets);
+
     return;
 }
-
-
 
 void Deleter::update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses)
 {
@@ -41,17 +52,16 @@ void Deleter::update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypo
         RD_DEBUG("score:%d\n", score);
         RD_DEBUG("lifecycle_score:%d\n", l.score);
         RD_DEBUG("---------------------------------------------");
-        rd_float_t angle =std::atan2(target.state.state_vector[2],target.state.state_vector[0]); // 计算角度
+        rd_float_t angle = std::atan2(target.state.state_vector[2], target.state.state_vector[0]); // 计算角度
         RD_DEBUG("angle:%f\n", angle);
         Eigen::Vector2d sub_vector(target.state.state_vector[0], target.state.state_vector[2]);
         rd_float_t r = sub_vector.norm();
         RD_DEBUG("r:%f\n", r);
-        //离开范围得删除
-        if(angle < this->fov[0] || angle > this->fov[1] || r > this->radius_range[1] || r < this->radius_range[0])
-        {
+        // 离开范围得删除
+        if (angle < this->fov[0] || angle > this->fov[1] || r > this->radius_range[1] || r < this->radius_range[0]) {
             l.score = -1;
         }
-        if(l.score > this->max_score){
+        if (l.score > this->max_score) {
             l.score = this->max_score;
         }
         RD_DEBUG("lifecycle_score:%d\n", l.score);

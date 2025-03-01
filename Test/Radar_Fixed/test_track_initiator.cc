@@ -1,6 +1,6 @@
 
 #include "track_initiator.hh"
-
+#include <cmath>
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -140,7 +140,8 @@ TEST(RadarFixedTest3, update_lifecycle_associated_motion)
 
     EXPECT_EQ(tracked_targets.front().life_cycle.unassociated_time, 0); // 如果没有关联，则unassociated_time 加上 时间差，原始2加dt 1 结果为3，单位为s
     EXPECT_EQ(tracked_targets.front().life_cycle.score,
-              510); // 如果没有关联但未超时，变化score先减去了lifecycle.unassociated_time（2） * unassociated_score（-100） / 2，为100， ,motion_score 400，原本生命周期分数为10，加上变化score，结果为510
+              510); // 如果没有关联但未超时，变化score先减去了lifecycle.unassociated_time（2） * unassociated_score（-100） / 2，为100， ,motion_score
+                    // 400，原本生命周期分数为10，加上变化score，结果为510
 }
 
 TEST(RadarFixedTest4, update_lifecycle_associated_static)
@@ -188,6 +189,96 @@ TEST(RadarFixedTest4, update_lifecycle_associated_static)
               610); // 如果没有关联但未超时，变化score 100 ,stadic_score 500，原本生命周期分数为10，加上变化score，结果为610
 }
 
+// 测试 Initiator::create targetas函数
+TEST(RadarFixedTest, creat_targets)
+{
+
+    static const uint32_t N = 4;
+    static rd_float_t state_vector[N][4] = {
+        { 4, 4, 1, 0 },
+        { 4, 8, 6, 2 },
+        { 1, 5, 7, 6 },
+        { 0, 0, 7, 7 }
+    };
+
+    static rd_float_t meas[N][3] = {
+
+    };
+
+    for (int i = 0; i < N; i++) {
+        rd_float_t *x = state_vector[i];
+        rd_float_t *z = meas[i];
+        z[0] = atan2(x[2], x[0]);
+        z[1] = hypot(x[0], x[2]);
+        z[2] = (x[0] * x[1] + x[2] * x[3]) / z[1];
+    }
+
+    // 定义一个存储 Vector3r 的向量
+    std::vector<Vector3r> measurements;
+    TrackedTargets unconfirmed_targets;
+    uint32_t timestamp_ms = 1000;
+    rd_float_t speed_threshold = 0.1;
+
+    for (int i = 0; i < N; i++) {
+        measurements.emplace_back((rd_float_t *)meas[i]);
+    }
+
+    printf("Measurements Info:\n");
+    for (int i = 0; i < measurements.size(); i++) {
+        printf("Speed %f\n", measurements[i](2));
+    }
+    // 创建 Initiator 对象并调用 creat_targets 函数
+    KalmanPredictor predictor(0);
+    KalmanUpdater updater(M_PI / 6, 6, 2.0);
+    Associator associator(predictor, updater, 0.2);
+    Initiator initiator(associator, 10, 2, 2, 0.1, 0.2);
+
+    // 调用creat_targets
+    initiator.creat_targets(unconfirmed_targets, measurements, timestamp_ms);
+
+    printf("Measurements After:\n");
+    for (const auto &target : unconfirmed_targets) {
+        std::cout << std::left << "new UUID: " << target.uuid << std::endl;
+        std::cout << std::left << "new state:\n " << target.state.state_vector << std::endl;
+    }
+}
+
+
+// 测试 Initiator::move_confirmed_targets函数
+TEST(RadarFixedTest, move_confirmed_targets)
+{
+    static int32_t targets_score[7] = { 3000, 1500, 5000, 100, 4500, 10, 3001 };
+    TrackedTargets unconfirmed_targets; // 创建未确认目标
+    TrackedTargets tracked_targets;     // 创建已确认目标
+    for (int i = 0; i < 7; i++) {
+        GaussianState state;
+        TrackedTarget t(i, state);
+        t.life_cycle.score = targets_score[i];
+        unconfirmed_targets.emplace_back(t);
+    }
+    printf("unconfirmed_targets Info:\n");
+    for (auto &t : unconfirmed_targets) {
+        printf("UUID:%d Score %d\n", t.uuid, t.life_cycle.score);
+    }
+    // 创建 Initiator 对象并调用 creat_targets 函数
+    KalmanPredictor predictor(0);
+    KalmanUpdater updater(M_PI / 6, 6, 2.0);
+    Associator associator(predictor, updater, 0.2);
+    Initiator initiator(associator, 10, 2, 2, 0.1, 0.2);
+
+    // 调用creat_targets
+    initiator.move_confirmed_targets(tracked_targets, unconfirmed_targets);
+
+    printf("tracked_targets After:\n");
+    for (auto &t : tracked_targets) {
+        printf("UUID:%d Score %d\n", t.uuid, t.life_cycle.score);
+    }
+
+    printf("unconfirmed_targets After:\n");
+    for (auto &t : unconfirmed_targets) {
+        printf("UUID:%d Score %d\n", t.uuid, t.life_cycle.score);
+    }
+}
 
 int main(int argc, char **argv)
 {

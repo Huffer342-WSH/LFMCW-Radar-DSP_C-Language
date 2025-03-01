@@ -3,7 +3,7 @@
 #include "track_kalman.hh"
 
 #include "radar_log.h"
-
+#include <Eigen/Dense>
 
 #undef RD_DEBUG
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
@@ -75,7 +75,7 @@ void Initiator::update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hy
             RD_DEBUG("unassociated_time:%f\n", l.unassociated_time);
         } else {
             RD_DEBUG("enter associated\n");
-            score -= l.unassociated_time * this->unassociated_score / 2; 
+            score -= l.unassociated_time * this->unassociated_score / 2;
             RD_DEBUG("score:%d\n", score);
             speed = std::abs(h->measurement[2]);
             if (speed > this->speed_threshold) {
@@ -102,11 +102,33 @@ void Initiator::update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hy
 
 void Initiator::move_confirmed_targets(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets)
 {
+    TrackedTargets::iterator it = unconfirmed_targets.begin(); // 遍历
+    while (it != unconfirmed_targets.end()) {
+        if (it->life_cycle.score >= this->max_score) { // 判断是否得分合规
+            TrackedTargets::iterator temp = it;
+            it++;
+            tracked_targets.splice(tracked_targets.begin(), unconfirmed_targets, temp);
+        } else {
+            it++;
+        }
+    }
     return;
 }
 
 
 void Initiator::creat_targets(TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms)
 {
+    speed_threshold = 0.1; // 速度阈值  太慢的速度不要
+    // 仍然没有被关联的测量值，用于创建新目标
+    // 遍历未关联的测量值
+
+    for (const auto &measurement : measurements) {
+        // 检查测量值的速度是否超过阈值
+        if (std::abs(measurement[2]) > speed_threshold) {
+            // 如果超过阈值，创建新的跟踪目标并添加到未确认目标列表中
+            // unconfirmed_targets.emplace_back(uuid, unconfirmed_targets.state);
+            unconfirmed_targets.emplace_back(measurement, this->init_covar, timestamp_ms);
+        }
+    }
     return;
 }

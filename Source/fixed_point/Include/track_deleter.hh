@@ -2,12 +2,15 @@
 
 #include "track_kalman.hh"
 #include "track_target.hh"
+#include "track_kalman.hh"
 
 #include <vector>
+#include <Eigen/Dense>
 
-class Deleter
+class Deleter 
 {
 private:
+
 public:
     static const int max_score = 5000;
 
@@ -30,4 +33,8 @@ public:
     void update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses);
 
     void delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses);
+
+    void delete_invalid_targets(TrackedTargets &tracked_targets);
+    
 };
+

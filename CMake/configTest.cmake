@@ -12,9 +12,9 @@ option(ENABLE_TEST_RADAR_CLUSTER "Enable test for radar_cluster" ON)
 option(ENABLE_TEST_RADAR_MATH "Enable test for radar_math" ON)
 option(ENABLE_TEST_RADAR_MATRIX "Enable test for radar_matrix" ON)
 
-
 option(ENABLE_TEST_TRACK_KALMAN "Enable test for track_kalman" ON)
 option(ENABLE_TEST_TRACK_TARGETS "Enable test for track_target" ON)
 option(ENABLE_TEST_TRACK_ASSOCIATOR "Enable test for track_associator" ON)
+
+option(ENABLE_TEST_TRACK_DELETER "Enable test for track_DELETER" ON)
 option(ENABLE_TEST_TRACK_INITIATOR "Enable test for track_initiator" ON)
-option(ENABLE_TEST_TRACK_DELETER "Enable test for radar_deleter" ON)
