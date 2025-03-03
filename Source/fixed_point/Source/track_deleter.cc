@@ -31,7 +31,7 @@ void Deleter::update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypo
         LifeCycle &l = target.life_cycle;
         RD_DEBUG("score:%d\n", score);
         RD_DEBUG("lifecycle_score:%d\n", l.score);
-        rd_float_t dt = (h->prediction.timestamp_ms - h->prior_state.timestamp_ms) / 1000; // 计算时间戳差的秒数
+        rd_float_t dt = (rd_float_t)(h->prediction.timestamp_ms - h->prior_state.timestamp_ms) / 1000; // 计算时间戳差的秒数
         RD_DEBUG("dt:%f\n", dt);
         RD_DEBUG("unassociated_score:%d\n", this->unassociated_score);
 
