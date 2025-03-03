@@ -10,7 +10,20 @@
  */
 #include "track_target.hh"
 
-uint32_t TrackedTarget::next_uuid = 0; 
+uint32_t TrackedTarget::next_uuid = 0;
+
+
+void TrackedTargets::delete_invalid_targets()
+{
+    for (TrackedTargets::iterator it = this->begin(); it != this->end();) {
+        if ((*it).life_cycle.score <= 0) {
+            it = this->erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
 
 /**
  * @brief C语言接口

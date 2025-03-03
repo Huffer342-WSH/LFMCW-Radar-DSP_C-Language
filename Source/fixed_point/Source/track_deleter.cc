@@ -16,7 +16,7 @@ void Deleter::delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothe
 
     update_lifecycle(tracked_targets, hypotheses);
 
-    delete_invalid_targets(tracked_targets);
+    tracked_targets.delete_invalid_targets();
 
     return;
 }

@@ -81,6 +81,8 @@ public:
     TrackedTargets() = default;
     ~TrackedTargets() = default;
 
+    void delete_invalid_targets();
+
     static TrackedTargets *cast_from_c(tracked_targets_list_t *targets)
     {
         return (reinterpret_cast<TrackedTargets *>(targets));

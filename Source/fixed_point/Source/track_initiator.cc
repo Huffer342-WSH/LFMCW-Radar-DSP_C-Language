@@ -24,6 +24,10 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
     this->update_lifecycle(unconfirmed_targets, hypotheses);
 
 
+    /* 删除无效目标 */
+    unconfirmed_targets.delete_invalid_targets();
+
+
     /* 将起始成功的目标移动到已跟踪目标列表 */
     this->move_confirmed_targets(tracked_targets, unconfirmed_targets);
 
