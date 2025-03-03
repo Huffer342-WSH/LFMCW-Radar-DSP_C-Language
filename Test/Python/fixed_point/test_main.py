@@ -133,6 +133,12 @@ radar_config.tracker_cfg.sigma_phi = 0.1
 radar_config.tracker_cfg.sigma_r = 0.5
 radar_config.tracker_cfg.sigma_r_dot = 0.1
 radar_config.tracker_cfg.missed_distance = 4
+radar_config.tracker_cfg.unassociated_time = 2.0
+radar_config.tracker_cfg.keep_motion_time = 1.0
+radar_config.tracker_cfg.keep_static_time = 10
+radar_config.tracker_cfg.speed_threshold = 0.05
+radar_config.tracker_cfg.missed_probability = 0.5
+
 
 print(f"雷达初始化参数:\n{radar_init_param}")
 pyRadar.radardsp_init(radar_handle, radar_init_param, radar_config)
@@ -159,11 +165,11 @@ measList = []
 clusterList = []
 timestamp = 0
 for i, frame in enumerate(rdms_list):
-    print(f"第{i}帧", flush=True)
+    # print(f"第{i}帧", flush=True)
     timestamp = int(i * timeFrameFull * 1000)
     set_matrix3d_complex_int16(rdms, frame)
     pyRadar.radardsp_input_new_frame(radar_handle, rdms, timestamp)
-    print(f"第{i}帧输入完成", flush=True)
+    # print(f"第{i}帧输入完成", flush=True)
 
     pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
 
@@ -223,7 +229,7 @@ fig.update_layout(
     yaxis=dict(range=[-1, numChrip + 1]),
     title="点云",
 )
-fig.show()
+fig
 
 # %%
 """计算二维平面点云"""
@@ -258,7 +264,7 @@ fig.update_layout(
     yaxis=dict(range=[-10, 10]),
     title="点云",
 )
-fig.show()
+fig
 
 # %% 绘制一帧数据
 # i = 176

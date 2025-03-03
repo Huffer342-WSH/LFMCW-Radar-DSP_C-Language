@@ -84,7 +84,7 @@ void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Vect
 
 
     /* GNN数据关联 */
-    std::vector<int64_t> a(10), b(10);
+    std::vector<int64_t> a(M), b(M);
     solve_rectangular_linear_sum_assignment(M, M + N, distance_matrix.data(), 0, a.data(), b.data());
 
 
@@ -115,9 +115,11 @@ void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Vect
     for (size_t i = 0; i < M; i++) {
         RADAR_LOG_PRINTF("[%d %d]\n", a[i], b[i]);
     }
+    RADAR_LOG_PRINTF("未使用的测量值:\n");
+    for (int i = 0; i < measurements.size(); i++) {
+        RADAR_LOG_PRINTF("%d:[%f %f %f]\n", i, measurements[i].x(), measurements[i].y(), measurements[i].z());
+    }
 #endif
-
-
     return;
 };
 
@@ -126,7 +128,6 @@ static inline void move_unused_measurements(std::vector<Vector3r> &measurements,
 {
     size_t n = measurements.size();
     std::vector<bool> is_used(n, false); // 位集，初始化全为 false
-
     for (int64_t index : used) {
         if (index >= 0 && index < n) {
             is_used[index] = true;
@@ -142,7 +143,6 @@ static inline void move_unused_measurements(std::vector<Vector3r> &measurements,
             i++;
         }
     }
-
     measurements.resize(i);
 }
 

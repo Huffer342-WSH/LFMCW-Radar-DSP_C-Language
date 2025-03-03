@@ -43,6 +43,11 @@ public:
         for (int i = 0; i < 4; ++i) {
             init_covar(i, i) = 0.1 * 0.1;
         }
+
+        RD_DEBUG("unassociated_time: %f\nkeep_motion_time: %f\nkeep_static_time: %f\nspeed_threshold: %f\nmissed_distance: %f\n"
+                 "unassociated_score: %d\nmotion_score: %d\nstatic_score: %d\n",
+                 unassociated_time, keep_motion_time, keep_static_time, speed_threshold, missed_distance, unassociated_score, motion_score, static_score);
+
         return;
     };
 
