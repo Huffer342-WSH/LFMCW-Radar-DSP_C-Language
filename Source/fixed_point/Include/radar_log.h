@@ -48,45 +48,68 @@ static inline void log_printf(const char *format, ...)
 #endif
 
 
+#ifndef FORCE_ENABLE_LOG
+#define FORCE_ENABLE_LOG 0
+#endif
+
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
-#define RD_LOG(prefix, format, ...) RADAR_LOG_PRINTF("[%s] [%s:%d]\n>>> " format "\r\n", prefix, __FILE__, __LINE__, ##__VA_ARGS__)
+#define RD_PRINTF(format, ...) RADAR_LOG_PRINTF(format, ##__VA_ARGS__)
 #else
-#define RD_LOG(prefix, format, ...)
+#define RD_PRINTF(format, ...)
+#endif
+
+
+#if LOG_LEVEL <= LOG_LEVEL_ASSERT
+#ifdef LOG_NO_PREFIX
+#define RD_LOG(prefix, format, ...) RADAR_LOG_PRINTF(format, ##__VA_ARGS__)
+#else
+#define RD_LOG(prefix, format, ...) RADAR_LOG_PRINTF("[%s] [%s:%d]>>>\n" format "\r\n", prefix, __FILE__, __LINE__, ##__VA_ARGS__)
+#endif
 #endif
 
 
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
 #define RD_DEBUG(format, ...) RD_LOG("DEBUG", format, ##__VA_ARGS__)
 #else
-#define RD_DEBUG(format, ...)
+#define RD_DEBUG(format, ...) \
+    if (FORCE_ENABLE_LOG)     \
+    RD_LOG("DEBUG", format, ##__VA_ARGS__)
 #endif
 
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
 #define RD_INFO(format, ...) RD_LOG("INFO", format, ##__VA_ARGS__)
 #else
-#define RD_INFO(format, ...)
+#define RD_INFO(format, ...) \
+    if (FORCE_ENABLE_LOG)    \
+    RD_LOG("INFO", format, ##__VA_ARGS__)
 #endif
 
 
 #if LOG_LEVEL <= LOG_LEVEL_WARN
 #define RD_WARN(format, ...) RD_LOG("WARN", format, ##__VA_ARGS__)
 #else
-#define RD_WARN(format, ...)
+#define RD_WARN(format, ...) \
+    if (FORCE_ENABLE_LOG)    \
+    RD_LOG("WARN", format, ##__VA_ARGS__)
 #endif
 
 
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
 #define RD_ERROR(format, ...) RD_LOG("ERROR", format, ##__VA_ARGS__)
 #else
-#define RD_ERROR(format, ...)
+#define RD_ERROR(format, ...) \
+    if (FORCE_ENABLE_LOG)     \
+    RD_LOG("ERROR", format, ##__VA_ARGS__)
 #endif
 
 
 #if LOG_LEVEL <= LOG_LEVEL_ASSERT
 #define RD_ASSERT(format, ...) RD_LOG("ASSERT FAILED !!!", format, ##__VA_ARGS__)
 #else
-#define RD_ASSERT(format, ...)
+#define RD_ASSERT(format, ...) \
+    if (FORCE_ENABLE_LOG)      \
+    RD_LOG("ASSERT FAILED !!!", format, ##__VA_ARGS__)
 #endif
 
 

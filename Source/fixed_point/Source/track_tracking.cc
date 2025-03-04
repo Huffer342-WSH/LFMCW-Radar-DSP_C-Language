@@ -53,6 +53,27 @@ void Tracker::track(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed
     /* 航迹起始 */
     this->initiator.initiate(tracked_targets, unconfirmed_targets, measurements, timestamp_ms);
 
+
+#if LOG_LEVEL <= LOG_LEVEL_INFO
+    {
+
+        static uint32_t frame_cnt = 0;
+        frame_cnt++;
+        RD_INFO("第%u帧>>>", frame_cnt);
+        RADAR_LOG_PRINTF("未确定目标\n");
+        for (auto target : unconfirmed_targets) {
+            RADAR_LOG_PRINTF("ID:%lu X:[%f %f %f %f] T:%u Score:%d\n", target.uuid, target.state.state_vector(0), target.state.state_vector(1),
+                             target.state.state_vector(2), target.state.state_vector(3), target.state.timestamp_ms, target.life_cycle.score);
+        }
+        RADAR_LOG_PRINTF("\n已跟踪目标\n");
+        for (auto target : tracked_targets) {
+            RADAR_LOG_PRINTF("ID:%lu X:[%f %f %f %f] T:%u Score:%d\n", target.uuid, target.state.state_vector(0), target.state.state_vector(1),
+                             target.state.state_vector(2), target.state.state_vector(3), target.state.timestamp_ms, target.life_cycle.score);
+        }
+        RADAR_LOG_PRINTF("<<<\n\n", frame_cnt);
+    }
+#endif
+
     return;
 }
 

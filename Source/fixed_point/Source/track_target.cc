@@ -130,6 +130,8 @@ int tracked_target_get_uuid(const tracked_targets_list_node_t node, uint32_t *uu
  * @param target    目标
  * @param state_vector 指向状态向量首地址的指针
  * @return int
+ *
+ * @note 返回的状态向量长度为4，分别为[x,vx,y,vy], 其中x是前后方向，y是左右方向，vx、vy是对应的速度。
  */
 int tracked_target_get_state_vector(const tracked_targets_list_node_t node, rd_float_t **state_vector)
 {
@@ -140,6 +142,15 @@ int tracked_target_get_state_vector(const tracked_targets_list_node_t node, rd_f
 }
 
 
+/**
+ * @brief 返回目标的生命周期分数
+ *
+ * @param node 目标
+ * @param score  分数
+ * @return int
+ *
+ * @note  目标的新建与删除通过维护分数来管理，分数为0时目标被删除。观察分数变化来调整跟踪器的参数
+ */
 int tracked_target_get_score(const tracked_targets_list_node_t node, int32_t *score)
 {
     TrackedTargets::iterator it;

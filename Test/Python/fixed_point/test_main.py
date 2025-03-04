@@ -165,7 +165,7 @@ measList = []
 clusterList = []
 timestamp = 0
 for i, frame in enumerate(rdms_list):
-    # print(f"第{i}帧", flush=True)
+    print(f"\n\n第{i}帧>>>", flush=True)
     timestamp = int(i * timeFrameFull * 1000)
     set_matrix3d_complex_int16(rdms, frame)
     pyRadar.radardsp_input_new_frame(radar_handle, rdms, timestamp)
@@ -189,17 +189,17 @@ for i, frame in enumerate(rdms_list):
         )
     )
     meas = radar_handle.getClusterMeasurements()
-    clusterList.append(
-        np.column_stack(
-            (
-                meas[:]["distance"],
-                meas[:]["velocity"],
-                meas[:]["azimuth"],
-            )
-        )
-    )
-    # print(indicesList[-1])
-    # print(measList[-1])
+    clusterList.append(np.column_stack((meas[:]["distance"], meas[:]["velocity"], meas[:]["azimuth"])))
+
+    # 保存跟踪目标的消息
+    unconfirmed_targets = radar_handle.getUnconfirmedTargets()
+    print("未确定目标：")
+    for target in unconfirmed_targets:
+        print(f"{target.uuid} {target.state.state_vector}")
+    tracked_targets = radar_handle.getTrackedTargets()
+    print("\n\n已跟踪目标：")
+    for target in tracked_targets:
+        print(f"{target.uuid} {target.state.state_vector}")
 
 snr_list = magSpec2D_list / noise_list
 

@@ -39,6 +39,7 @@ typedef struct {
 } tracker_config_t;
 
 typedef struct {
+    uint8_t unused;
 } tracker_handel_t;
 
 
