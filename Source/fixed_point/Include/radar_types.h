@@ -9,6 +9,11 @@
 #include "radar_cluster.h"
 #include "track.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
  */
@@ -78,6 +83,8 @@ typedef struct {
     void (*hook_point_clouds)(const measurements_t *meas);
     void (*hook_point_clouds_filtered)(const measurements_t *meas);
     void (*hook_clusters)(const measurements_t *clusters);
+    void (*hook_unconfirmed_targets)(const tracked_targets_list_t *targets);
+    void (*hook_tracked_targets)(const tracked_targets_list_t *targets);
 } radar_hook_t;
 
 typedef struct {
@@ -94,9 +101,6 @@ typedef struct {
     tracked_targets_list_t *unconfirmed_targets;
 } radar_handle_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param);
 int radar_hook_init(radar_hook_t *hook);

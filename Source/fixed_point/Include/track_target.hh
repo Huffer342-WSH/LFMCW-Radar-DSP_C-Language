@@ -83,9 +83,10 @@ public:
 
     void delete_invalid_targets();
 
-    static TrackedTargets *cast_from_c(tracked_targets_list_t *targets)
+
+    static TrackedTargets *cast_from_c(const tracked_targets_list_t *targets)
     {
-        return (reinterpret_cast<TrackedTargets *>(targets));
+        return (reinterpret_cast<TrackedTargets *>((tracked_targets_list_t *)targets));
     }
 
     tracked_targets_list_t *cast_to_c()

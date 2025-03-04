@@ -34,7 +34,8 @@ typedef struct {
 
     rd_float_t missed_probability;
 
-
+    rd_float_t fov[2];
+    rd_float_t radius_range[2];
 } tracker_config_t;
 
 typedef struct {

@@ -19,12 +19,12 @@ public:
     int32_t unassociated_score;
     std::array<rd_float_t, 2> fov;
     std::array<rd_float_t, 2> radius_range;
-    Deleter(rd_float_t unassociated_time, rd_float_t missed_probability, std::array<rd_float_t, 2> fov, std::array<rd_float_t, 2> radius_range) 
-    : unassociated_time(unassociated_time)
-    , missed_probability(missed_probability)
-    , fov(fov)
-    , radius_range(radius_range)
+    Deleter(rd_float_t unassociated_time, rd_float_t missed_probability, rd_float_t fov[2], rd_float_t radius_range[2])
+        : unassociated_time(unassociated_time)
+        , missed_probability(missed_probability)
     {
+        memcpy(this->fov.data(), fov, this->fov.size() * sizeof(rd_float_t));
+        memcpy(this->radius_range.data(), radius_range, sizeof(rd_float_t) * this->radius_range.size());
         unassociated_score = -this->max_score / this->unassociated_time;
      };
 
@@ -33,8 +33,4 @@ public:
     void update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses);
 
     void delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses);
-
-    void delete_invalid_targets(TrackedTargets &tracked_targets);
-    
 };
-

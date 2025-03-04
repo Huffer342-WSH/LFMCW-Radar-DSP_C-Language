@@ -9,5 +9,5 @@
 
 #define RADAR_ALGORITHM_DESCRIPTION "适用于LFMCW雷达的数据处理算法库，最终希望提供一个可移植的C语言库，输入2D-FFT后的雷达中频信号，输出目标跟踪结果"
 
-#define GIT_HASH "b185431"
-#define GIT_COMMIT_TIME "Sat Mar 1 19:17:07 2025 +0800"
+#define GIT_HASH "d0a8f90"
+#define GIT_COMMIT_TIME "Mon Mar 3 15:45:18 2025 +0800"

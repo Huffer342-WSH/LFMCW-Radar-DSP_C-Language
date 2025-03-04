@@ -257,13 +257,16 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
     }
 
 
-    /*=========================================================================
-        到此为止，信号处理已经结束，得到的是新一帧的目标检测结果
-        接下来主要是完成目标跟踪，也就是把不同帧检测出来的结果前后关联起来，得到一个个目标的运动轨迹
-    =========================================================================*/
-
+    /* 10. 目标跟踪 */
     RD_DEBUG("运行目标跟踪");
     tracker_run(radar->tracker, radar->tracked_targets, radar->unconfirmed_targets, radar->cluster.cluster_meas, timestamp_ms);
+
+    if (radar->hook.hook_unconfirmed_targets != NULL) {
+        radar->hook.hook_unconfirmed_targets(radar->unconfirmed_targets);
+    }
+    if (radar->hook.hook_tracked_targets != NULL) {
+        radar->hook.hook_tracked_targets(radar->tracked_targets);
+    }
 
 
 #if 0

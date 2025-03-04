@@ -61,7 +61,7 @@ void tracked_targets_list_delete(tracked_targets_list_t *list)
  * @param list 被跟踪目标链表
  * @return tracked_target_t*
  */
-tracked_targets_list_node_t tracked_targets_list_first(tracked_targets_list_t *list)
+tracked_targets_list_node_t tracked_targets_list_first(const tracked_targets_list_t *list)
 {
     TrackedTargets *t = TrackedTargets::cast_from_c(list);
     tracked_targets_list_node_t ret;
@@ -71,13 +71,28 @@ tracked_targets_list_node_t tracked_targets_list_first(tracked_targets_list_t *l
 }
 
 
+tracked_targets_list_node_t tracked_targets_list_end(const tracked_targets_list_t *list)
+{
+    TrackedTargets *t = TrackedTargets::cast_from_c(list);
+    tracked_targets_list_node_t ret;
+    TrackedTargets::iterator it = t->end();
+    memcpy(&ret, &it, sizeof(TrackedTargets::iterator));
+    return ret;
+}
+
+size_t tracked_targets_list_size(const tracked_targets_list_t *list)
+{
+    TrackedTargets *t = TrackedTargets::cast_from_c(list);
+    return t->size();
+}
+
 /**
  * @brief 获取当前元素在链表中的下一个元素
  *
  * @param target 目标
  * @return tracked_target_t*
  */
-tracked_targets_list_node_t tracked_targets_list_next(tracked_targets_list_t *list, tracked_targets_list_node_t node)
+tracked_targets_list_node_t tracked_targets_list_next(const tracked_targets_list_t *list, tracked_targets_list_node_t node)
 {
     tracked_targets_list_node_t ret;
     TrackedTargets &t = *TrackedTargets::cast_from_c(list);
@@ -100,7 +115,7 @@ tracked_targets_list_node_t tracked_targets_list_next(tracked_targets_list_t *li
  * @param uuid  ID
  * @return int
  */
-int tracked_target_get_uuid(tracked_targets_list_node_t node, uint32_t *uuid)
+int tracked_target_get_uuid(const tracked_targets_list_node_t node, uint32_t *uuid)
 {
     TrackedTargets::iterator it;
     memcpy(&it, &node, sizeof(TrackedTargets::iterator));
@@ -116,11 +131,21 @@ int tracked_target_get_uuid(tracked_targets_list_node_t node, uint32_t *uuid)
  * @param state_vector 指向状态向量首地址的指针
  * @return int
  */
-int tracked_target_get_state_vector(tracked_targets_list_node_t node, rd_float_t *state_vector)
+int tracked_target_get_state_vector(const tracked_targets_list_node_t node, rd_float_t **state_vector)
 {
     TrackedTargets::iterator it;
     memcpy(&it, &node, sizeof(TrackedTargets::iterator));
-    state_vector = it->state.state_vector.data();
+    *state_vector = it->state.state_vector.data();
     return 0;
 }
+
+
+int tracked_target_get_score(const tracked_targets_list_node_t node, int32_t *score)
+{
+    TrackedTargets::iterator it;
+    memcpy(&it, &node, sizeof(TrackedTargets::iterator));
+    *score = it->life_cycle.score;
+    return 0;
 }
+
+} // extern "C"

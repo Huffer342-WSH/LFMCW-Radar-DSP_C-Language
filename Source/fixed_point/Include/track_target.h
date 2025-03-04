@@ -34,20 +34,21 @@ typedef struct {
 tracked_targets_list_t *tracked_targets_list_new();
 void tracked_targets_list_delete(tracked_targets_list_t *list);
 
-tracked_targets_list_node_t tracked_targets_list_first(tracked_targets_list_t *list);
-tracked_targets_list_node_t tracked_targets_list_next(tracked_targets_list_t *list, tracked_targets_list_node_t node);
+tracked_targets_list_node_t tracked_targets_list_first(const tracked_targets_list_t *list);
+tracked_targets_list_node_t tracked_targets_list_next(const tracked_targets_list_t *list, tracked_targets_list_node_t node);
+tracked_targets_list_node_t tracked_targets_list_end(const tracked_targets_list_t *list);
+size_t tracked_targets_list_size(const tracked_targets_list_t *list);
 
-
-int tracked_target_get_uuid(tracked_targets_list_node_t node, uint32_t *uuid);
-int tracked_target_get_state_vector(tracked_targets_list_node_t node, rd_float_t *state_vector);
-
-
+int tracked_target_get_uuid(const tracked_targets_list_node_t node, uint32_t *uuid);
+int tracked_target_get_state_vector(const tracked_targets_list_node_t node, rd_float_t **state_vector);
+int tracked_target_get_score(const tracked_targets_list_node_t node, int32_t *score);
 /**
  * @brief 遍历链表
  *
  */
-#define FOR_EACH_TARGET(pTarget, pTargets) \
-    for (tracked_targets_list_node_t pTarget = tracked_targets_list_first(pTargets); pTarget.ptr != 0; pTarget = tracked_targets_list_next(pTargets, pTarget))
+#define FOR_EACH_TARGET(pTarget, pTargets)                                                                                      \
+    for (tracked_targets_list_node_t pTarget = tracked_targets_list_first(pTargets), pEnd = tracked_targets_list_end(pTargets); \
+         tracked_targets_list_size(pTargets) > 0 && pTarget.ptr != 0; pTarget = tracked_targets_list_next(pTargets, pTarget))
 
 
 #ifdef __cplusplus
