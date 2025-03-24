@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 #include <pyradar_fixed_radar_types.hh>
 
 #include <stdexcept>
@@ -9,6 +10,7 @@
 #include <list_wrapper.hh>
 
 #include "radar_types.h"
+#include "track_target.hh"
 
 
 namespace py = pybind11;
@@ -136,6 +138,8 @@ void bind_radar_basic_data(pybind11::module_ &m)
 }
 
 
+PYBIND11_MAKE_OPAQUE(std::list<TrackedTarget>)
+
 void bind_radar_handle(pybind11::module_ &m)
 {
     pybind11::class_<radar_handle_t>(m, "radar_handle")
@@ -145,6 +149,28 @@ void bind_radar_handle(pybind11::module_ &m)
         .def_readwrite("config", &radar_handle_t::config)
         .def_readwrite("basic", &radar_handle_t::basic)
         .def_readwrite("cfar", &radar_handle_t::cfar)
+        .def(
+            "getTrackedTargets",
+            [](radar_handle_t &self) {
+                TrackedTargets *t = TrackedTargets::cast_from_c(self.tracked_targets);
+                std::vector<TrackedTarget> vec;
+                for (const auto &target : *t) {
+                    vec.push_back(target);
+                }
+                return vec;
+            },
+            "Get a copy of the 2D magnitude spectrum.")
+        .def(
+            "getUnconfirmedTargets",
+            [](radar_handle_t &self) {
+                TrackedTargets *t = TrackedTargets::cast_from_c(self.unconfirmed_targets);
+                std::vector<TrackedTarget> vec;
+                for (const auto &target : *t) {
+                    vec.push_back(target);
+                }
+                return vec;
+            },
+            "Get a copy of the 2D magnitude spectrum.")
         .def(
             "getMagSpec2D",
             [](radar_handle_t &self) {

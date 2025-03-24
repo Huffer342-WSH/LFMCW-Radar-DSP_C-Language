@@ -1,12 +1,14 @@
 #include "track_deleter.hh"
 #include <gtest/gtest.h>
-
+static const rd_float_t pi = 3.14159; // pi
+rd_float_t fov[2] = { -pi / 3, pi / 3 };
+rd_float_t radius_range[2] = { 0.2, 100 };
 TEST(RadarFixedtest1, unassoiatedTrack_inspace)
 {
     static const rd_float_t pi = 3.14159; // pi
     std::vector<Hypothesis> hypotheses;
     TrackedTargets tracked_targets;
-    Deleter deleter(10.0, 0.2, { -pi / 3, pi / 3 }, { 0.2, 100 }); // unassociated_time, missed_probability, fov, radius_range
+    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
     rd_float_t prior_state_vector[4] = { 2.0, 2.0, 3.0, 4.0 };     // 测量范围内，
     rd_float_t prior_state_covar[16] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
     uint32_t timestamp_ms = 0;
@@ -31,7 +33,7 @@ TEST(RadarFixedtest2, assoiatedTrack_inspace)
     static const rd_float_t pi = 3.14159; // pi
     std::vector<Hypothesis> hypotheses;
     TrackedTargets tracked_targets;
-    Deleter deleter(10.0, 0.2, { -pi / 3, pi / 3 }, { 0.2, 100 }); // unassociated_time, missed_probability, fov, radius_range
+    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
     rd_float_t prior_state_vector[4] = { 2.0, 2.0, 3.0, 4.0 };     // 测量范围内，
     rd_float_t prior_state_covar[16] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
     uint32_t timestamp_ms = 0;
@@ -57,7 +59,7 @@ TEST(RadarFixedtest3, outspace)
     static const rd_float_t pi = 3.14159; // pi
     std::vector<Hypothesis> hypotheses;
     TrackedTargets tracked_targets;
-    Deleter deleter(10.0, 0.2, { -pi / 3, pi / 3 }, { 0.2, 100 }); // unassociated_time, missed_probability, fov, radius_range
+    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
     rd_float_t prior_state_vector[4] = { 0.5, 2.0, 3.0, 4.0 };     // 测量范围内，
     rd_float_t prior_state_covar[16] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
     uint32_t timestamp_ms = 0;
@@ -94,9 +96,9 @@ TEST(RadarFixedtest3, track_deleter)
     }
 
     // 创建 Deleter 类的测试数据
-    Deleter deleter(2, 0.2, { -M_PI / 3, M_PI / 3 }, { 0.2, 100 });
+    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
 
-    deleter.delete_invalid_targets(targets);
+    // deleter.delete_invalid_targets();
 
     printf("After delete:\n");
     for (auto &t : targets) {

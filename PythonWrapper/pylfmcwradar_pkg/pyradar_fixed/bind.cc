@@ -4,6 +4,8 @@
 #include "pyradar_fixed_radar_types.hh"
 #include "pyradar_fixed_radar_cluster.hh"
 
+#include "pyradar_fixed_track_kalman.hh"
+#include "pyradar_fixed_track_target.hh"
 #include "pyradar_fixed_track.hh"
 
 PYBIND11_MODULE(pyradar_fixed, m)
@@ -12,6 +14,8 @@ PYBIND11_MODULE(pyradar_fixed, m)
     bind_radar_matrix(m);
     bind_cfar(m);
 
+    bind_tracker_kalmen(m);
+    bind_track_target(m);
     bind_track(m);
 
     bind_radar_types(m);

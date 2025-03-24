@@ -1,6 +1,7 @@
 #include "pyradar_fixed_track.hh"
-
+#include "matrix_wrapper.hh"
 #include "track.h"
+#include "track_target.h"
 
 
 void bind_tracker_config(pybind11::module_ &m)
@@ -25,6 +26,7 @@ void bind_tracker_config(pybind11::module_ &m)
                    ", speed_threshold=" + std::to_string(cfg.speed_threshold) + ", missed_probability=" + std::to_string(cfg.missed_probability) + ">";
         });
 }
+
 
 void bind_track(pybind11::module_ &m)
 {

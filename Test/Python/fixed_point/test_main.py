@@ -169,7 +169,6 @@ for i, frame in enumerate(rdms_list):
     timestamp = int(i * timeFrameFull * 1000)
     set_matrix3d_complex_int16(rdms, frame)
     pyRadar.radardsp_input_new_frame(radar_handle, rdms, timestamp)
-    # print(f"第{i}帧输入完成", flush=True)
 
     pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
 
@@ -177,17 +176,15 @@ for i, frame in enumerate(rdms_list):
     magSpec2DRef_list[i] = np.sum(np.abs(frame) * np.sqrt(2**25), axis=0)
     noise_list[i] = noise_buffer.data.copy()
     count = radar_handle.cfar.numPoint
+
+    # CFAR结果
     indicesList.append(np.column_stack((radar_handle.cfar.point[:count]["idx0"], radar_handle.cfar.point[:count]["idx1"])))
+
+    # 测量值
     meas = radar_handle.getMeasurements()
-    measList.append(
-        np.column_stack(
-            (
-                meas[:]["distance"],
-                meas[:]["velocity"],
-                meas[:]["azimuth"],
-            )
-        )
-    )
+    measList.append(np.column_stack((meas[:]["distance"], meas[:]["velocity"], meas[:]["azimuth"])))
+
+    # 聚类后测量值
     meas = radar_handle.getClusterMeasurements()
     clusterList.append(np.column_stack((meas[:]["distance"], meas[:]["velocity"], meas[:]["azimuth"])))
 
@@ -195,11 +192,12 @@ for i, frame in enumerate(rdms_list):
     unconfirmed_targets = radar_handle.getUnconfirmedTargets()
     print("未确定目标：")
     for target in unconfirmed_targets:
-        print(f"{target.uuid} {target.state.state_vector}")
+        print(f"ID:{target.uuid} X:{target.state.state_vector} T:{target.state.timestamp_ms} Score:{target.life_cycle.score}")
     tracked_targets = radar_handle.getTrackedTargets()
-    print("\n\n已跟踪目标：")
+    print("\n已跟踪目标：")
     for target in tracked_targets:
-        print(f"{target.uuid} {target.state.state_vector}")
+        print(f"ID:{target.uuid} X:{target.state.state_vector} T:{target.state.timestamp_ms} Score:{target.life_cycle.score}")
+    print("<<<\n")
 
 snr_list = magSpec2D_list / noise_list
 
@@ -274,4 +272,4 @@ fig
 # go.Figure(data=[go.Surface(z=snr_list[i])]).show()
 
 
-# %%
+# %% 绘制跟踪结果
