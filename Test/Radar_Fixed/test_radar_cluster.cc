@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "radar_cluster.h"
+#include <radar/sp/fixed_point/radar_cluster.h>
 
 #include <iostream>
 #include <iomanip>

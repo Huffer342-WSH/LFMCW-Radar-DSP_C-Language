@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "radar_matrix.h"
+#include <radar/sp/fixed_point/radar_matrix.h>
 
 #include <iostream>
 #include <iomanip>

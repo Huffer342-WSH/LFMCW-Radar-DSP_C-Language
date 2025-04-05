@@ -1,4 +1,4 @@
-#include "radar_mag.h"
+#include <radar/sp/fixed_point/radar_mag.h>
 #include <gtest/gtest.h>
 #include <cmath>
 #include <cstdint>

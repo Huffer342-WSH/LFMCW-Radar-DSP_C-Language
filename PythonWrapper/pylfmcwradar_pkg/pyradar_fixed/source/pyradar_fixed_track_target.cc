@@ -1,5 +1,5 @@
 #include "pyradar_fixed_track_target.hh"
-#include "track_target.hh"
+#include <radar/ot/track_target.hh>
 
 namespace py = pybind11;
 

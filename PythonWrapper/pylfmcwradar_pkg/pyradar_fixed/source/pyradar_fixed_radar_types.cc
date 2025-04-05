@@ -9,8 +9,8 @@
 #include <matrix_wrapper.hh>
 #include <list_wrapper.hh>
 
-#include "radar_types.h"
-#include "track_target.hh"
+#include <radar/app/radar_types_fixed.h>
+#include <radar/ot/track_target.hh>
 
 
 namespace py = pybind11;

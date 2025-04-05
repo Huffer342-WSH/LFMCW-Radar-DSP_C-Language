@@ -3,7 +3,7 @@
 
 #include "matrix_wrapper.hh"
 
-#include "radar_matrix.h"
+#include <radar/sp/fixed_point/radar_matrix.h>
 
 
 void bind_matrix3d_complex_int16(pybind11::module_ &m)

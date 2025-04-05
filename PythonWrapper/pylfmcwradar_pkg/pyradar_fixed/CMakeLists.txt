@@ -18,7 +18,7 @@ target_include_directories(pyradar_fixed PRIVATE
 )
 
 target_link_libraries(pyradar_fixed PRIVATE
-    lfmcwradar_fixed
+    RadarDP_Fixed
 )
 
 set_target_properties(pyradar_fixed

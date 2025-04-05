@@ -7,13 +7,14 @@ project(LFMCWRadarProcesser VERSION 0.2.0
 # 可修改选项
 option(CROSS_COMPILE "使能交叉编译" OFF)
 option(BUILD_DOCUMENT "生成文档" OFF)
+option(BUILD_TEST "编译测试" ON)
+option(BUILD_PythonWrapper "编译Python封装" ON)
+set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Portable" CACHE STRING "Path to RadarConfig.h")
+
 
 if(CROSS_COMPILE)
-    option(BUILD_TEST "编译测试" OFF)
-    option(BUILD_PythonWrapper "编译Python封装" OFF)
-else()
-    option(BUILD_TEST "编译测试" ON)
-    option(BUILD_PythonWrapper "编译Python封装" ON)
+    set(BUILD_TEST OFF)
+    set(BUILD_PythonWrapper OFF)
 endif()
 
 # 设置 C++ 标准
@@ -40,15 +41,17 @@ include(configAddressSanitizer) # 测试中使用了AddressSanitizer
 # 设置 MSVC 编译选项
 include(msvc_compile_options) # 解决CMake使用MSVC的Bug
 
+if(BUILD_PythonWrapper)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 # 编译依赖库
 add_subdirectory(ThirdParty)
 
 # 编译雷达信号处理库
-add_subdirectory(Source)
+add_subdirectory(Core)
 
 if(BUILD_PythonWrapper)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
     # 设置虚拟环境的 Python 路径（假设虚拟环境路径为 venv）
     include(configPython)
 
@@ -72,5 +75,5 @@ endif()
 
 # 构建文档
 if(BUILD_DOCUMENT)
-add_subdirectory(Doc)
+    add_subdirectory(Doc)
 endif()

@@ -3,8 +3,9 @@
 
 #include "matrix_wrapper.hh"
 
-#include "radar_types.h"
-#include "radar_processer.h"
+#include <radar/app/radar_types_fixed.h>
+#include <radar/sp/fixed_point/radar_processer.h>
+#include
 
 namespace py = pybind11;
 

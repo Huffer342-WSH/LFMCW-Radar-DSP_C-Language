@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "radar_math.h"
+#include <radar/sp/fixed_point/radar_math.h>
 
 #include <iostream>
 #include <iomanip>

@@ -1,5 +1,5 @@
 #include "pyradar_fixed_radar_cfar.hh"
-#include "radar_cfar.h"
+#include <radar/sp/fixed_point/radar_cfar.h>
 
 #include <matrix_wrapper.hh>
 #include <list_wrapper.hh>

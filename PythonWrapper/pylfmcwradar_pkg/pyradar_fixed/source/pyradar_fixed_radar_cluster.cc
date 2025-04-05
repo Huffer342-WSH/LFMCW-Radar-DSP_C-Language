@@ -1,5 +1,5 @@
 #include "pyradar_fixed_radar_cluster.hh"
-#include "radar_cluster.h"
+#include <radar/sp/fixed_point/radar_cluster.h>
 
 #include <matrix_wrapper.hh>
 #include <list_wrapper.hh>

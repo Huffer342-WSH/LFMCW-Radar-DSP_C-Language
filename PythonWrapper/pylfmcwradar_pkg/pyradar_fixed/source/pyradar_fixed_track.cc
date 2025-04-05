@@ -1,7 +1,7 @@
 #include "pyradar_fixed_track.hh"
 #include "matrix_wrapper.hh"
-#include "track.h"
-#include "track_target.h"
+#include <radar/ot/track.h>
+#include <radar/ot/track_target.h>
 
 
 void bind_tracker_config(pybind11::module_ &m)

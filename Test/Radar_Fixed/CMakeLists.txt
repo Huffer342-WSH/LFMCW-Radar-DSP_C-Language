@@ -1,4 +1,4 @@
-set(public_libraries lfmcwradar_fixed GTest::gtest_main ${ADDRESSSANITIZER_LINKER_FLAGS})
+set(public_libraries RadarDP_Fixed GTest::gtest_main ${ADDRESSSANITIZER_LINKER_FLAGS})
 
 
 

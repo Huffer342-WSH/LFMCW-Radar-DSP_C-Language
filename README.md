@@ -12,39 +12,51 @@
 
 **文件结构**：
 ```
-├──.output                  # 生成的可执行文件和库文件
-├──.venv                    # Python虚拟环境
-├──.vscode                  # VSCode配置
-├──Data                     # 测试数据
-├──Doc                      # 文档
-├──PythonWrapper            # C语言静态库封装成Python模块
-│   └── pylfmcwradar_pkg    # Python模块源代码
-│       ├── include         # 公共头文件，提供封装数据结构用的模板
-│       ├── pyradar_fixed   # 定点数版本封装源代码
-│       └── pyradar_float   # 浮点数版本模块源代码
-├──Source                   # C语言源码
-│  ├──fixed_point           # 定点数版本，当前继续该版本用于Cortex-M0平台
-│  └──float_point           # 浮点数版本
-├──Test                     # 测试程序，测试部分函数以及静态库
+.
+├──.output                      # 生成的可执行文件和库文件
+├──.venv                        # Python虚拟环境
+├──.vscode                      # VSCode配置
+├── CMake                       # CMake配置文件
+│   └── template    
+├── Core                        # 雷达算法核心部分
+│   ├── Include                 ## 头文件
+│   │   └── radar   
+│   ├── Portable                ## 移植时需要修改的文件
+│   └── Source                  ## 源文件
+│       ├── app                 #### 应用层
+│       ├── common              #### 公共部分
+│       ├── object_tracking     #### 目标跟踪
+│       └── signal_processing   #### 信号处理
+|
+├──Data                         # 测试数据
+├──Doc                          # 文档
+├──PythonWrapper                # C语言静态库封装成Python模块
+│   └── pylfmcwradar_pkg        ## Python模块源代码
+│       ├── include             ### 公共头文件，提供封装数据结构用的模板
+│       ├── pyradar_fixed       ### 定点数版本封装源代码
+│       └── pyradar_float       ### 浮点数版本模块源代码
+|
+├──Test                         # 测试程序，测试部分函数以及静态库
 │   ├── CMSIS-DSP
 │   ├── FFTW
-│   ├── Python              # Python模块测试
-│   └── Radar_Fixed         # 雷达算法库点数版本的C语言测试
-└──ThirdParty    # 第三方库
-    ├── CMSIS-DSP           # 适合ARM的DSP函数
-    ├── eigen-3.4.0         # 矩阵运算（卡尔曼滤波基于Eigen实现）
-    ├── googletest-1.15.2   # C++测试框架
-    ├── pybind11-2.13.6     # 封装C语言代码成Python模块
+│   ├── Python                  ## Python模块测试
+│   └── Radar_Fixed             ## 雷达算法库点数版本的C语言测试
+|
+└──ThirdParty                   # 第三方库   
+    ├── CMSIS-DSP               ## 适合ARM的DSP函数
+    ├── eigen-3.4.0             ## 矩阵运算（卡尔曼滤波基于Eigen实现）
+    ├── googletest-1.15.2       ## C++测试框架
+    ├── pybind11-2.13.6         ## 封装C语言代码成Python模块
     └── ...
 ```
 
 ## 2. 使用该项目
 
-[《构建与使用.md》](.Doc/构建与使用.md)
+[《构建与使用.md》](./Doc/构建与使用.md)
 
 ## 3. Git代码管理
 
-[《Git代码管理》](Doc/Git代码管理.md)
+[《Git代码管理》](./Doc/Git代码管理.md)
 
 ## 4. 开发进度
 

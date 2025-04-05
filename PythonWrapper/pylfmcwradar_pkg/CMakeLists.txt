@@ -7,4 +7,4 @@ set(PUBLIC_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(pyradar_fixed)
 
-add_subdirectory(pyradar_float)
+# add_subdirectory(pyradar_float)

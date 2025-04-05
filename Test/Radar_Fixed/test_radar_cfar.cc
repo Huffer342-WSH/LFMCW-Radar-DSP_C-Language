@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "radar_cfar.h"
+#include <radar/sp/fixed_point/radar_cfar.h>
 
 #include <iostream>
 #include <iomanip>
