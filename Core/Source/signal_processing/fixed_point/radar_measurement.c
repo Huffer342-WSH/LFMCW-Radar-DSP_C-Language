@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stc/cbits.h>
+#include <radar/lib/bitset.h>
 
 /**
  * @brief 分配一个量测值列表，可容纳capacity个量测值
@@ -256,7 +256,7 @@ int radar_measure_delete_obscured(measurements_t *meas, int32_t r)
     r = abs(r);
 
     const size_t n = meas->num;
-    cbits mask = cbits_with_size(n, true);
+    bitset_t *mask = bitset_new(n, true);
 
     for (size_t i = 0; i < n; i++) {
         int32_t occluded_angle_range = INT32_MAX;
@@ -272,20 +272,20 @@ int radar_measure_delete_obscured(measurements_t *meas, int32_t r)
                 int32_t angle_diff = (int32_t)a->azimuth - (int32_t)b->azimuth;
                 angle_diff = abs(angle_diff);
                 if (occluded_angle_range > angle_diff) {
-                    cbits_reset(&mask, j);
+                    bitset_reset(mask, j);
                 }
             }
         }
     }
     size_t numPoint = 0;
     for (size_t i = 0; i < n; i++) {
-        if (cbits_test(&mask, i)) {
+        if (bitset_test(mask, i)) {
             if (numPoint != i)
                 meas->data[numPoint] = meas->data[i];
             numPoint++;
         }
     }
     meas->num = numPoint;
-    cbits_drop(&mask);
+    bitset_delete(mask);
     return 0;
 }

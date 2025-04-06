@@ -5,7 +5,6 @@ add_library(RadarDP_SigProc_fixed STATIC)
 
 target_link_libraries(RadarDP_SigProc_fixed_objs PUBLIC
     CMSISDSP
-    stc
     RadarDP_Common
 )
 

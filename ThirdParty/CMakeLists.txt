@@ -9,7 +9,6 @@ else()
     add_subdirectory(CMSIS-DSP/Source EXCLUDE_FROM_ALL)
 endif()
 
-add_subdirectory(STC-4.2 EXCLUDE_FROM_ALL)
 add_subdirectory(eigen-3.4.0 EXCLUDE_FROM_ALL)
 add_subdirectory(scipy EXCLUDE_FROM_ALL)
 

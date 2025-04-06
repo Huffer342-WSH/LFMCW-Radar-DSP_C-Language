@@ -9,7 +9,7 @@ option(CROSS_COMPILE "使能交叉编译" OFF)
 option(BUILD_DOCUMENT "生成文档" OFF)
 option(BUILD_TEST "编译测试" ON)
 option(BUILD_PythonWrapper "编译Python封装" ON)
-set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Portable" CACHE STRING "Path to RadarConfig.h")
+set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Core/Portable" CACHE STRING "Path to RadarConfig.h")
 
 
 if(CROSS_COMPILE)

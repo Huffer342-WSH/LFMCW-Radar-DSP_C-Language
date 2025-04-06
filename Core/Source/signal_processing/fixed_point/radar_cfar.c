@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <stc/cbits.h>
+#include <radar/lib/bitset.h>
 
 static inline int unwrapper_neg(int x, int n);
 static inline int wrap_pos(int x, int n);
@@ -374,7 +374,7 @@ int radar_cfar_result_filtering(cfar2d_result_t *res, const cfar2d_filter_cfg_t 
 {
     const size_t n = res->numPoint;
     cfar2d_point_t *p = res->point;
-    cbits mask = cbits_with_size(n, true);
+    bitset_t *mask = bitset_new(n, true);
     int32_t r_q16 = div_i32q16_i32q16(1 << 16, (int32_t)(cfg->th * (1 << 16)));
     for (size_t i = 0; i < n; i++) {
         cfar2d_point_t *a = &p[i];
@@ -396,7 +396,7 @@ int radar_cfar_result_filtering(cfar2d_result_t *res, const cfar2d_filter_cfg_t 
             }
             if (diff <= cfg->range1) {
                 if (ar_q16 < ((int64_t)b->amp << 16)) {
-                    cbits_reset(&mask, i);
+                    bitset_reset(mask, i);
                     break;
                 }
             }
@@ -405,14 +405,14 @@ int radar_cfar_result_filtering(cfar2d_result_t *res, const cfar2d_filter_cfg_t 
     /* 删除掉不满足条件的点 */
     size_t numPoint = 0;
     for (size_t i = 0; i < n; i++) {
-        if (cbits_test(&mask, i)) {
+        if (bitset_test(mask, i)) {
             if (numPoint != i)
                 p[numPoint] = p[i];
             numPoint++;
         }
     }
     res->numPoint = numPoint;
-    cbits_drop(&mask);
+    bitset_delete(mask);
     return 0;
 }
 
