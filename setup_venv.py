@@ -19,6 +19,7 @@ REQUIRED_PACKAGES = [
     "moviepy",
     "plotly",
     "scikit-learn",
+    "stonesoup"
 ]
 
 

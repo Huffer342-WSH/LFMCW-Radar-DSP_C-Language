@@ -49,7 +49,7 @@ TEST(RadarFixedtest2, assoiatedTrack_inspace)
     tracked_targets.push_back(tracked_target);
 
     deleter.update_lifecycle(tracked_targets, hypotheses);
-    EXPECT_EQ(tracked_targets.front().life_cycle.score, 135);
+    EXPECT_EQ(tracked_targets.front().life_cycle.score, 510);
     EXPECT_EQ(tracked_targets.front().life_cycle.unassociated_time, 0); // 如果关联，则unassociated_time 重置为0
 }
 

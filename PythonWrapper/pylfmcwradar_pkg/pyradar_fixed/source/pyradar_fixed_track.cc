@@ -3,6 +3,8 @@
 #include <radar/ot/track.h>
 #include <radar/ot/track_target.h>
 
+#include "pybind11/stl.h"
+
 
 void bind_tracker_config(pybind11::module_ &m)
 {
@@ -18,6 +20,22 @@ void bind_tracker_config(pybind11::module_ &m)
         .def_readwrite("keep_static_time", &tracker_config_t::keep_static_time)
         .def_readwrite("speed_threshold", &tracker_config_t::speed_threshold)
         .def_readwrite("missed_probability", &tracker_config_t::missed_probability)
+        .def_property(
+            "fov",
+            [](tracker_config_t &self) {
+                return array_c2numpy<rd_float_t>(self.fov, { 2 });
+            },
+            [](tracker_config_t &self, pybind11::array &arr) {
+                array_numpy2c<rd_float_t>(self.fov, arr, { 2 });
+            })
+        .def_property(
+            "radius_range",
+            [](tracker_config_t &self) {
+                return array_c2numpy<rd_float_t>(self.radius_range, { 2 });
+            },
+            [](tracker_config_t &self, pybind11::array &arr) {
+                array_numpy2c<rd_float_t>(self.radius_range, arr, { 2 });
+            })
         .def("__repr__", [](const tracker_config_t &cfg) {
             return "<TrackerConfig velocity_noise_coef=" + std::to_string(cfg.velocity_noise_coef) + ", sigma_phi=" + std::to_string(cfg.sigma_phi) +
                    ", sigma_r=" + std::to_string(cfg.sigma_r) + ", sigma_r_dot=" + std::to_string(cfg.sigma_r_dot) +
