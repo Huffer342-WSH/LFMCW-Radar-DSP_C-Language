@@ -167,6 +167,7 @@ static int cb_set_track_meas(rd_float_t *meas, size_t capacity, void *args)
         *dst++ = (rd_float_t)(src->data[i].distance) / (rd_float_t)(1000.0);
         *dst++ = (rd_float_t)(src->data[i].velocity) / (rd_float_t)(1000.0);
     }
+    return 0;
 }
 
 /**
