@@ -19,11 +19,10 @@ extern "C" {
  * @brief 雷达参数，主要包含指波形和采样等只读的参数
  */
 typedef struct _radar_param_t {
-    rd_float_t wavelength;   ///< 单位:m 雷达波长，24GHz雷达波长为 12.42663038e-3
-    rd_float_t bandwidth;    ///< 单位:Hz 雷达有效带宽
-    rd_float_t timeChirp;    ///< 单位:s
-    rd_float_t timeChirpGap; ///< 单位:s
-    rd_float_t timeFrameGap; ///< 单位:s
+    rd_float_t wavelength;      ///< 单位:m 雷达波长，24GHz雷达波长为 12.42663038e-3
+    rd_float_t bandwidth;       ///< 单位:Hz 雷达有效带宽
+    rd_float_t timeChirpPeriod; ///< 单位:s Chirp周期
+    rd_float_t timeFramePeriod; ///< 单位:s 帧周期
 
     uint16_t numChannel;  ///< 雷达通道数
     uint16_t numSample;   ///< 采样点数
@@ -32,12 +31,10 @@ typedef struct _radar_param_t {
 
 
     /* 以下参数位衍生参数，有上方参数计算得到，用于方便计算 */
-    rd_float_t timeChirpFull;
-    rd_float_t timeFrameVaild; ///< 单位:s 一帧的有效时间
-    rd_float_t timeFrameTotal; ///< 单位:s 一帧的有效时间
-    int32_t resRange;          ///< 单位:m 距离分辨率
-    int32_t resVelocity;       ///< 单位:m/s 速度分辨率
-    int32_t lambda_over_d_q15; ///< 波长/天线间距,Q16.15定点数
+    rd_float_t timeFrameDuration; ///< 单位:s 帧有效时长
+    int32_t resRange;             ///< 单位:m 距离分辨率
+    int32_t resVelocity;          ///< 单位:m/s 速度分辨率
+    int32_t lambda_over_d_q15;    ///< 波长/天线间距,Q16.15定点数
 } radar_param_t;
 
 typedef struct {
@@ -109,6 +106,8 @@ int radar_cluster_init(radar_cluster_t *cluster, size_t num_frame, size_t num_me
 
 void radar_basic_data_deinit(radar_basic_data_t *basic);
 void radar_cluster_deinit(radar_cluster_t *cluster);
+
+void radar_set_timeChirpPeriod(radar_handle_t *radar, float timeChirpPeriod);
 
 
 #ifdef __cplusplus

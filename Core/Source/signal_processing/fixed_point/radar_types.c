@@ -117,3 +117,11 @@ void default_hook_clusters(const measurements_t *clusters)
 {
     (void)clusters;
 }
+
+
+void radar_set_timeChirpPeriod(radar_handle_t *radar, float timeChirpPeriod)
+{
+    radar->param.timeChirpPeriod = timeChirpPeriod;
+    radar->param.timeFrameDuration = radar->param.numChirp * radar->param.timeChirpPeriod;
+    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameDuration) * 1000;
+}

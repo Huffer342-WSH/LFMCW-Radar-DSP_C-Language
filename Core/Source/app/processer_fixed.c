@@ -52,18 +52,15 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
     /* 设置参数 */
     radar->param.wavelength = param->wavelength;
     radar->param.bandwidth = param->bandwidth;
-    radar->param.timeChirp = param->timeChirp;
-    radar->param.timeChirpGap = param->timeChirpGap;
-    radar->param.timeFrameGap = param->timeFrameGap;
+    radar->param.timeChirpPeriod = param->timeChirpPeriod;
+    radar->param.timeFramePeriod = param->timeFramePeriod;
     radar->param.numChannel = param->numChannel;
     radar->param.numRangeBin = param->numRangeBin;
     radar->param.numChirp = param->numChirp;
 
-    radar->param.timeChirpFull = radar->param.timeChirp + radar->param.timeChirpGap;
-    radar->param.timeFrameVaild = radar->param.numChirp * radar->param.timeChirpFull;
-    radar->param.timeFrameTotal = radar->param.timeFrameVaild + radar->param.timeFrameGap;
+    radar->param.timeFrameDuration = radar->param.numChirp * radar->param.timeChirpPeriod;
     radar->param.resRange = 149896229.0 / radar->param.bandwidth * 1000;
-    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 1000;
+    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameDuration) * 1000;
     radar->param.lambda_over_d_q15 = radar->param.wavelength / param->rx_antenna_spacing * ((int32_t)1 << 15);
 
     /* 设置配置 */
@@ -77,7 +74,7 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
     }
 
     /* 初始化微动检测 */
-    status = radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFrameTotal));
+    status = radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFramePeriod));
     if (status != 0) {
         status = 2;
         goto RADARDSP_INIT_FAILED2;

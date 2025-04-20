@@ -21,9 +21,8 @@ typedef struct {
     float wavelength;             ///< m, 波长
     float bandwidth;              ///< Hz, 带宽
     float rx_antenna_spacing;     ///< m, 接收天线间距
-    float timeChirp;              ///< s, Chirp调频时长
-    float timeChirpGap;           ///< s, Chirp间距，从一个Chirp结束到下一个Chirp开始
-    float timeFrameGap;           ///< s. 帧间距，从一个帧结束到下一个帧开始
+    float timeChirpPeriod;        ///< s, Chirp周期，两个Chirp头部之间的时长
+    float timeFramePeriod;        ///< s, 帧周期，两个Frame头部之间的时长
     uint16_t numChannel;          ///< 雷达通道数
     uint16_t numRangeBin;         ///< 距离单元数
     uint16_t numChirp;            ///< Chirp数
