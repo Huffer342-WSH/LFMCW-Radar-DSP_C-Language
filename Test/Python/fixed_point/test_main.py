@@ -30,16 +30,16 @@ c = scipy.constants.c
 frequency = mat["frequency"][0, 0]
 wavelength = c / frequency
 bandwidth = mat["bandwidth"][0, 0]
-timeChrip = mat["timeChrip"][0, 0]
-timeChripGap = mat["timeChripGap"][0, 0]
+timeChirp = mat["timeChirp"][0, 0]
+timeChirpGap = mat["timeChirpGap"][0, 0]
 timeFrameGap = mat["timeFrameGap"][0, 0]
 numPoint = mat["numPoint"][0, 0]
 numRangeBin = 25
-numChrip = mat["numChrip"][0, 0]
+numChirp = mat["numChirp"][0, 0]
 numChannel = mat["numChannel"][0, 0]
 numFrame = len(mat["radarDataCube"])
 
-timeFrameFull = (timeChrip + timeChripGap) * numChrip + timeFrameGap
+timeFrameFull = (timeChirp + timeChirpGap) * numChirp + timeFrameGap
 
 rdms_list = fft(fft(mat["radarDataCube"], axis=-1)[:, :, :, :numRangeBin], axis=-2).transpose(0, 1, 3, 2)
 rdms_list = rdms_list * (2**15 - 1) / np.max(np.abs(rdms_list))
@@ -53,12 +53,12 @@ rdms_list.imag = rdms_list.imag.astype(np.int16)
 # frequency = 24.125e9
 # wavelength = c / frequency
 # bandwidth = 245e6
-# timeChrip = mat["timeChrip"][0, 0]
-# timeChripGap = mat["timeChripGap"][0, 0]
+# timeChirp = mat["timeChirp"][0, 0]
+# timeChirpGap = mat["timeChirpGap"][0, 0]
 # timeFrameGap = mat["timeFrameGap"][0, 0]
 # numPoint = mat["numSample"][0, 0]
 # numRangeBin = mat["numRangeBin"][0, 0]
-# numChrip = mat["numChrip"][0, 0]
+# numChirp = mat["numChirp"][0, 0]
 # numChannel = mat["numChannel"][0, 0]
 # numFrame = len(mat["RDM"])
 
@@ -73,16 +73,16 @@ rdms_list.imag = rdms_list.imag.astype(np.int16)
 # frequency = 24.125e9
 # wavelength = c / frequency
 # bandwidth = 245e6
-# timeChrip = mat["timeChrip"][0, 0]
-# timeChripGap = mat["timeChripGap"][0, 0]
+# timeChirp = mat["timeChirp"][0, 0]
+# timeChirpGap = mat["timeChirpGap"][0, 0]
 # timeFrameGap = mat["timeFrameGap"][0, 0]
 # numPoint = mat["numSample"][0, 0]
 # numRangeBin = mat["numRangeBin"][0, 0]
-# numChrip = mat["numChrip"][0, 0]
+# numChirp = mat["numChirp"][0, 0]
 # numChannel = mat["numChannel"][0, 0]
 # numFrame = len(mat["RDM"])
 
-# timeFrameFull = (timeChrip + timeChripGap) * numChrip + timeFrameGap
+# timeFrameFull = (timeChirp + timeChirpGap) * numChirp + timeFrameGap
 
 
 # rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
@@ -94,19 +94,19 @@ pi = 3.14159
 pi = 3.14159
 radar_init_param = pyRadar.radar_init_param()
 radar_handle = pyRadar.radar_handle()
-rdms = pyRadar.matrix3d_complex_int16_alloc(numChannel, numRangeBin, numChrip)
-noise_buffer = pyRadar.matrix2d_int32_alloc(numRangeBin, numChrip)
+rdms = pyRadar.matrix3d_complex_int16_alloc(numChannel, numRangeBin, numChirp)
+noise_buffer = pyRadar.matrix2d_int32_alloc(numRangeBin, numChirp)
 
 
 radar_init_param.wavelength = wavelength
 radar_init_param.bandwidth = bandwidth
 radar_init_param.rx_antenna_spacing = 6.25e-3
-radar_init_param.timeChrip = timeChrip
-radar_init_param.timeChripGap = timeChripGap
+radar_init_param.timeChirp = timeChirp
+radar_init_param.timeChirpGap = timeChirpGap
 radar_init_param.timeFrameGap = timeFrameGap
 radar_init_param.numChannel = numChannel
 radar_init_param.numRangeBin = numRangeBin
-radar_init_param.numChrip = numChrip
+radar_init_param.numChirp = numChirp
 radar_init_param.numMaxCfarPoints = 20
 radar_init_param.numMaxCachedFrame = 8
 radar_init_param.numInitialMultiMeas = 40
@@ -122,7 +122,7 @@ radar_config.cfarCfg.thSNR = 2.0
 
 radar_config.cfar_filter_cfg.range0 = 1
 radar_config.cfar_filter_cfg.range1 = 3
-radar_config.cfar_filter_cfg.shape1 = numChrip
+radar_config.cfar_filter_cfg.shape1 = numChirp
 radar_config.cfar_filter_cfg.thSNR = 0.6
 
 radar_config.channel_phase_diff_threshold = int(3.14 * (1 << 13))
@@ -166,9 +166,9 @@ def add_one_frame(frame, timestamp: int):
 
 # %% 输入所有帧
 
-magSpec2D_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
-magSpec2DRef_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
-noise_list = np.zeros((len(rdms_list), numRangeBin, numChrip))
+magSpec2D_list = np.zeros((len(rdms_list), numRangeBin, numChirp))
+magSpec2DRef_list = np.zeros((len(rdms_list), numRangeBin, numChirp))
+noise_list = np.zeros((len(rdms_list), numRangeBin, numChirp))
 indicesList = []  # 每个元素代表一帧，帧为一个Nx2的矩阵，记录N个RDM中的坐标
 measList = []
 clusterList = []
@@ -301,7 +301,7 @@ for i in range(numFrame):
 fig = dh.draw_animation(listData[::1], title="RDM的 GOCA-2DCFAR 搜索结果")
 fig.update_layout(
     xaxis=dict(range=[-1, numRangeBin + 1]),
-    yaxis=dict(range=[-1, numChrip + 1]),
+    yaxis=dict(range=[-1, numChirp + 1]),
     title="点云",
 )
 fig

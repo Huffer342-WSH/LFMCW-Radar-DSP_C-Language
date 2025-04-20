@@ -20,7 +20,7 @@ print(
     f"\ntype of radarParam.numPoint :{type(radarHandle.basic.staticClutter)}\n"
     f"radarHandle.param.numChannel: {radarHandle.param.numChannel}\n"
     f"radarHandle.param.numRangeBin: {radarHandle.param.numRangeBin}\n"
-    f"radarHandle.param.numChrip: {radarHandle.param.numChrip}\n"
+    f"radarHandle.param.numChirp: {radarHandle.param.numChirp}\n"
 )
 
 
@@ -41,29 +41,29 @@ radarDataCube += np.random.randn(radarDataCube.shape[-1]) + 1j * np.random.randn
 
 frequency = mat["frequency"][0, 0]
 bandwidth = mat["bandwidth"][0, 0]
-timeChrip = mat["timeChrip"][0, 0]
-timeChripGap = mat["timeChripGap"][0, 0]
+timeChirp = mat["timeChirp"][0, 0]
+timeChirpGap = mat["timeChirpGap"][0, 0]
 timeFrameGap = mat["timeFrameGap"][0, 0]
 numPoint = mat["numPoint"][0, 0]
 numRangeBin = 25
-numChrip = mat["numChrip"][0, 0]
+numChirp = mat["numChirp"][0, 0]
 numChannel = mat["numChannel"][0, 0]
 print(
     f"\nfrequency: {frequency}"
     f"\nbandwidth: {bandwidth}"
-    f"\ntimeChrip: {timeChrip}"
-    f"\ntimeChripGap: {timeChripGap}"
+    f"\ntimeChirp: {timeChirp}"
+    f"\ntimeChirpGap: {timeChirpGap}"
     f"\ntimeFrameGap: {timeFrameGap}"
     f"numPoint: {numPoint}"
     f"\nnumRangeBin: {numRangeBin}"
-    f"\nnumChrip: {numChrip}"
+    f"\nnumChirp: {numChirp}"
     f"\nnumChannel: {numChannel}"
     "\n"
 )
 
 referPositionList = mat["tergatTrajectory"][:, :, :2].transpose(1, 0, 2)
 
-chripMean = fft2(radarDataCube[0], axes=(-2, -1))[:, 0, :]
+chirpMean = fft2(radarDataCube[0], axes=(-2, -1))[:, 0, :]
 
 # %%
 # 使用C语言模块处理数据k,同时把数据保存下来观察

@@ -21,18 +21,18 @@ extern "C" {
 typedef struct _radar_param_t {
     rd_float_t wavelength;   ///< 单位:m 雷达波长，24GHz雷达波长为 12.42663038e-3
     rd_float_t bandwidth;    ///< 单位:Hz 雷达有效带宽
-    rd_float_t timeChrip;    ///< 单位:s
-    rd_float_t timeChripGap; ///< 单位:s
+    rd_float_t timeChirp;    ///< 单位:s
+    rd_float_t timeChirpGap; ///< 单位:s
     rd_float_t timeFrameGap; ///< 单位:s
 
     uint16_t numChannel;  ///< 雷达通道数
     uint16_t numSample;   ///< 采样点数
     uint16_t numRangeBin; ///< 距离单元数量
-    uint16_t numChrip;    ///< Chrip数
+    uint16_t numChirp;    ///< Chirp数
 
 
     /* 以下参数位衍生参数，有上方参数计算得到，用于方便计算 */
-    rd_float_t timeChripFull;
+    rd_float_t timeChirpFull;
     rd_float_t timeFrameVaild; ///< 单位:s 一帧的有效时间
     rd_float_t timeFrameTotal; ///< 单位:s 一帧的有效时间
     int32_t resRange;          ///< 单位:m 距离分辨率

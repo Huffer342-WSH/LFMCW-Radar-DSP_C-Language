@@ -8,19 +8,19 @@
 
 void bind_radar_init_param(pybind11::module_ &m)
 {
+    PYBIND11_NUMPY_DTYPE(radar_init_param_t, wavelength, bandwidth, rx_antenna_spacing, timeChirpPeriod, timeFramePeriod, numChannel, numRangeBin, numChirp,
+                         numMaxCfarPoints, numMaxCachedFrame, numInitialMultiMeas, numInitialCluster);
 
-    PYBIND11_NUMPY_DTYPE(radar_init_param_t, wavelength, bandwidth, timeChrip, timeChripGap, timeFrameGap, numChannel, numRangeBin, numChrip);
     pybind11::class_<radar_init_param_t>(m, "radar_init_param")
         .def(pybind11::init<>())
         .def_readwrite("wavelength", &radar_init_param_t::wavelength)
         .def_readwrite("bandwidth", &radar_init_param_t::bandwidth)
         .def_readwrite("rx_antenna_spacing", &radar_init_param_t::rx_antenna_spacing)
-        .def_readwrite("timeChrip", &radar_init_param_t::timeChrip)
-        .def_readwrite("timeChripGap", &radar_init_param_t::timeChripGap)
-        .def_readwrite("timeFrameGap", &radar_init_param_t::timeFrameGap)
+        .def_readwrite("timeChirpPeriod", &radar_init_param_t::timeChirpPeriod)
+        .def_readwrite("timeFramePeriod", &radar_init_param_t::timeFramePeriod)
         .def_readwrite("numChannel", &radar_init_param_t::numChannel)
         .def_readwrite("numRangeBin", &radar_init_param_t::numRangeBin)
-        .def_readwrite("numChrip", &radar_init_param_t::numChrip)
+        .def_readwrite("numChirp", &radar_init_param_t::numChirp)
         .def_readwrite("numMaxCfarPoints", &radar_init_param_t::numMaxCfarPoints)
         .def_readwrite("numMaxCachedFrame", &radar_init_param_t::numMaxCachedFrame)
         .def_readwrite("numInitialMultiMeas", &radar_init_param_t::numInitialMultiMeas)
@@ -32,19 +32,22 @@ void bind_radar_init_param(pybind11::module_ &m)
         .def("__repr__", [](const radar_init_param_t &self) {
             std::ostringstream oss;
             oss << "radar_init_param:\n"
-                << std::setw(25) << "wavelength       =" << std::setw(3) << self.wavelength << "\n"
-                << std::setw(25) << "bandwidth        =" << std::setw(3) << self.bandwidth << "\n"
-                << std::setw(25) << "timeChrip        =" << std::setw(3) << self.timeChrip << "\n"
-                << std::setw(25) << "timeChripGap     =" << std::setw(3) << self.timeChripGap << "\n"
-                << std::setw(25) << "timeFrameGap     =" << std::setw(3) << self.timeFrameGap << "\n"
-                << std::setw(25) << "numChannel       =" << std::setw(3) << self.numChannel << "\n"
-                << std::setw(25) << "numRangeBin      =" << std::setw(3) << self.numRangeBin << "\n"
-                << std::setw(25) << "numChrip         =" << std::setw(3) << self.numChrip << "\n"
-                << std::setw(25) << "numMaxCfarPoints =" << std::setw(3) << self.numMaxCfarPoints << "\n";
+                << std::setw(25) << "wavelength          =" << std::setw(3) << self.wavelength << "\n"
+                << std::setw(25) << "bandwidth           =" << std::setw(3) << self.bandwidth << "\n"
+                << std::setw(25) << "rx_antenna_spacing  =" << std::setw(3) << self.rx_antenna_spacing << "\n"
+                << std::setw(25) << "timeChirpPeriod     =" << std::setw(3) << self.timeChirpPeriod << "\n"
+                << std::setw(25) << "timeFramePeriod     =" << std::setw(3) << self.timeFramePeriod << "\n"
+                << std::setw(25) << "numChannel          =" << std::setw(3) << self.numChannel << "\n"
+                << std::setw(25) << "numRangeBin         =" << std::setw(3) << self.numRangeBin << "\n"
+                << std::setw(25) << "numChirp            =" << std::setw(3) << self.numChirp << "\n"
+                << std::setw(25) << "numMaxCfarPoints    =" << std::setw(3) << self.numMaxCfarPoints << "\n"
+                << std::setw(25) << "numMaxCachedFrame   =" << std::setw(3) << self.numMaxCachedFrame << "\n"
+                << std::setw(25) << "numInitialMultiMeas =" << std::setw(3) << self.numInitialMultiMeas << "\n"
+                << std::setw(25) << "numInitialCluster   =" << std::setw(3) << self.numInitialCluster << "\n";
             return oss.str();
         });
-    ;
 }
+
 
 void bind_radar_functions(pybind11::module_ &m)
 {

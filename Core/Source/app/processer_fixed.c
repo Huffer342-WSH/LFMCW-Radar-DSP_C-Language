@@ -52,15 +52,15 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
     /* 设置参数 */
     radar->param.wavelength = param->wavelength;
     radar->param.bandwidth = param->bandwidth;
-    radar->param.timeChrip = param->timeChrip;
-    radar->param.timeChripGap = param->timeChripGap;
+    radar->param.timeChirp = param->timeChirp;
+    radar->param.timeChirpGap = param->timeChirpGap;
     radar->param.timeFrameGap = param->timeFrameGap;
     radar->param.numChannel = param->numChannel;
     radar->param.numRangeBin = param->numRangeBin;
-    radar->param.numChrip = param->numChrip;
+    radar->param.numChirp = param->numChirp;
 
-    radar->param.timeChripFull = radar->param.timeChrip + radar->param.timeChripGap;
-    radar->param.timeFrameVaild = radar->param.numChrip * radar->param.timeChripFull;
+    radar->param.timeChirpFull = radar->param.timeChirp + radar->param.timeChirpGap;
+    radar->param.timeFrameVaild = radar->param.numChirp * radar->param.timeChirpFull;
     radar->param.timeFrameTotal = radar->param.timeFrameVaild + radar->param.timeFrameGap;
     radar->param.resRange = 149896229.0 / radar->param.bandwidth * 1000;
     radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameVaild) * 1000;
@@ -180,7 +180,7 @@ static int cb_set_track_meas(rd_float_t *meas, size_t capacity, void *args)
  */
 int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rdms, uint32_t timestamp_ms)
 {
-    RADAR_ASSERT(rdms != NULL && rdms->size0 == radar->param.numChannel && rdms->size1 == radar->param.numRangeBin && rdms->size2 == radar->param.numChrip);
+    RADAR_ASSERT(rdms != NULL && rdms->size0 == radar->param.numChannel && rdms->size1 == radar->param.numRangeBin && rdms->size2 == radar->param.numChirp);
     RD_DEBUG("开始处理一帧数据\r\n");
     /*
     输入一帧RDM（2D-FFT后的产物）

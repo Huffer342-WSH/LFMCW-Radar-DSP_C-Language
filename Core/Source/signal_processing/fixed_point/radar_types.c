@@ -13,7 +13,7 @@ int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param)
     basic->staticClutter = radar_matrix2d_complex_int32_alloc(param->numChannel, param->numRangeBin);
     basic->staticClutterAccBuffer = radar_matrix2d_complex_int32_alloc(param->numChannel, param->numRangeBin);
 #endif
-    basic->magSpec2D = radar_matrix2d_int32_alloc(param->numRangeBin, param->numChrip);
+    basic->magSpec2D = radar_matrix2d_int32_alloc(param->numRangeBin, param->numChirp);
     if (basic->magSpec2D == NULL) {
         RADAR_ERROR("failed to allocate space for magSpec2D", RADAR_ENOMEM);
         return -1;

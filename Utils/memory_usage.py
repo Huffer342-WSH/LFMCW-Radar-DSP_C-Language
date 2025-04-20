@@ -2,7 +2,7 @@
 import numpy as np
 
 numChannel = 2
-numChrip = 64
+numChirp = 64
 numRangeBin = 30
 numSample = 256
 # %%
@@ -12,9 +12,9 @@ m = dict()
 m["RawMean"] = 2 * numChannel * numSample * 4
 m["Raw"] = 8 * numChannel * numSample * 2
 m["RangeFFT"] = numChannel * numSample * 2
-m["VeloFFT"] = numChannel * numChrip * numRangeBin * 4
+m["VeloFFT"] = numChannel * numChirp * numRangeBin * 4
 
-m["RDM"] = numChannel * numChrip * numRangeBin * 4
+m["RDM"] = numChannel * numChirp * numRangeBin * 4
 m["MagSpec2D"] = numChannel * numRangeBin * 4
 
 m["MicroMove_prevFrame"] = numRangeBin * 2

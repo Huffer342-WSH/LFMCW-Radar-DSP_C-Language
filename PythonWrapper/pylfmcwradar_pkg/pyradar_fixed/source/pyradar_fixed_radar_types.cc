@@ -33,8 +33,7 @@ void bind_measurements(pybind11::module_ &m)
              })
         .def("__repr__", [](const measurement_t &m) {
             return "<measurements(distance=" + std::to_string(m.distance) + ", velocity=" + std::to_string(m.velocity) +
-                   ", azimuth=" + std::to_string(m.azimuth) + ", amp=" + std::to_string(m.amp) +
-                   ", snr=" + std::to_string(m.snr) + ")>";
+                   ", azimuth=" + std::to_string(m.azimuth) + ", amp=" + std::to_string(m.amp) + ", snr=" + std::to_string(m.snr) + ")>";
         });
 
     ;
@@ -70,23 +69,20 @@ void bind_multi_frame_meas_fixed(pybind11::module_ &m)
 
 void bind_radar_param(pybind11::module_ &m)
 {
-    PYBIND11_NUMPY_DTYPE(
-        radar_param_t, wavelength, bandwidth, timeChrip, timeChripGap, timeFrameGap, numChannel, numSample, numRangeBin,
-        numChrip, timeFrameVaild, resRange, resVelocity
-    );
+    PYBIND11_NUMPY_DTYPE(radar_param_t, wavelength, bandwidth, timeChirpPeriod, timeFramePeriod, numChannel, numSample, numRangeBin, numChirp,
+                         timeFrameDuration, resRange, resVelocity, lambda_over_d_q15);
 
     pybind11::class_<radar_param_t>(m, "radar_param")
         .def(pybind11::init<>())
         .def_readwrite("wavelength", &radar_param_t::wavelength)
         .def_readwrite("bandwidth", &radar_param_t::bandwidth)
-        .def_readwrite("timeChrip", &radar_param_t::timeChrip)
-        .def_readwrite("timeChripGap", &radar_param_t::timeChripGap)
-        .def_readwrite("timeFrameGap", &radar_param_t::timeFrameGap)
+        .def_readwrite("timeChirpPeriod", &radar_param_t::timeChirpPeriod)
+        .def_readwrite("timeFramePeriod", &radar_param_t::timeFramePeriod)
         .def_readwrite("numChannel", &radar_param_t::numChannel)
         .def_readwrite("numSample", &radar_param_t::numSample)
         .def_readwrite("numRangeBin", &radar_param_t::numRangeBin)
-        .def_readwrite("numChrip", &radar_param_t::numChrip)
-        .def_readwrite("timeFrameVaild", &radar_param_t::timeFrameVaild)
+        .def_readwrite("numChirp", &radar_param_t::numChirp)
+        .def_readwrite("timeFrameDuration", &radar_param_t::timeFrameDuration)
         .def_readwrite("resRange", &radar_param_t::resRange)
         .def_readwrite("resVelocity", &radar_param_t::resVelocity)
         .def_readwrite("lambda_over_d_q15", &radar_param_t::lambda_over_d_q15)
@@ -174,7 +170,7 @@ void bind_radar_handle(pybind11::module_ &m)
         .def(
             "getMagSpec2D",
             [](radar_handle_t &self) {
-                std::vector<size_t> shape = { self.param.numRangeBin, self.param.numChrip };
+                std::vector<size_t> shape = { self.param.numRangeBin, self.param.numChirp };
                 pybind11::array_t<int32_t> numpy_array = array_c2numpy<int32_t>(self.basic.magSpec2D->data, shape);
                 return numpy_array.attr("copy")();
             },
@@ -201,10 +197,7 @@ void bind_radar_handle(pybind11::module_ &m)
 
 void bind_radar_basic_data_init(pybind11::module_ &m)
 {
-    m.def(
-        "radar_basic_data_init", &radar_basic_data_init, pybind11::return_value_policy::take_ownership,
-        "Allocate a new radar_basic_data."
-    );
+    m.def("radar_basic_data_init", &radar_basic_data_init, pybind11::return_value_policy::take_ownership, "Allocate a new radar_basic_data.");
 }
 
 void bind_radar_measurements_alloc(pybind11::module_ &m)
