@@ -186,7 +186,9 @@ void Associator::update(TrackedTargets &targets, std::vector<Hypothesis> &hypoth
     std::vector<Hypothesis>::iterator h = hypotheses.begin();
     for (TrackedTarget &target : targets) {
         this->updater.update(target.state, *h);
+        target.update_life_cycle_data(*h);
         h++;
     }
+
     return;
 }

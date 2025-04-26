@@ -21,6 +21,8 @@ public:
     int32_t score;            // 当前评分
     double unassociated_time; // 关联失败时间
     int deducted_score;       // 未关联扣除分数
+    GaussianState state_prev; ///< 上一个关联成功的状态
+    rd_float_t timestep;      ///< 时间间隔
 
     // 动态列表
     LifeCycle(int32_t score) // 构造函数
@@ -30,6 +32,17 @@ public:
         this->deducted_score = 0;
     }
     ~LifeCycle() { }; // 析构函数
+
+    void update_data(Hypothesis &hypothesis)
+    {
+        if (hypothesis.has_meas)
+            state_prev = hypothesis.prior_state;
+        timestep = (hypothesis.prediction.timestamp_ms - hypothesis.prior_state.timestamp_ms) / (rd_float_t)1000;
+    }
+
+    void update_score(Hypothesis &hypothesis, ...)
+    {
+    }
 };
 
 class TrackedTarget
@@ -70,6 +83,13 @@ public:
 
 
     ~TrackedTarget() = default;
+
+
+    void update_life_cycle_data(Hypothesis &hypothesis)
+    {
+        life_cycle.update_data(hypothesis);
+    }
+
 
     static TrackedTarget *cast_from_c(tracked_targets_list_node_t target);
 };

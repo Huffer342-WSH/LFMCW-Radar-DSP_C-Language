@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0123 NEW)
-project(LFMCWRadarProcesser VERSION 0.2.0
+project(LFMCWRadarProcesser VERSION 0.3.0
     DESCRIPTION "适用于LFMCW雷达的数据处理算法库，最终希望提供一个可移植的C语言库，输入2D-FFT后的雷达中频信号，输出目标跟踪结果"
     LANGUAGES ASM C CXX
 )
@@ -10,7 +10,6 @@ option(CROSS_COMPILE "使能交叉编译" OFF)
 option(BUILD_DOCUMENT "生成文档" OFF)
 option(BUILD_TEST "编译测试" ON)
 option(BUILD_PythonWrapper "编译Python封装" ON)
-
 
 if(CROSS_COMPILE)
     set(BUILD_TEST OFF)
@@ -24,14 +23,12 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 # 设置输出路径
-if(${PROJECT_SOURCE_DIR} EQUAL ${CMAKE_SOURCE_DIR})
+if(${PROJECT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     set(TATGET_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/.output/${CMAKE_BUILD_TYPE})
     set(EXECUTABLE_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/bin)
     set(LIBRARY_OUTPUT_PATH ${TATGET_OUTPUT_PATH}/lib)
     set(CMAKE_INSTALL_PREFIX ${TATGET_OUTPUT_PATH}/)
 endif()
-
-
 
 # 添加 CMake 模块
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")

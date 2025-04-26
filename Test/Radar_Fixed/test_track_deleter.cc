@@ -8,8 +8,8 @@ TEST(RadarFixedtest1, unassoiatedTrack_inspace)
     static const rd_float_t pi = 3.14159; // pi
     std::vector<Hypothesis> hypotheses;
     TrackedTargets tracked_targets;
-    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
-    rd_float_t prior_state_vector[4] = { 2.0, 2.0, 3.0, 4.0 };     // 测量范围内，
+    Deleter deleter(10.0, 0.2, INFINITY, fov, radius_range);   // unassociated_time, missed_probability, fov, radius_range
+    rd_float_t prior_state_vector[4] = { 2.0, 2.0, 3.0, 4.0 }; // 测量范围内，
     rd_float_t prior_state_covar[16] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
     uint32_t timestamp_ms = 0;
     GaussianState prior_state(prior_state_vector, prior_state_covar, timestamp_ms);
@@ -23,7 +23,7 @@ TEST(RadarFixedtest1, unassoiatedTrack_inspace)
     tracked_target.life_cycle.score = 10;
     tracked_targets.push_back(tracked_target);
 
-    deleter.update_lifecycle(tracked_targets, hypotheses);
+    deleter.update_score(tracked_targets, hypotheses);
     EXPECT_EQ(tracked_targets.front().life_cycle.score, -490);
     EXPECT_EQ(tracked_targets.front().life_cycle.unassociated_time, 1); // 如果没有关联，则unassociated_time 加上 时间差，原始2加dt 1 结果为3，单位为s
 }
@@ -33,8 +33,8 @@ TEST(RadarFixedtest2, assoiatedTrack_inspace)
     static const rd_float_t pi = 3.14159; // pi
     std::vector<Hypothesis> hypotheses;
     TrackedTargets tracked_targets;
-    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
-    rd_float_t prior_state_vector[4] = { 2.0, 2.0, 3.0, 4.0 };     // 测量范围内，
+    Deleter deleter(10.0, 0.2, INFINITY, fov, radius_range);   // unassociated_time, missed_probability, fov, radius_range
+    rd_float_t prior_state_vector[4] = { 2.0, 2.0, 3.0, 4.0 }; // 测量范围内，
     rd_float_t prior_state_covar[16] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
     uint32_t timestamp_ms = 0;
     GaussianState prior_state(prior_state_vector, prior_state_covar, timestamp_ms);
@@ -48,7 +48,7 @@ TEST(RadarFixedtest2, assoiatedTrack_inspace)
     tracked_target.life_cycle.score = 10;
     tracked_targets.push_back(tracked_target);
 
-    deleter.update_lifecycle(tracked_targets, hypotheses);
+    deleter.update_score(tracked_targets, hypotheses);
     EXPECT_EQ(tracked_targets.front().life_cycle.score, 510);
     EXPECT_EQ(tracked_targets.front().life_cycle.unassociated_time, 0); // 如果关联，则unassociated_time 重置为0
 }
@@ -59,8 +59,8 @@ TEST(RadarFixedtest3, outspace)
     static const rd_float_t pi = 3.14159; // pi
     std::vector<Hypothesis> hypotheses;
     TrackedTargets tracked_targets;
-    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
-    rd_float_t prior_state_vector[4] = { 0.5, 2.0, 3.0, 4.0 };     // 测量范围内，
+    Deleter deleter(10.0, 0.2, INFINITY, fov, radius_range);   // unassociated_time, missed_probability, fov, radius_range
+    rd_float_t prior_state_vector[4] = { 0.5, 2.0, 3.0, 4.0 }; // 测量范围内，
     rd_float_t prior_state_covar[16] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
     uint32_t timestamp_ms = 0;
     GaussianState prior_state(prior_state_vector, prior_state_covar, timestamp_ms);
@@ -73,7 +73,7 @@ TEST(RadarFixedtest3, outspace)
     tracked_target.life_cycle.score = 10;
     tracked_targets.push_back(tracked_target);
 
-    deleter.update_lifecycle(tracked_targets, hypotheses);
+    deleter.update_score(tracked_targets, hypotheses);
 
     EXPECT_EQ(tracked_targets.front().life_cycle.score, -1); // 如果没有关联，则unassociated_time 加上 时间差，原始2加dt 1 结果为3，单位为s
 }
@@ -96,7 +96,7 @@ TEST(RadarFixedtest3, track_deleter)
     }
 
     // 创建 Deleter 类的测试数据
-    Deleter deleter(10.0, 0.2, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
+    Deleter deleter(10.0, 0.2, INFINITY, fov, radius_range); // unassociated_time, missed_probability, fov, radius_range
 
     // deleter.delete_invalid_targets();
 

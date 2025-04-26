@@ -18,21 +18,29 @@ extern "C" {
 #endif
 
 typedef struct {
-    rd_float_t velocity_noise_coef;
-    rd_float_t sigma_phi;
-    rd_float_t sigma_r;
-    rd_float_t sigma_r_dot;
-    rd_float_t missed_distance;
-    rd_float_t unassociated_time; // 目标关联失败超时时间
-    rd_float_t keep_motion_time;  // 目标是连续运动时，多少时间关联成功
-    rd_float_t keep_static_time;  // 目标是连续静止时，多少时间关联成功
-    rd_float_t speed_threshold;   // 速度阈值
+    /* 卡尔曼滤波 */
+    rd_float_t velocity_noise_coef; ///< 速度噪声系数（用于计算状态转移噪声）
+    rd_float_t sigma_phi;           ///< 速度标准差
+    rd_float_t sigma_r;             ///< 距离标准差
+    rd_float_t sigma_r_dot;         ///< 速度标准差
+
+    /* 数据关联 */
+    rd_float_t missed_distance; ///< 无法关联的最大距离
+
+    /* 生命周期维护-航迹起始 */
+    rd_float_t time2delete_initiator; ///< 目标关联失败超时时间
+    rd_float_t time2init_motion;      ///< 目标是连续运动时，多少时间关联成功
+    rd_float_t time2init_static;      ///< 目标是连续静止时，多少时间关联成功
+    rd_float_t speed_threshold;       ///< 速度阈值，区分目标是运动还是静止
 
 
-    rd_float_t missed_probability;
+    /* 生命周期维护-航迹终止 */
+    rd_float_t time2delete_deleter;    ///< 目标关联失败超时时间
+    rd_float_t time2stop_unassociated; ///< 目标关联失败时，匀减速至0所需时间
+    rd_float_t missed_probability;     ///< 目标关联失败概率
+    rd_float_t fov[2];                 ///< 角度范围
+    rd_float_t radius_range[2];        ///< 距离范围
 
-    rd_float_t fov[2];
-    rd_float_t radius_range[2];
 } tracker_config_t;
 
 #ifdef __cplusplus
@@ -64,8 +72,8 @@ public:
         : updater(cfg->sigma_phi, cfg->sigma_r, cfg->sigma_r_dot)
         , predictor(cfg->velocity_noise_coef)
         , associator(predictor, updater, cfg->missed_distance)
-        , deleter(cfg->unassociated_time, cfg->missed_probability, cfg->fov, cfg->radius_range)
-        , initiator(associator, cfg->unassociated_time, cfg->keep_motion_time, cfg->keep_static_time, cfg->speed_threshold, cfg->missed_distance)
+        , initiator(associator, cfg->time2delete_initiator, cfg->time2init_motion, cfg->time2init_static, cfg->speed_threshold, cfg->missed_distance)
+        , deleter(cfg->time2delete_deleter, cfg->missed_probability, cfg->time2stop_unassociated, cfg->fov, cfg->radius_range)
     {
     }
 

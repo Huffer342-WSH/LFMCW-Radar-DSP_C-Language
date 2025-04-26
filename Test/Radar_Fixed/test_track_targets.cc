@@ -38,7 +38,7 @@ TEST(RadarFixedTest, TrackedTargets)
     TrackedTargets *cxx_targets = reinterpret_cast<TrackedTargets *>(targets);
     TrackedTargets list2;
 
-    printf("Size of iterator: %d\n", sizeof(TrackedTargets::iterator));
+    printf("Size of iterator: %lu\n", sizeof(TrackedTargets::iterator));
 
 
     for (int i = 0; i < N; i++) {

@@ -39,7 +39,7 @@ TEST(RadarFixedTest1, update_lifecycle_unassociated_timeout)
     printf("unassociated_time: %f\n", tracked_target.life_cycle.unassociated_time);
     printf("score: %d\n", tracked_target.life_cycle.score);
     std::cout << "\n----------------------------\n";
-    initiator.update_lifecycle(tracked_targets, hypotheses);
+    initiator.update_score(tracked_targets, hypotheses);
 
     std::cout << "\n----------------------------\n";
 
@@ -84,7 +84,7 @@ TEST(RadarFixedTest2, update_lifecycle_associated_untimeout)
     printf("unassociated_time: %f\n", tracked_target.life_cycle.unassociated_time);
     printf("score: %d\n", tracked_target.life_cycle.score);
     std::cout << "\n----------------------------\n";
-    initiator.update_lifecycle(tracked_targets, hypotheses);
+    initiator.update_score(tracked_targets, hypotheses);
 
     std::cout << "\n----------------------------\n";
 
@@ -129,7 +129,7 @@ TEST(RadarFixedTest3, update_lifecycle_associated_motion)
     printf("unassociated_time: %f\n", tracked_target.life_cycle.unassociated_time);
     printf("score: %d\n", tracked_target.life_cycle.score);
     std::cout << "\n----------------------------\n";
-    initiator.update_lifecycle(tracked_targets, hypotheses);
+    initiator.update_score(tracked_targets, hypotheses);
 
     std::cout << "\n----------------------------\n";
 
@@ -176,7 +176,7 @@ TEST(RadarFixedTest4, update_lifecycle_associated_static)
     printf("unassociated_time: %f\n", tracked_target.life_cycle.unassociated_time);
     printf("score: %d\n", tracked_target.life_cycle.score);
     std::cout << "\n----------------------------\n";
-    initiator.update_lifecycle(tracked_targets, hypotheses);
+    initiator.update_score(tracked_targets, hypotheses);
 
     std::cout << "\n----------------------------\n";
 

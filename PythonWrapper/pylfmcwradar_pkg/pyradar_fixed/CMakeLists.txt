@@ -29,7 +29,6 @@ set_target_properties(pyradar_fixed
 # 生成头文件
 add_custom_command(TARGET pyradar_fixed POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${PYTHON_PACKAGE_OUTPUT_DIR}" ${Python_EXECUTABLE} -m pybind11_stubgen pyradar_fixed --output-dir ${PYTHON_PACKAGE_OUTPUT_DIR}
-    DEPENDS pyradar_fixed
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Generating .pyi file for pyRadar"
     VERBATIM

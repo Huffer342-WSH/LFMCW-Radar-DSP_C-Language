@@ -21,7 +21,7 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
 
 
     /*  更新生命周期 */
-    this->update_lifecycle(unconfirmed_targets, hypotheses);
+    this->update_score(unconfirmed_targets, hypotheses);
 
 
     /* 删除无效目标 */
@@ -40,7 +40,7 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
 }
 
 
-void Initiator::update_lifecycle(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses)
+void Initiator::update_score(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses)
 {
     RD_DEBUG("[航迹起始]-更新生命周期 开始");
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG

@@ -1,7 +1,7 @@
 # %%
 import sys
 import datetime
-
+import os
 from pylfmcwradar import pyradar_fixed as pyRadar
 import numpy as np
 import scipy
@@ -15,6 +15,12 @@ from stonesoup.types.track import Track
 
 sys.path.append("../")
 from drawhelp import draw as dh
+
+log_file = "app.log"
+
+if os.path.exists(log_file):
+    os.remove(log_file)
+
 
 # %%
 def set_matrix3d_complex_int16(m: pyRadar.matrix3d_complex_int16, complexMat: np.ndarray):
@@ -30,64 +36,23 @@ c = scipy.constants.c
 frequency = mat["frequency"][0, 0]
 wavelength = c / frequency
 bandwidth = mat["bandwidth"][0, 0]
-timeChirp = mat["timeChirp"][0, 0]
-timeChirpGap = mat["timeChirpGap"][0, 0]
+timeChirp = mat["timeChrip"][0, 0]
+timeChirpGap = mat["timeChripGap"][0, 0]
 timeFrameGap = mat["timeFrameGap"][0, 0]
 numPoint = mat["numPoint"][0, 0]
 numRangeBin = 25
-numChirp = mat["numChirp"][0, 0]
+numChirp = mat["numChrip"][0, 0]
 numChannel = mat["numChannel"][0, 0]
 numFrame = len(mat["radarDataCube"])
 
-timeFrameFull = (timeChirp + timeChirpGap) * numChirp + timeFrameGap
+timeChirpPeriod = timeChirp + timeChirpGap
+timeFramePeriod = (timeChirpPeriod) * numChirp + timeFrameGap
 
 rdms_list = fft(fft(mat["radarDataCube"], axis=-1)[:, :, :, :numRangeBin], axis=-2).transpose(0, 1, 3, 2)
 rdms_list = rdms_list * (2**15 - 1) / np.max(np.abs(rdms_list))
 rdms_list.real = rdms_list.real.astype(np.int16)
 rdms_list.imag = rdms_list.imag.astype(np.int16)
 
-# mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData_运动人体_长方形轨迹.mat")
-
-
-# c = scipy.constants.c
-# frequency = 24.125e9
-# wavelength = c / frequency
-# bandwidth = 245e6
-# timeChirp = mat["timeChirp"][0, 0]
-# timeChirpGap = mat["timeChirpGap"][0, 0]
-# timeFrameGap = mat["timeFrameGap"][0, 0]
-# numPoint = mat["numSample"][0, 0]
-# numRangeBin = mat["numRangeBin"][0, 0]
-# numChirp = mat["numChirp"][0, 0]
-# numChannel = mat["numChannel"][0, 0]
-# numFrame = len(mat["RDM"])
-
-# rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
-# rdms_list.real = rdms_list.real.astype(np.int16)
-# rdms_list.imag = rdms_list.imag.astype(np.int16)
-
-# mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData_运动人体_长方形轨迹.mat")
-# mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData 2024-11-20 17-12-26.mat")
-
-# c = scipy.constants.c
-# frequency = 24.125e9
-# wavelength = c / frequency
-# bandwidth = 245e6
-# timeChirp = mat["timeChirp"][0, 0]
-# timeChirpGap = mat["timeChirpGap"][0, 0]
-# timeFrameGap = mat["timeFrameGap"][0, 0]
-# numPoint = mat["numSample"][0, 0]
-# numRangeBin = mat["numRangeBin"][0, 0]
-# numChirp = mat["numChirp"][0, 0]
-# numChannel = mat["numChannel"][0, 0]
-# numFrame = len(mat["RDM"])
-
-# timeFrameFull = (timeChirp + timeChirpGap) * numChirp + timeFrameGap
-
-
-# rdms_list = mat["RDM"].transpose(0, 1, 3, 2)
-# rdms_list.real = rdms_list.real.astype(np.int16)
-# rdms_list.imag = rdms_list.imag.astype(np.int16)
 
 # %% 初始化雷达算法
 pi = 3.14159
@@ -101,9 +66,8 @@ noise_buffer = pyRadar.matrix2d_int32_alloc(numRangeBin, numChirp)
 radar_init_param.wavelength = wavelength
 radar_init_param.bandwidth = bandwidth
 radar_init_param.rx_antenna_spacing = 6.25e-3
-radar_init_param.timeChirp = timeChirp
-radar_init_param.timeChirpGap = timeChirpGap
-radar_init_param.timeFrameGap = timeFrameGap
+radar_init_param.timeChirpPeriod = timeChirpPeriod
+radar_init_param.timeFramePeriod = timeFramePeriod
 radar_init_param.numChannel = numChannel
 radar_init_param.numRangeBin = numRangeBin
 radar_init_param.numChirp = numChirp
@@ -134,20 +98,24 @@ radar_config.dbscan_config.wv = 0
 radar_config.dbscan_config.eps = 800
 radar_config.dbscan_config.min_samples = 4
 
-radar_config.tracker_cfg.velocity_noise_coef = 1.2
-radar_config.tracker_cfg.sigma_phi = 0.1
+radar_config.tracker_cfg.velocity_noise_coef = 10000
+radar_config.tracker_cfg.sigma_phi = 0.4
 radar_config.tracker_cfg.sigma_r = 0.5
-radar_config.tracker_cfg.sigma_r_dot = 0.1
+radar_config.tracker_cfg.sigma_r_dot = 0.2
+
 radar_config.tracker_cfg.missed_distance = 4
-radar_config.tracker_cfg.unassociated_time = 2.0
-radar_config.tracker_cfg.keep_motion_time = 1.0
-radar_config.tracker_cfg.keep_static_time = 10
+
+radar_config.tracker_cfg.time2delete_initiator = 2.0
+radar_config.tracker_cfg.time2init_motion = 1.0
+radar_config.tracker_cfg.time2init_static = 10
 radar_config.tracker_cfg.speed_threshold = 0.05
+
+radar_config.tracker_cfg.time2delete_deleter = 20.0
+radar_config.tracker_cfg.time2stop_unassociated = 0.5
 radar_config.tracker_cfg.missed_probability = 0.5
-radar_config.tracker_cfg.fov = np.array([-pi/3, pi/3], dtype=np.float64)
+radar_config.tracker_cfg.fov = np.array([-pi / 3, pi / 3], dtype=np.float64)
 radar_config.tracker_cfg.radius_range = np.array([0.2, 100], dtype=np.float64)
-radar_config.tracker_cfg.fov = np.array([-pi/3, pi/3], dtype=np.float64)
-radar_config.tracker_cfg.radius_range = np.array([0.2, 100], dtype=np.float64)
+
 
 print(f"雷达初始化参数:\n{radar_init_param}")
 pyRadar.radardsp_init(radar_handle, radar_init_param, radar_config)
@@ -174,8 +142,8 @@ measList = []
 clusterList = []
 timestamp = 0
 
-timestamps_plotter = []
 timestamp_start = datetime.datetime.now()
+timestamps = [timestamp_start + i * datetime.timedelta(seconds=timeFramePeriod) for i in range(numFrame)]
 
 
 all_unconfirmed_targets = []
@@ -184,34 +152,15 @@ all_tracked_targets = []
 trajectorys = dict()
 unconfirmed_trajectorys = dict()
 
-
-timestamps_plotter = []
-timestamp_start = datetime.datetime.now()
-
-
-all_unconfirmed_targets = []
-all_tracked_targets = []
-
-trajectorys = dict()
-unconfirmed_trajectorys = dict()
 
 for i, frame in enumerate(rdms_list):
     print(f"\n\n第{i}帧>>>", flush=True)
-    timestamp = int(i * timeFrameFull * 1000)
-
-    timestamp_plotter = timestamp_start + datetime.timedelta(seconds=i * timeFrameFull)
-
-    timestamps_plotter.append(timestamp_plotter)
-
-
-    timestamp_plotter = timestamp_start + datetime.timedelta(seconds=i * timeFrameFull)
-
-    timestamps_plotter.append(timestamp_plotter)
+    timestamp = timestamps[i]
 
     set_matrix3d_complex_int16(rdms, frame)
-    pyRadar.radardsp_input_new_frame(radar_handle, rdms, timestamp)
-    #这里就已经完成了整个流程
-    #这里就已经完成了整个流程
+    pyRadar.radardsp_input_new_frame(radar_handle, rdms, int((timestamp - timestamp_start).total_seconds() * 1000))
+    # 这里就已经完成了整个流程
+    # 这里就已经完成了整个流程
     pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
 
     magSpec2D_list[i] = radar_handle.getMagSpec2D()
@@ -225,16 +174,10 @@ for i, frame in enumerate(rdms_list):
     # 测量值
     meas = radar_handle.getMeasurements()
     measList.append(np.column_stack((meas[:]["distance"], meas[:]["velocity"], meas[:]["azimuth"])))
-    
-    
-    
-    
 
     # 聚类后测量值
     meas = radar_handle.getClusterMeasurements()
     clusterList.append(np.column_stack((meas[:]["distance"], meas[:]["velocity"], meas[:]["azimuth"])))
-    
-    
 
     # 保存跟踪目标的消息
     unconfirmed_targets = radar_handle.getUnconfirmedTargets()
@@ -243,15 +186,15 @@ for i, frame in enumerate(rdms_list):
         print(f"ID:{target.uuid} X:{target.state.state_vector} T:{target.state.timestamp_ms} Score:{target.life_cycle.score}")
         uuid = target.uuid
         if uuid in unconfirmed_trajectorys.keys():
-            unconfirmed_trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter))
+            unconfirmed_trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp))
         else:
-            unconfirmed_trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter)]
+            unconfirmed_trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp)]
 
         uuid = target.uuid
         if uuid in unconfirmed_trajectorys.keys():
-            unconfirmed_trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter))
+            unconfirmed_trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp))
         else:
-            unconfirmed_trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter)]
+            unconfirmed_trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp)]
 
     tracked_targets = radar_handle.getTrackedTargets()
     print("\n已跟踪目标：")
@@ -259,18 +202,16 @@ for i, frame in enumerate(rdms_list):
         print(f"ID:{target.uuid} X:{target.state.state_vector} T:{target.state.timestamp_ms} Score:{target.life_cycle.score}")
         uuid = target.uuid
         if uuid in trajectorys.keys():
-            trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter))
+            trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp))
         else:
-            trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter)]
-    
-        
+            trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp)]
+
         uuid = target.uuid
         if uuid in trajectorys.keys():
-            trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter))
+            trajectorys[uuid].append(GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp))
         else:
-            trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp_plotter)]
-    
-        
+            trajectorys[uuid] = [GaussianState(state_vector=target.state.state_vector, covar=target.state.covar, timestamp=timestamp)]
+
     print("<<<\n")
     all_unconfirmed_targets.append(unconfirmed_targets)
     all_tracked_targets.append(tracked_targets)
@@ -315,11 +256,6 @@ measList_plotter = []
 count = 0
 
 
-
-measList_plotter = []
-count = 0
-
-
 for i in measList:
     meas_plotter = set()
     meas_plotter = set()
@@ -328,24 +264,12 @@ for i in measList:
     for j in i:
         x = j[0] * np.cos(j[2] / 2**13) / 1000
         y = j[0] * np.sin(j[2] / 2**13) / 1000
-        meas_plotter.add(Detection(state_vector=[x, y], timestamp=timestamps_plotter[count]))
-        
-        
+        meas_plotter.add(Detection(state_vector=[x, y], timestamp=timestamps[count]))
     count += 1
     measList_plotter.append(meas_plotter)
-
-    # 内容是x，y
-    for j in i:
-        x = j[0] * np.cos(j[2] / 2**13) / 1000
-        y = j[0] * np.sin(j[2] / 2**13) / 1000
-        meas_plotter.add(Detection(state_vector=[x, y], timestamp=timestamps_plotter[count]))
-        
-        
-    count += 1
-    measList_plotter.append(meas_plotter)
-
     pointClouds /= 1000
     pointCloudList.append(pointClouds)
+
 for i in clusterList:
     cluster = np.column_stack((i[:, 0] * np.cos(i[:, 2] / 2**13), i[:, 0] * np.sin(i[:, 2] / 2**13), i[:, 1]))
     cluster /= 1000
@@ -374,7 +298,6 @@ fig.update_layout(
 fig
 
 
-
 # %% 绘制一帧数据
 # i = 176
 # go.Figure(data=[go.Surface(z=magSpec2D_list[i])]).show()
@@ -384,9 +307,11 @@ fig
 
 
 # %% 绘制跟踪结果
-plotter = AnimatedPlotterly(timestamps_plotter, tail_length=0.1) # 初始化一个对象
+plotter = AnimatedPlotterly(timestamps, tail_length=(1 / timeFramePeriod / len(timestamps)))  # 初始化一个对象
 plotter.plot_measurements(measList_plotter, [0, 1], convert_measurements=False)
 plotter.plot_tracks(trajectorys.values(), [0, 2], track_label="User-confirmed")
 plotter.plot_tracks(unconfirmed_trajectorys.values(), [0, 2], track_label="User-unconfirmed", marker=dict(symbol="x", size=8))
 
 plotter.fig
+
+# %%
