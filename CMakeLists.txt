@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0123 NEW)
-project(LFMCWRadarProcesser VERSION 0.3.0
+project(LFMCWRadarProcesser VERSION 0.3.1
     DESCRIPTION "适用于LFMCW雷达的数据处理算法库，最终希望提供一个可移植的C语言库，输入2D-FFT后的雷达中频信号，输出目标跟踪结果"
     LANGUAGES ASM C CXX
 )

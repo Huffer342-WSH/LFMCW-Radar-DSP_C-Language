@@ -27,6 +27,12 @@ target_sources(RadarDP_ObjTrack_objs PRIVATE
 )
 
 
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "ARMClang")
+    target_compile_options(RadarDP_ObjTrack_objs PRIVATE -ffp-mode=full)
+endif()
+
+
+
 target_link_libraries(RadarDP_ObjTrack PUBLIC
     RadarDP_ObjTrack_objs
 )

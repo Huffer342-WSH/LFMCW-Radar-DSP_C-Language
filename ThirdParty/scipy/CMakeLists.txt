@@ -13,8 +13,7 @@ target_include_directories(scipy PUBLIC
 )
 
 # 判断是否是 ARM 平台，并且是 ARM Clang 编译器
-if(CMAKE_SYSTEM_NAME STREQUAL "generic" AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm.*")
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(scipy PRIVATE -ffp-mode=full)
-    endif()
+
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "ARMClang")
+    target_compile_options(scipy PRIVATE -ffp-mode=full)
 endif()
