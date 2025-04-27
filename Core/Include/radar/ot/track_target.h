@@ -43,6 +43,8 @@ size_t tracked_targets_list_size(const tracked_targets_list_t *list);
 int tracked_target_get_uuid(const tracked_targets_list_node_t node, uint32_t *uuid);
 int tracked_target_get_state_vector(const tracked_targets_list_node_t node, rd_float_t **state_vector);
 int tracked_target_get_score(const tracked_targets_list_node_t node, int32_t *score);
+int tracked_target_get_unassociated_time(const tracked_targets_list_node_t node, rd_float_t *time);
+
 /**
  * @brief 遍历链表
  *

@@ -89,9 +89,6 @@ public:
     {
         life_cycle.update_data(hypothesis);
     }
-
-
-    static TrackedTarget *cast_from_c(tracked_targets_list_node_t target);
 };
 
 
@@ -112,5 +109,12 @@ public:
     tracked_targets_list_t *cast_to_c()
     {
         return reinterpret_cast<tracked_targets_list_t *>(this);
+    }
+
+    static TrackedTarget *cast_from_c(const tracked_targets_list_node_t node)
+    {
+        TrackedTargets::iterator it;
+        memcpy(&it, &node, sizeof(TrackedTargets::iterator));
+        return &(*it);
     }
 };

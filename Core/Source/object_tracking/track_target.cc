@@ -117,9 +117,8 @@ tracked_targets_list_node_t tracked_targets_list_next(const tracked_targets_list
  */
 int tracked_target_get_uuid(const tracked_targets_list_node_t node, uint32_t *uuid)
 {
-    TrackedTargets::iterator it;
-    memcpy(&it, &node, sizeof(TrackedTargets::iterator));
-    *uuid = it->uuid;
+    TrackedTarget *target = TrackedTargets::cast_from_c(node);
+    *uuid = target->uuid;
     return 0;
 }
 
@@ -135,9 +134,8 @@ int tracked_target_get_uuid(const tracked_targets_list_node_t node, uint32_t *uu
  */
 int tracked_target_get_state_vector(const tracked_targets_list_node_t node, rd_float_t **state_vector)
 {
-    TrackedTargets::iterator it;
-    memcpy(&it, &node, sizeof(TrackedTargets::iterator));
-    *state_vector = it->state.state_vector.data();
+    TrackedTarget *target = TrackedTargets::cast_from_c(node);
+    *state_vector = target->state.state_vector.data();
     return 0;
 }
 
@@ -153,10 +151,26 @@ int tracked_target_get_state_vector(const tracked_targets_list_node_t node, rd_f
  */
 int tracked_target_get_score(const tracked_targets_list_node_t node, int32_t *score)
 {
-    TrackedTargets::iterator it;
-    memcpy(&it, &node, sizeof(TrackedTargets::iterator));
-    *score = it->life_cycle.score;
+    TrackedTarget *target = TrackedTargets::cast_from_c(node);
+    *score = target->life_cycle.score;
     return 0;
 }
+
+
+/**
+ * @brief 返回目标自上次关联以来经过的时间
+ *
+ * @param node  目标
+ * @param time  时间，以毫秒为单位
+ * @return int
+ *
+ */
+int tracked_target_get_unassociated_time(const tracked_targets_list_node_t node, rd_float_t *time)
+{
+    TrackedTarget *target = TrackedTargets::cast_from_c(node);
+    *time = target->life_cycle.unassociated_time;
+    return 0;
+}
+
 
 } // extern "C"
