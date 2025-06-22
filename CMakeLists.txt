@@ -10,6 +10,7 @@ option(CROSS_COMPILE "使能交叉编译" OFF)
 option(BUILD_DOCUMENT "生成文档" OFF)
 option(BUILD_TEST "编译测试" ON)
 option(BUILD_PythonWrapper "编译Python封装" ON)
+option(CONFIGURE_EIGEN "配置Eigen" OFF)
 
 if(CROSS_COMPILE)
     set(BUILD_TEST OFF)
