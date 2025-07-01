@@ -11,6 +11,7 @@ option(BUILD_DOCUMENT "生成文档" OFF)
 option(BUILD_TEST "编译测试" ON)
 option(BUILD_PythonWrapper "编译Python封装" ON)
 option(CONFIGURE_EIGEN "配置Eigen" OFF)
+option(CONFIG_ASAN "开启AddressSanitizer" OFF)
 
 if(CROSS_COMPILE)
     set(BUILD_TEST OFF)
@@ -37,7 +38,9 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 include(configGitInfo)
 
 # 包含 AddressSanitizer 配置文件
+if(CONFIG_ASAN)
 include(configAddressSanitizer) # 测试中使用了AddressSanitizer
+endif()
 
 # 设置 MSVC 编译选项
 include(msvc_compile_options) # 解决CMake使用MSVC的Bug

@@ -1,7 +1,9 @@
 include(GoogleTest)
 
+if(ADDRESSSANITIZER_FLAGS)
 add_compile_options(${ADDRESSSANITIZER_FLAGS})
 link_libraries(${ADDRESSSANITIZER_LIBRARIES})
+endif()
 
 # FFTW测试
 add_subdirectory(FFTW)
