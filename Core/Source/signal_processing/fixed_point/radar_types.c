@@ -1,7 +1,6 @@
 #include <radar/app/radar_types_fixed.h>
 #include <radar/common/radar_log.h>
-
-#include <stdlib.h>
+#include <radar/common/mm.h>
 
 
 int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param)

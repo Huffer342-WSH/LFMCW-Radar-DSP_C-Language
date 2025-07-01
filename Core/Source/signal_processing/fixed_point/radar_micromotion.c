@@ -1,8 +1,7 @@
 #include <radar/sp/fixed_point/radar_micromotion.h>
 
-#include <stdlib.h>
-
 #include <radar/common/radar_log.h>
+#include <radar/common/mm.h>
 
 int radar_micromotion_handle_init(radar_micromotion_handle_t *mm, size_t numRangeBin, size_t capacity)
 {

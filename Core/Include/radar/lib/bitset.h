@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdlib.h>
+#include <radar/common/mm.h>
 
 #ifdef __cplusplus
 extern "C" {

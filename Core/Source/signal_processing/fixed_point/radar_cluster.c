@@ -17,9 +17,8 @@
 #include <radar/sp/fixed_point/radar_cluster.h>
 
 #include <radar/common/radar_log.h>
-#include <radar/common/radar_log.h>
+#include <radar/common/mm.h>
 
-#include <stdlib.h>
 #include <stdio.h>
 
 
