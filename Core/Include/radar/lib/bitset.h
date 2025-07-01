@@ -35,7 +35,7 @@ typedef struct bitset {
 static inline bitset_t *bitset_new(size_t n, bool value)
 {
     size_t num_elm = _bits2words(n);
-    bitset_t *self = (bitset_t *)malloc(sizeof(size_t) + num_elm * sizeof(elm));
+    bitset_t *self = (bitset_t *)rd_malloc(sizeof(size_t) + num_elm * sizeof(elm));
     memset(self->data, value ? ~0 : 0, num_elm * sizeof(elm));
     return self;
 }
@@ -60,7 +60,7 @@ static inline bool bitset_test(bitset_t *self, size_t pos)
 
 static inline void bitset_delete(bitset_t *self)
 {
-    free(self);
+    rd_free(self);
 }
 
 

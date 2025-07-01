@@ -48,7 +48,7 @@ int radar_cluster_init(radar_cluster_t *cluster, size_t num_frame, size_t num_me
         goto RADAR_CLUSTER_INIT_FAILED2;
     }
 
-    cluster->multi_frame_meas_labels = malloc(sizeof(size_t) * num_meas);
+    cluster->multi_frame_meas_labels = rd_malloc(sizeof(size_t) * num_meas);
     if (cluster->multi_frame_meas_labels == NULL) {
         RADAR_ERROR("radar_cluster_init() failed to allocate space for measurements labels", RADAR_ENOMEM);
         status = -3;
@@ -66,7 +66,7 @@ int radar_cluster_init(radar_cluster_t *cluster, size_t num_frame, size_t num_me
     return 0;
 
 RADAR_CLUSTER_INIT_FAILED4:
-    free(cluster->multi_frame_meas_labels);
+    rd_free(cluster->multi_frame_meas_labels);
 RADAR_CLUSTER_INIT_FAILED3:
     radar_measurements_free(cluster->multi_frame_meas);
 RADAR_CLUSTER_INIT_FAILED2:
@@ -87,7 +87,7 @@ void radar_basic_data_deinit(radar_basic_data_t *basic)
 
 void radar_cluster_deinit(radar_cluster_t *cluster)
 {
-    free(cluster->multi_frame_meas_labels);
+    rd_free(cluster->multi_frame_meas_labels);
     radar_measurements_free(cluster->multi_frame_meas);
     radar_measurements_free(cluster->cluster_meas);
     radar_measurements_list_free(cluster->list);

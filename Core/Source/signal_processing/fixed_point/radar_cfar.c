@@ -32,15 +32,15 @@ static inline int wrap_pos(int x, int n);
 cfar2d_result_t *cfar2d_result_alloc(size_t n)
 {
     // 分配结果结构
-    cfar2d_result_t *res = (cfar2d_result_t *)malloc(sizeof(cfar2d_result_t));
+    cfar2d_result_t *res = (cfar2d_result_t *)rd_malloc(sizeof(cfar2d_result_t));
     if (res == NULL) {
         return NULL;
     }
 
     // 分配点云数据
-    res->point = (cfar2d_point_t *)malloc(n * sizeof(cfar2d_point_t));
+    res->point = (cfar2d_point_t *)rd_malloc(n * sizeof(cfar2d_point_t));
     if (res->point == NULL) {
-        free(res);
+        rd_free(res);
         return NULL;
     }
 
@@ -100,10 +100,10 @@ void cfar2d_result_free(cfar2d_result_t *result)
 
     // 释放内存
     if (result->is_point_need_free) {
-        free(result->point);
+        rd_free(result->point);
     }
     if (result->is_struct_need_free) {
-        free(result);
+        rd_free(result);
     }
 }
 

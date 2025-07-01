@@ -51,9 +51,9 @@ int dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_ge
             return 0;
         }
     }
-    stack = (size_t *)malloc((n - 1) * sizeof(size_t));
+    stack = (size_t *)rd_malloc((n - 1) * sizeof(size_t));
     if (stack == NULL) {
-        RADAR_ERROR("dbscan_core malloc stack failed", RADAR_ENOMEM);
+        RADAR_ERROR("dbscan_core rd_malloc stack failed", RADAR_ENOMEM);
         return -1;
     }
 
@@ -89,7 +89,7 @@ int dbscan_core(size_t *labels, size_t n, int32_t eps, size_t min_samples, cb_ge
         }
         label_num++;
     }
-    free(stack);
+    rd_free(stack);
     return label_num;
 }
 
@@ -181,43 +181,43 @@ static void radar_calc_neighbors_info(size_t n, int32_t *D, int32_t eps, size_t 
  */
 dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(measurements_t *meas, int32_t wr, int32_t wv, int32_t eps)
 {
-    dbscan_neighbors_t *nb = (dbscan_neighbors_t *)malloc(sizeof(dbscan_neighbors_t));
+    dbscan_neighbors_t *nb = (dbscan_neighbors_t *)rd_malloc(sizeof(dbscan_neighbors_t));
     size_t i;
     int failed_number = 0;
     if (nb == NULL) {
-        RADAR_ERROR("radar_cluster_dbscan_neighbors_create malloc dbscan_neighbors_t failed", RADAR_ENOMEM);
+        RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc dbscan_neighbors_t failed", RADAR_ENOMEM);
         return NULL;
     }
     size_t capacity = meas->num * (meas->num - 1) / 2;
     nb->n = meas->num;
 
     /* 距离矩阵 */
-    nb->D = (int32_t *)malloc(capacity * sizeof(nb->D[0]));
+    nb->D = (int32_t *)rd_malloc(capacity * sizeof(nb->D[0]));
     if (nb->D == NULL) {
-        RADAR_ERROR("radar_cluster_dbscan_neighbors_create malloc D failed", RADAR_ENOMEM);
+        RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc D failed", RADAR_ENOMEM);
         failed_number = 1;
     }
     radar_calc_meas_distance(meas, wr, wv, nb->D);
 
 
     /* 邻居数量 */
-    nb->n_neighbors = (size_t *)calloc(nb->n, sizeof(nb->n_neighbors[0]));
+    nb->n_neighbors = (size_t *)rd_calloc(nb->n, sizeof(nb->n_neighbors[0]));
     if (nb->n_neighbors == NULL) {
-        RADAR_ERROR("radar_cluster_dbscan_neighbors_create malloc n_neighbors failed", RADAR_ENOMEM);
+        RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc n_neighbors failed", RADAR_ENOMEM);
         failed_number = 2;
     }
     radar_calc_neighbors_num(nb->n, nb->D, eps, nb->n_neighbors);
 
     /* 邻居信息 */
-    nb->neighborhoods = (size_t **)malloc(nb->n * sizeof(nb->neighborhoods[0]));
+    nb->neighborhoods = (size_t **)rd_malloc(nb->n * sizeof(nb->neighborhoods[0]));
     if (nb->neighborhoods == NULL) {
-        RADAR_ERROR("radar_cluster_dbscan_neighbors_create malloc neighborhoods failed", RADAR_ENOMEM);
+        RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc neighborhoods failed", RADAR_ENOMEM);
         failed_number = 3;
     }
     for (i = 0; i < nb->n; i++) {
-        nb->neighborhoods[i] = (size_t *)malloc(nb->n_neighbors[i] * sizeof(nb->neighborhoods[0][0]));
+        nb->neighborhoods[i] = (size_t *)rd_malloc(nb->n_neighbors[i] * sizeof(nb->neighborhoods[0][0]));
         if (nb->neighborhoods[i] == NULL) {
-            RADAR_ERROR("radar_cluster_dbscan_neighbors_create malloc failed", RADAR_ENOMEM);
+            RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc failed", RADAR_ENOMEM);
             failed_number = 4;
             break;
         }
@@ -227,13 +227,13 @@ dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(measurements_t *meas, 
     /* 发生分配失败时，释放已经成功分配的内存 */
     switch (failed_number) {
     case 4:
-        for (size_t j = 0; j < i; j++) free(nb->neighborhoods[j]);
+        for (size_t j = 0; j < i; j++) rd_free(nb->neighborhoods[j]);
     case 3:
-        free(nb->neighborhoods);
+        rd_free(nb->neighborhoods);
     case 2:
-        free(nb->n_neighbors);
+        rd_free(nb->n_neighbors);
     case 1:
-        free(nb->D);
+        rd_free(nb->D);
         break;
     default:
         break;
@@ -250,12 +250,12 @@ dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(measurements_t *meas, 
 void radar_cluster_dbscan_neighbors_free(dbscan_neighbors_t *nb)
 {
     for (size_t i = 0; i < nb->n; i++) {
-        free(nb->neighborhoods[i]);
+        rd_free(nb->neighborhoods[i]);
     }
-    free(nb->neighborhoods);
-    free(nb->n_neighbors);
-    free(nb->D);
-    free(nb);
+    rd_free(nb->neighborhoods);
+    rd_free(nb->n_neighbors);
+    rd_free(nb->D);
+    rd_free(nb);
 }
 
 
@@ -290,7 +290,7 @@ int radar_cluster_dbscan(size_t *labels, measurements_t *meas, int32_t wr, int32
     int num_cluster;
     dbscan_neighbors_t *nb = radar_cluster_dbscan_neighbors_create(meas, wr, wv, eps);
     if (nb == NULL) {
-        RADAR_ERROR("radar_cluster_dbscan malloc dbscan_neighbors_t failed", RADAR_ENOMEM);
+        RADAR_ERROR("radar_cluster_dbscan rd_malloc dbscan_neighbors_t failed", RADAR_ENOMEM);
         return -1;
     }
     num_cluster = dbscan_core(labels, meas->num, eps, min_samples, radar_get_neighbors, nb);

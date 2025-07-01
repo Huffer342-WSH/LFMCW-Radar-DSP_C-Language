@@ -2,6 +2,7 @@
 .vscode/c_cpp_properties.json
 .output
 .venv
+.cache
 build
 **/__pycache__/
 **/__pycache__/**
@@ -15,3 +16,5 @@ Doc/doxygen
 Doc/Doxyfile
 
 Test/**/app.log
+
+Core/Include/radar/version.h

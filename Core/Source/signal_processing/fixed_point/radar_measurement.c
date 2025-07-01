@@ -27,15 +27,15 @@
  */
 measurements_t *radar_measurements_alloc(size_t capacity)
 {
-    measurements_t *meas = (measurements_t *)malloc(sizeof(measurements_t));
+    measurements_t *meas = (measurements_t *)rd_malloc(sizeof(measurements_t));
     if (meas == NULL) {
         RADAR_ERROR("failed to allocate space for measurements_t", RADAR_ENOMEM);
         return NULL;
     }
 
-    meas->data = (measurement_t *)malloc(sizeof(measurement_t) * capacity);
+    meas->data = (measurement_t *)rd_malloc(sizeof(measurement_t) * capacity);
     if (meas->data == NULL) {
-        free(meas);
+        rd_free(meas);
         RADAR_ERROR("failed to allocate space for measurements_t", RADAR_ENOMEM);
         return NULL;
     }
@@ -48,14 +48,14 @@ measurements_t *radar_measurements_alloc(size_t capacity)
 
 void radar_measurements_free(measurements_t *m)
 {
-    free(m->data);
-    free(m);
+    rd_free(m->data);
+    rd_free(m);
 }
 
 
 measurements_list_t *radar_measurements_list_alloc(size_t capacity)
 {
-    measurements_list_t *m = (measurements_list_t *)malloc(sizeof(measurements_list_t));
+    measurements_list_t *m = (measurements_list_t *)rd_malloc(sizeof(measurements_list_t));
     if (m == NULL) {
         RADAR_ERROR("failed to allocate space for measurements_list_t", RADAR_ENOMEM);
         return NULL;
@@ -70,7 +70,7 @@ measurements_list_t *radar_measurements_list_alloc(size_t capacity)
 static void meas_node_free(struct meas_node *node)
 {
     radar_measurements_free(node->data);
-    free(node);
+    rd_free(node);
 }
 
 static void delete_all_meas_node(struct meas_node *node)
@@ -107,7 +107,7 @@ void radar_measurements_list_push(measurements_list_t *m, measurements_t *frame)
     measurements_list_delete_tail(m, m->capacity - 1);
 
     /* 头部插入新节点 */
-    struct meas_node *node = (struct meas_node *)malloc(sizeof(struct meas_node));
+    struct meas_node *node = (struct meas_node *)rd_malloc(sizeof(struct meas_node));
     if (node == NULL) {
         RADAR_ERROR("failed to allocate space for meas_node", RADAR_ENOMEM);
         return;
@@ -170,9 +170,9 @@ void radar_measurements_list_free(measurements_list_t *m)
         struct meas_node *tmp = node;
         node = node->next;
         radar_measurements_free(tmp->data);
-        free(tmp);
+        rd_free(tmp);
     }
-    free(m);
+    rd_free(m);
 }
 
 

@@ -318,9 +318,9 @@ static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFr
     size_t num_meas = radar_measurements_list_get_meas_num(list);
     if (cluster->multi_frame_meas->capacity < num_meas) {
         radar_measurements_free(cluster->multi_frame_meas);
-        free(cluster->multi_frame_meas_labels);
+        rd_free(cluster->multi_frame_meas_labels);
         cluster->multi_frame_meas = radar_measurements_alloc(num_meas);
-        cluster->multi_frame_meas_labels = malloc(sizeof(size_t) * num_meas);
+        cluster->multi_frame_meas_labels = rd_malloc(sizeof(size_t) * num_meas);
     }
     radar_measurements_list_copyout(cluster->multi_frame_meas, list);
 

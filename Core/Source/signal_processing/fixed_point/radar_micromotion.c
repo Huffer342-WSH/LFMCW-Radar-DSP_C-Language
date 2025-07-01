@@ -16,7 +16,7 @@ int radar_micromotion_handle_init(radar_micromotion_handle_t *mm, size_t numRang
     }
     mm->deltaPhase = radar_matrix2d_int16_alloc(numRangeBin, capacity);
     if (mm->deltaPhase == NULL) {
-        free(mm->prevFramePhase);
+        rd_free(mm->prevFramePhase);
         RADAR_ERROR("radar_micromotion_handle_init() failed to allocate space for deltaPhase", RADAR_ENOMEM);
         return -2;
     }

@@ -50,12 +50,12 @@ static inline void *align_ptr(void *ptr, size_t alignment)
 matrix3d_complex_int16_t *radar_matrix3d_complex_int16_alloc(size_t n0, size_t n1, size_t n2)
 {
     matrix3d_complex_int16_t *m;
-    m = (matrix3d_complex_int16_t *)malloc(sizeof(matrix3d_complex_int16_t));
+    m = (matrix3d_complex_int16_t *)rd_malloc(sizeof(matrix3d_complex_int16_t));
     if (m == NULL) {
         RADAR_ERROR("failed to allocate space for matrix struct", RADAR_ENOMEM);
     }
 
-    m->data = (int16_t *)malloc(sizeof(int16_t) * n0 * n1 * n2 * 2);
+    m->data = (int16_t *)rd_malloc(sizeof(int16_t) * n0 * n1 * n2 * 2);
     if (m->data == NULL) {
         RADAR_ERROR("failed to allocate space for matrix data", RADAR_ENOMEM);
     }
@@ -86,12 +86,12 @@ matrix3d_complex_int16_t *radar_matrix3d_complex_int16_alloc(size_t n0, size_t n
 matrix2d_complex_int32_t *radar_matrix2d_complex_int32_alloc(size_t n0, size_t n1)
 {
     matrix2d_complex_int32_t *m;
-    m = (matrix2d_complex_int32_t *)malloc(sizeof(matrix2d_complex_int32_t));
+    m = (matrix2d_complex_int32_t *)rd_malloc(sizeof(matrix2d_complex_int32_t));
     if (m == NULL) {
         RADAR_ERROR("failed to allocate space for matrix struct", RADAR_ENOMEM);
     }
 
-    m->data = (int32_t *)malloc(sizeof(int32_t) * n0 * n1 * 2);
+    m->data = (int32_t *)rd_malloc(sizeof(int32_t) * n0 * n1 * 2);
     if (m->data == NULL) {
         RADAR_ERROR("failed to allocate space for matrix data", RADAR_ENOMEM);
     }
@@ -120,13 +120,13 @@ matrix2d_complex_int32_t *radar_matrix2d_complex_int32_alloc(size_t n0, size_t n
 matrix2d_complex_int16_t *radar_matrix2d_complex_int16_alloc(size_t n0, size_t n1)
 {
     matrix2d_complex_int16_t *m;
-    m = (matrix2d_complex_int16_t *)malloc(sizeof(matrix2d_complex_int16_t));
+    m = (matrix2d_complex_int16_t *)rd_malloc(sizeof(matrix2d_complex_int16_t));
 
     if (m == NULL) {
         RADAR_ERROR("failed to allocate space for matrix struct", RADAR_ENOMEM);
     }
 
-    m->data = (int16_t *)malloc(sizeof(int16_t) * n0 * n1 * 2);
+    m->data = (int16_t *)rd_malloc(sizeof(int16_t) * n0 * n1 * 2);
 
     if (m->data == NULL) {
         RADAR_ERROR("failed to allocate space for matrix data", RADAR_ENOMEM);
@@ -156,13 +156,13 @@ matrix2d_complex_int16_t *radar_matrix2d_complex_int16_alloc(size_t n0, size_t n
 matrix2d_int32_t *radar_matrix2d_int32_alloc(size_t n0, size_t n1)
 {
     matrix2d_int32_t *m;
-    m = (matrix2d_int32_t *)malloc(sizeof(matrix2d_int32_t));
+    m = (matrix2d_int32_t *)rd_malloc(sizeof(matrix2d_int32_t));
 
     if (m == NULL) {
         RADAR_ERROR("failed to allocate space for matrix struct", RADAR_ENOMEM);
     }
 
-    m->data = (int32_t *)malloc(sizeof(int32_t) * n0 * n1);
+    m->data = (int32_t *)rd_malloc(sizeof(int32_t) * n0 * n1);
 
     if (m->data == NULL) {
         RADAR_ERROR("failed to allocate space for matrix data", RADAR_ENOMEM);
@@ -192,13 +192,13 @@ matrix2d_int32_t *radar_matrix2d_int32_alloc(size_t n0, size_t n1)
 matrix2d_int16_t *radar_matrix2d_int16_alloc(size_t n0, size_t n1)
 {
     matrix2d_int16_t *m;
-    m = (matrix2d_int16_t *)malloc(sizeof(matrix2d_int16_t));
+    m = (matrix2d_int16_t *)rd_malloc(sizeof(matrix2d_int16_t));
 
     if (m == NULL) {
         RADAR_ERROR("failed to allocate space for matrix struct", RADAR_ENOMEM);
     }
 
-    m->data = (int16_t *)malloc(sizeof(int16_t) * n0 * n1);
+    m->data = (int16_t *)rd_malloc(sizeof(int16_t) * n0 * n1);
 
     if (m->data == NULL) {
         RADAR_ERROR("failed to allocate space for matrix data", RADAR_ENOMEM);
@@ -378,7 +378,7 @@ int radar_matrix3d_complex_int16_set_data(matrix3d_complex_int16_t *m, int16_t *
 {
     RADAR_ASSERT(size == n0 * n1 * n2 * 2);
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     m->size0 = n0;
     m->size1 = n1;
@@ -394,7 +394,7 @@ int radar_matrix2d_complex_int32_set_data(matrix2d_complex_int32_t *m, int32_t *
 {
     RADAR_ASSERT(size == n0 * n1 * 2);
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     m->size0 = n0;
     m->size1 = n1;
@@ -408,7 +408,7 @@ int radar_matrix2d_complex_int16_set_data(matrix2d_complex_int16_t *m, int16_t *
 {
     RADAR_ASSERT(size == n0 * n1 * 2);
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     m->size0 = n0;
     m->size1 = n1;
@@ -422,7 +422,7 @@ int radar_matrix2d_int32_set_data(matrix2d_int32_t *m, int32_t *data, size_t siz
 {
     RADAR_ASSERT(size == n0 * n1);
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     m->size0 = n0;
     m->size1 = n1;
@@ -436,7 +436,7 @@ int radar_matrix2d_int16_set_data(matrix2d_int16_t *m, int16_t *data, size_t siz
 {
     RADAR_ASSERT(size == n0 * n1);
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     m->size0 = n0;
     m->size1 = n1;
@@ -446,55 +446,55 @@ int radar_matrix2d_int16_set_data(matrix2d_int16_t *m, int16_t *data, size_t siz
     return 0;
 }
 
-// MARK: free
+// MARK: rd_free
 
 
 void radar_matrix3d_complex_int16_free(matrix3d_complex_int16_t *m)
 {
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     if (m->owner != -1) {
-        free(m);
+        rd_free(m);
     }
 }
 
 void radar_matrix2d_complex_int32_free(matrix2d_complex_int32_t *m)
 {
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     if (m->owner != -1) {
-        free(m->data);
+        rd_free(m->data);
     }
 }
 
 void radar_matrix2d_complex_int16_free(matrix2d_complex_int16_t *m)
 {
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     if (m->owner != -1) {
-        free(m);
+        rd_free(m);
     }
 }
 
 void radar_matrix2d_int32_free(matrix2d_int32_t *m)
 {
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     if (m->owner != -1) {
-        free(m);
+        rd_free(m);
     }
 }
 
 void radar_matrix2d_int16_free(matrix2d_int16_t *m)
 {
     if (m->owner) {
-        free(m->data);
+        rd_free(m->data);
     }
     if (m->owner != -1) {
-        free(m);
+        rd_free(m);
     }
 }

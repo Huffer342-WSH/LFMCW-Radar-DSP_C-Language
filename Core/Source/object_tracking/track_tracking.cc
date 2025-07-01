@@ -69,7 +69,7 @@ void Tracker::track(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed
             RADAR_LOG_PRINTF("ID:%lu X:[%f %f %f %f] T:%u Score:%d\n", target.uuid, target.state.state_vector(0), target.state.state_vector(1),
                              target.state.state_vector(2), target.state.state_vector(3), target.state.timestamp_ms, target.life_cycle.score);
         }
-        RADAR_LOG_PRINTF("<<<\n\n", frame_cnt);
+        RADAR_LOG_PRINTF("<<<\n\n");
     }
 #endif
 

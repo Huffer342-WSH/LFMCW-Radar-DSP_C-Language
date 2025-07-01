@@ -27,11 +27,11 @@ int radardsp_init(radar_handle_t *radar)
     param->numRangeBin = 25;
 
     basic->param = param;
-    basic->staticClutter = malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
+    basic->staticClutter = rd_malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
     // basic->staticClutter = NULL;
     basic->numStaticClutterAcc = 0;
-    basic->staticClutterAccBuffer = malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
-    basic->magSpec2D = malloc(sizeof(double) * param->numRangeBin * param->numChirp);
+    basic->staticClutterAccBuffer = rd_malloc(sizeof(double) * 2 * param->numChannel * param->numRangeBin);
+    basic->magSpec2D = rd_malloc(sizeof(double) * param->numRangeBin * param->numChirp);
     return 0;
 }
 
