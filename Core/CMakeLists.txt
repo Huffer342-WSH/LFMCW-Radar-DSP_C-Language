@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # 检查配置文件所在路径： RADAR_CONFIG_FILE_DIRECTORY
-set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Core/Portable" CACHE STRING "Path to RadarConfig.h")
+set(RADAR_CONFIG_FILE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Portable" CACHE STRING "Path to RadarConfig.h")
 if(RADAR_CONFIG_FILE_DIRECTORY STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/Portable")
     message(WARNING "Default RADAR_CONFIG_FILE_DIRECTORY is used\n" "If you need to modify the radar algorithm configuration, use the RADAR_CONFIG_FILE_DIRECTORY variable to specify the path where the RadarConfig.h file is located")
     if(CROSS_COMPILE)
