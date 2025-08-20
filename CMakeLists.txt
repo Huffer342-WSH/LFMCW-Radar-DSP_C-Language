@@ -5,6 +5,29 @@ project(LFMCWRadarProcesser VERSION 0.3.2
     LANGUAGES ASM C CXX
 )
 
+# 检查板级支持包
+if(TARGET RadarBoard)
+    # 已存在target
+    message(STATUS "RadarBoard target already exists.")
+else()
+    if(NOT DEFINED RADAR_BOARD_PATH)
+        message(WARNING "RADAR_BOARD_PATH is not defined, using default path.")
+
+        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+            set(RADAR_BOARD_PATH "${PROJECT_SOURCE_DIR}/Core/Portable/win_x86")
+        elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            set(RADAR_BOARD_PATH "${PROJECT_SOURCE_DIR}/Core/Portable/linux_x86")
+        else()
+            set(RADAR_BOARD_PATH "${PROJECT_SOURCE_DIR}/Core/Portable/external")
+        endif()
+    endif()
+
+    message(STATUS "Using RADAR_BOARD_PATH: ${RADAR_BOARD_PATH}")
+    add_subdirectory(${RADAR_BOARD_PATH})
+endif()
+
+
+
 # 可修改选项
 option(CROSS_COMPILE "使能交叉编译" OFF)
 option(BUILD_DOCUMENT "生成文档" OFF)
