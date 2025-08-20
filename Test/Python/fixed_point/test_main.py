@@ -30,25 +30,25 @@ def set_matrix3d_complex_int16(m: pyRadar.matrix3d_complex_int16, complexMat: np
 
 # %% 加载数据
 
-mat = scipy.io.loadmat(file_name="../../../Data/RadarData_Simulate.mat")
+mat = scipy.io.loadmat(file_name="../../../Data/AT24G_RecordedData_运动人体_长方形轨迹.mat")
 
 c = scipy.constants.c
 frequency = mat["frequency"][0, 0]
 wavelength = c / frequency
 bandwidth = mat["bandwidth"][0, 0]
-timeChirp = mat["timeChrip"][0, 0]
-timeChirpGap = mat["timeChripGap"][0, 0]
+timeChirp = mat["timeChirp"][0, 0]
+timeChirpGap = mat["timeChirpGap"][0, 0]
 timeFrameGap = mat["timeFrameGap"][0, 0]
-numPoint = mat["numPoint"][0, 0]
-numRangeBin = 25
-numChirp = mat["numChrip"][0, 0]
+numSample = mat["numSample"][0, 0]
+numRangeBin = mat["numRangeBin"][0, 0]
+numChirp = mat["numChirp"][0, 0]
 numChannel = mat["numChannel"][0, 0]
-numFrame = len(mat["radarDataCube"])
+rdms_list = mat["RDM"].transpose((0, 1, 3, 2))  # 转置为 (numFrame, numChannel, numRangeBin, numChirp)
+numFrame = len(rdms_list)
 
 timeChirpPeriod = timeChirp + timeChirpGap
 timeFramePeriod = (timeChirpPeriod) * numChirp + timeFrameGap
 
-rdms_list = fft(fft(mat["radarDataCube"], axis=-1)[:, :, :, :numRangeBin], axis=-2).transpose(0, 1, 3, 2)
 rdms_list = rdms_list * (2**15 - 1) / np.max(np.abs(rdms_list))
 rdms_list.real = rdms_list.real.astype(np.int16)
 rdms_list.imag = rdms_list.imag.astype(np.int16)
@@ -160,7 +160,6 @@ for i, frame in enumerate(rdms_list):
     set_matrix3d_complex_int16(rdms, frame)
     pyRadar.radardsp_input_new_frame(radar_handle, rdms, int((timestamp - timestamp_start).total_seconds() * 1000))
     # 这里就已经完成了整个流程
-    # 这里就已经完成了整个流程
     pyRadar.radar_cfar2d_goca_debug(noise_buffer, radar_handle.basic.magSpec2D, radar_handle.config.cfarCfg)
 
     magSpec2D_list[i] = radar_handle.getMagSpec2D()
@@ -224,10 +223,9 @@ print("幅度谱均方误差：", mese)
 
 # %%
 stride = int(numFrame / 50)
-# dh.draw_2d_spectrumlist(magSpec2D_list[::stride], title="幅度谱").show()
-# dh.draw_2d_spectrumlist(magSpec2DRef_list[::stride], title="幅度谱").show()
-# dh.draw_2d_spectrumlist(noise_list[::stride], title="噪声水平").show()
-# dh.draw_2d_spectrumlist(snr_list[::stride], title="信噪比").show()
+dh.draw_2d_spectrumlist(magSpec2D_list[::stride], title="幅度谱").show()
+dh.draw_2d_spectrumlist(noise_list[::stride], title="噪声水平").show()
+dh.draw_2d_spectrumlist(snr_list[::stride], title="信噪比").show()
 
 # %%
 """ 绘制RDM的CFAR搜索结果 """
@@ -295,15 +293,8 @@ fig.update_layout(
     yaxis=dict(range=[-10, 10]),
     title="点云",
 )
+
 fig
-
-
-# %% 绘制一帧数据
-# i = 176
-# go.Figure(data=[go.Surface(z=magSpec2D_list[i])]).show()
-# go.Figure(data=[go.Surface(z=magSpec2DRef_list[i])]).show()
-# go.Figure(data=[go.Surface(z=noise_list[i])]).show()
-# go.Figure(data=[go.Surface(z=snr_list[i])]).show()
 
 
 # %% 绘制跟踪结果
