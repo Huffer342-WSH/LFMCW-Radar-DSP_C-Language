@@ -33,6 +33,8 @@ extern "C" {
 #define PI_Q13 25736
 #endif
 
+#define I32Q16(x) ((int32_t)((x) * (1 << 16)))
+
 #define LIGHT_SPEED (299792458)
 
 static inline int32_t radar_sqrt_q31(int32_t x)
