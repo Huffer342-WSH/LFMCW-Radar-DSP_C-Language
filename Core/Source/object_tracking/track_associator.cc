@@ -113,7 +113,7 @@ void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Vect
 
     RADAR_LOG_PRINTF("关联结果：\n");
     for (size_t i = 0; i < M; i++) {
-        RADAR_LOG_PRINTF("[%d %d]\n", a[i], b[i]);
+        RADAR_LOG_PRINTF("[%" PRId64 " %" PRId64 "]\n", a[i], b[i]);
     }
     RADAR_LOG_PRINTF("未使用的测量值:\n");
     for (int i = 0; i < measurements.size(); i++) {
