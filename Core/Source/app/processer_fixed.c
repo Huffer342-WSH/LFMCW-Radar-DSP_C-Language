@@ -309,29 +309,27 @@ static void check_and_delete_static_point(radar_handle_t *radar)
 static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame)
 {
     radar_cluster_t *cluster = &radar->cluster;
-    measurements_list_t *list = cluster->list;
+    measurements_buffer_t* buf = cluster->buffer;
 
-    /* 新一帧的量测值添加到队列 */
-    radar_measurements_list_push(list, newFrame);
-
-    /* 将多帧的量测值复制到一个measurements_t中 */
-    size_t num_meas = radar_measurements_list_get_meas_num(list);
-    if (cluster->multi_frame_meas->capacity < num_meas) {
-        radar_measurements_free(cluster->multi_frame_meas);
-        rd_free(cluster->multi_frame_meas_labels);
-        cluster->multi_frame_meas = radar_measurements_alloc(num_meas);
-        cluster->multi_frame_meas_labels = rd_malloc(sizeof(size_t) * num_meas);
+    /* 如果缓冲区满了，删除最早的一帧 */
+    if (radar_measurements_buffer_framenum(buf) >= buf->gp_size - 1) {
+        radar_measurements_buffer_pop(buf);
     }
-    radar_measurements_list_copyout(cluster->multi_frame_meas, list);
+
+    /* 将当前帧的量测值放入缓冲区 */
+    radar_measurements_buffer_push(buf, newFrame);
+
+    /* 将缓冲区中的所有量测值复制到multi_frame_meas中 */
+    radar_measurements_buffer_copyout(cluster->multi_frame_meas, buf);
 
     /* DBSCAN */
-    int num_cluster = radar_cluster_dbscan(cluster->multi_frame_meas_labels,    //
-                                           cluster->multi_frame_meas,           //
-                                           radar->config.dbscan_cfg.wr,         //
-                                           radar->config.dbscan_cfg.wv,         //
-                                           radar->config.dbscan_cfg.eps,        //
-                                           radar->config.dbscan_cfg.min_samples //
-
+    int num_cluster = radar_cluster_dbscan(  //
+        cluster->multi_frame_meas_labels,    // 聚类后的标签
+        cluster->multi_frame_meas,           // 待聚类的量测值
+        radar->config.dbscan_cfg.wr,         // 距离权重
+        radar->config.dbscan_cfg.wv,         // 速度权重
+        radar->config.dbscan_cfg.eps,        // 广义距离阈值
+        radar->config.dbscan_cfg.min_samples // 每个簇的最小点数
     );
 
     /* 点云融合 */

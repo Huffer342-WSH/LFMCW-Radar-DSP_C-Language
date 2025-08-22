@@ -147,7 +147,7 @@ void bind_radar_handle(pybind11::module_ &m)
         .def_readwrite("cfar", &radar_handle_t::cfar)
         .def(
             "getTrackedTargets",
-            [](radar_handle_t &self) {
+            [](radar_handle_t& self) {
                 TrackedTargets *t = TrackedTargets::cast_from_c(self.tracked_targets);
                 std::vector<TrackedTarget> vec;
                 for (const auto &target : *t) {
@@ -158,7 +158,7 @@ void bind_radar_handle(pybind11::module_ &m)
             "Get a copy of the 2D magnitude spectrum.")
         .def(
             "getUnconfirmedTargets",
-            [](radar_handle_t &self) {
+            [](radar_handle_t& self) {
                 TrackedTargets *t = TrackedTargets::cast_from_c(self.unconfirmed_targets);
                 std::vector<TrackedTarget> vec;
                 for (const auto &target : *t) {
@@ -169,7 +169,7 @@ void bind_radar_handle(pybind11::module_ &m)
             "Get a copy of the 2D magnitude spectrum.")
         .def(
             "getMagSpec2D",
-            [](radar_handle_t &self) {
+            [](radar_handle_t& self) {
                 std::vector<size_t> shape = { self.param.numRangeBin, self.param.numChirp };
                 pybind11::array_t<int32_t> numpy_array = array_c2numpy<int32_t>(self.basic.magSpec2D->data, shape);
                 return numpy_array.attr("copy")();
@@ -177,18 +177,46 @@ void bind_radar_handle(pybind11::module_ &m)
             "Get a copy of the 2D magnitude spectrum.")
         .def(
             "getMeasurements",
-            [](radar_handle_t &self) {
-                if (self.cluster.list->head.next != NULL) {
-                    measurements_t *m = self.cluster.list->head.next->data;
-                    return pybind11::array_t<measurement_t>({ static_cast<pybind11::ssize_t>(m->num) }, m->data);
+            [](radar_handle_t& self) {
+                measurements_buffer_t* buf = self.cluster.buffer;
+
+                /* 如果队列为空，返回空数组 */
+                if (buf->gp_out == buf->gp_in) {
+                    return array_c2numpy<measurement_t>(nullptr, { 0 });
                 }
-                return array_c2numpy<measurement_t>(nullptr, { 0 });
+
+                /* 找到最近一帧的长度 */
+                size_t idx = (buf->gp_in == 0) ? buf->gp_size - 1 : buf->gp_in - 1;
+                py::ssize_t frame_size = buf->gp_fifo[idx];
+
+                /* 确定这帧在 meas 循环队列中的起始位置 */
+                size_t meas_end = buf->m_in;
+                size_t meas_start = (meas_end >= frame_size) ? meas_end - frame_size
+                                                             : buf->m_size + meas_end - frame_size;
+
+                /* 创建 numpy 数组 */
+                pybind11::array_t<measurement_t> arr({ frame_size });
+
+                /* 取得 numpy 内部指针 */
+                measurement_t* dest = reinterpret_cast<measurement_t*>(arr.mutable_data());
+
+                /* 拷贝数据（考虑 wrap-around） */
+                if (meas_start + frame_size <= buf->m_size) {
+                    memcpy(dest, &buf->meas_fifo[meas_start], frame_size * sizeof(measurement_t));
+                } else {
+                    size_t first_part = buf->m_size - meas_start;
+                    memcpy(dest, &buf->meas_fifo[meas_start], first_part * sizeof(measurement_t));
+                    memcpy(dest + first_part, &buf->meas_fifo[0],
+                        (frame_size - first_part) * sizeof(measurement_t));
+                }
+
+                return arr;
             },
-            "Get a copy of the measurements.")
+            "Get a copy of the most recent measurements frame")
 
         .def(
             "getClusterMeasurements",
-            [](radar_handle_t &self) {
+            [](radar_handle_t& self) {
                 return pybind11::array_t<measurement_t>({ static_cast<pybind11::ssize_t>(self.cluster.cluster_meas->num) }, self.cluster.cluster_meas->data);
             },
             "Get a copy of the cluster measurements.");

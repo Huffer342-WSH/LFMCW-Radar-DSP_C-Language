@@ -68,7 +68,7 @@ typedef struct {
 } radar_basic_data_t;
 
 typedef struct {
-    measurements_list_t *list;
+    measurements_buffer_t* buffer;
     measurements_t *multi_frame_meas;
     size_t *multi_frame_meas_labels;
     measurements_t *cluster_meas;
