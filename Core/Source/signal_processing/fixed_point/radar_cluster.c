@@ -244,6 +244,7 @@ dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(
     return nb;
 errout:
     radar_cluster_dbscan_neighbors_free(nb);
+    return NULL;
 }
 
 /**
