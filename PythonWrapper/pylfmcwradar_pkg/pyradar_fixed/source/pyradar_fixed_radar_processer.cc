@@ -9,7 +9,7 @@
 void bind_radar_init_param(pybind11::module_ &m)
 {
     PYBIND11_NUMPY_DTYPE(radar_init_param_t, wavelength, bandwidth, rx_antenna_spacing, timeChirpPeriod, timeFramePeriod, numChannel, numRangeBin, numChirp,
-                         numMaxCfarPoints, numMaxCachedFrame, numInitialMultiMeas, numInitialCluster);
+                         numMaxCfarPoints, numMaxCachedFrame, numMaxMeas, numMaxCluster);
 
     pybind11::class_<radar_init_param_t>(m, "radar_init_param")
         .def(pybind11::init<>())
@@ -23,8 +23,8 @@ void bind_radar_init_param(pybind11::module_ &m)
         .def_readwrite("numChirp", &radar_init_param_t::numChirp)
         .def_readwrite("numMaxCfarPoints", &radar_init_param_t::numMaxCfarPoints)
         .def_readwrite("numMaxCachedFrame", &radar_init_param_t::numMaxCachedFrame)
-        .def_readwrite("numInitialMultiMeas", &radar_init_param_t::numInitialMultiMeas)
-        .def_readwrite("numInitialCluster", &radar_init_param_t::numInitialCluster)
+        .def_readwrite("numMaxMeas", &radar_init_param_t::numMaxMeas)
+        .def_readwrite("numMaxCluster", &radar_init_param_t::numMaxCluster)
         .def("to_numpy",
              [](radar_init_param_t &self) {
                  return array_c2numpy<radar_init_param_t>(&self, { 1 });
@@ -42,8 +42,8 @@ void bind_radar_init_param(pybind11::module_ &m)
                 << std::setw(25) << "numChirp            =" << std::setw(3) << self.numChirp << "\n"
                 << std::setw(25) << "numMaxCfarPoints    =" << std::setw(3) << self.numMaxCfarPoints << "\n"
                 << std::setw(25) << "numMaxCachedFrame   =" << std::setw(3) << self.numMaxCachedFrame << "\n"
-                << std::setw(25) << "numInitialMultiMeas =" << std::setw(3) << self.numInitialMultiMeas << "\n"
-                << std::setw(25) << "numInitialCluster   =" << std::setw(3) << self.numInitialCluster << "\n";
+                << std::setw(25) << "numMaxMeas =" << std::setw(3) << self.numMaxMeas << "\n"
+                << std::setw(25) << "numMaxCluster   =" << std::setw(3) << self.numMaxCluster << "\n";
             return oss.str();
         });
 }

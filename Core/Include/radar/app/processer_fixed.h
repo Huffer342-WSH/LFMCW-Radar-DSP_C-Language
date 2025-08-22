@@ -27,9 +27,9 @@ typedef struct {
     uint16_t numRangeBin;         ///< 距离单元数
     uint16_t numChirp;            ///< Chirp数
     uint16_t numMaxCfarPoints;    ///< CFAR检测的最大点数，超出上限时较远距离的点会被丢弃
-    uint16_t numMaxCachedFrame;   ///< 缓存帧的最大数量，用于叠加多帧聚类
-    uint16_t numInitialMultiMeas; ///< 缓存你多帧量测值的数组的初始大小
-    uint16_t numInitialCluster;   ///< 缓存聚类结果的数组的初始大小
+    uint16_t numMaxCachedFrame;   ///< 多帧叠加时，缓存的最大帧数
+    uint16_t numMaxMeas;          ///< 多帧叠加时，缓存的量测值的最大数量
+    uint16_t numMaxCluster;       ///< 聚类后簇的最大数量
 } radar_init_param_t;
 
 
