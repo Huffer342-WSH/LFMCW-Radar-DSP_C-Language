@@ -6,7 +6,7 @@
 #include <radar/common/radar_config.h>
 
 #include <stdarg.h>
-
+#include <inttypes.h>
 
 /**
  * @brief  默认的日志打印函数
