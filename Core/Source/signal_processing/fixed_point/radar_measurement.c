@@ -289,3 +289,185 @@ int radar_measure_delete_obscured(measurements_t *meas, int32_t r)
     bitset_delete(mask);
     return 0;
 }
+
+
+/**
+ * @brief 分配一个量测值缓冲区
+ *
+ * @param gp_size 最多可以存储多少帧量测值
+ * @param m_size  最多可以存储多少个量测值
+ * @return measurements_buffer_t*
+ */
+measurements_buffer_t* radar_measurements_buffer_alloc(size_t gp_size, size_t m_size)
+{
+    measurements_buffer_t* buf;
+
+    gp_size++;
+    m_size++;
+
+    buf = (measurements_buffer_t*)malloc(sizeof(measurements_buffer_t));
+    if (!buf)
+        return NULL;
+
+    buf->gp_fifo = (size_t*)malloc(sizeof(size_t) * gp_size);
+    if (!buf->gp_fifo) {
+        free(buf);
+        return NULL;
+    }
+
+    buf->meas_fifo = (measurement_t*)malloc(sizeof(measurement_t) * m_size);
+    if (!buf->meas_fifo) {
+        free(buf->gp_fifo);
+        free(buf);
+        return NULL;
+    }
+
+    buf->gp_size = gp_size;
+    buf->m_size = m_size;
+    buf->gp_in = buf->gp_out = 0;
+    buf->m_in = buf->m_out = 0;
+
+    return buf;
+}
+
+/**
+ * @brief 释放量测值缓冲区
+ *
+ * @param buf 量测值缓冲区
+ */
+void radar_measurements_buffer_free(measurements_buffer_t* buf)
+{
+    RADAR_ASSERT(buf != NULL && buf->gp_fifo != NULL && buf->meas_fifo != NULL);
+    free(buf->gp_fifo);
+    free(buf->meas_fifo);
+    free(buf);
+}
+
+/**
+ * @brief 计算 meas 队列可用空间
+ */
+static size_t meas_available_space(measurements_buffer_t* buf)
+{
+    if (buf->m_in >= buf->m_out)
+        return buf->m_size - (buf->m_in - buf->m_out);
+    else
+        return buf->m_out - buf->m_in;
+}
+
+/**
+ * @brief 计算 gp_fifo 队列可用空间
+ */
+static size_t gp_available_space(measurements_buffer_t* buf)
+{
+    if (buf->gp_in >= buf->gp_out)
+        return buf->gp_size - (buf->gp_in - buf->gp_out);
+    else
+        return buf->gp_out - buf->gp_in;
+}
+
+/**
+ * @brief 入队一帧 measurement
+ *
+ * @param buf   量测值缓冲区
+ * @param frame 量测值帧
+ * @return int
+ */
+int radar_measurements_buffer_push(measurements_buffer_t* buf, measurements_t* frame)
+{
+    size_t n;
+    n = frame->num;
+
+    RADAR_ASSERT(buf && frame);
+
+    if (gp_available_space(buf) == 0 || meas_available_space(buf) < n) {
+        return -1; // 空间不足
+    }
+
+    size_t first_part = buf->m_size - buf->m_in;
+    if (first_part >= n) {
+        memcpy(&buf->meas_fifo[buf->m_in], frame->data, n * sizeof(measurement_t));
+        buf->m_in = (buf->m_in + n) % buf->m_size;
+    } else {
+        // 分两次拷贝以处理循环队列 wrap-around
+        memcpy(&buf->meas_fifo[buf->m_in], frame->data, first_part * sizeof(measurement_t));
+        memcpy(
+            &buf->meas_fifo[0], frame->data + first_part, (n - first_part) * sizeof(measurement_t));
+        buf->m_in = n - first_part;
+    }
+
+    buf->gp_fifo[buf->gp_in] = n;
+    buf->gp_in = (buf->gp_in + 1) % buf->gp_size;
+
+    return 0;
+}
+
+/**
+ * @brief 出队一帧 measurement
+ *
+ * @param buf
+ * @return int
+ */
+int radar_measurements_buffer_pop(measurements_buffer_t* buf)
+{
+    RADAR_ASSERT(buf);
+
+    if (buf->gp_out == buf->gp_in)
+        return -1; // 队列空
+
+    size_t frame_num = buf->gp_fifo[buf->gp_out];
+    buf->gp_out = (buf->gp_out + 1) % buf->gp_size;
+    buf->m_out = (buf->m_out + frame_num) % buf->m_size;
+
+    return 0;
+}
+
+/**
+ * @brief 从量测值缓冲区中拷贝出量测值到目标量测值数组
+ *
+ * @param dest 目标量测值数组
+ * @param m    量测值缓冲区
+ * @return int
+ */
+int radar_measurements_buffer_copyout(measurements_t* dest, measurements_buffer_t* buf)
+{
+    if (!dest || !buf)
+        return -1;
+
+    size_t total = 0;        /* 总共要拷贝的 measurement 数量 */
+    size_t idx = buf->gp_in; /* 临时索引，用于从 gp_in 往 gp_out 回溯 */
+
+    /* 先计算可以完整拷贝的帧数，总量不超过 dest->capacity */
+    while (idx != buf->gp_out) {
+        /* 前向索引，靠近 m_in */
+        idx = (idx == 0) ? buf->gp_size - 1 : idx - 1;
+        size_t frame_size = buf->gp_fifo[idx];
+        if (total + frame_size > dest->capacity)
+            break; /* 超过 dest 容量则停止 */
+        total += frame_size;
+        if (idx == buf->gp_out)
+            break;
+    }
+
+    if (total == 0) {
+        dest->num = 0; /* 没有可拷贝的内容 */
+        return 0;
+    }
+
+    /* 计算 meas 中 measurement 数据的起始和结束索引 */
+    size_t meas_end = buf->m_in;
+    size_t meas_start = (meas_end >= total) ? meas_end - total : buf->m_size + meas_end - total;
+
+    /* 一次或两次 memcpy 拷贝，处理循环队列 wrap-around */
+    if (meas_start + total <= buf->m_size) {
+        /* 不 wrap-around，一次 memcpy */
+        memcpy(dest->data, &buf->meas_fifo[meas_start], total * sizeof(measurement_t));
+    } else {
+        /* wrap-around，分两次 memcpy */
+        size_t part = buf->m_size - meas_start;
+        memcpy(dest->data, &buf->meas_fifo[meas_start], part * sizeof(measurement_t));
+        memcpy(dest->data + part, &buf->meas_fifo[0], (total - part) * sizeof(measurement_t));
+    }
+
+    dest->num = total; /* 设置实际拷贝数量 */
+    return 0;
+}

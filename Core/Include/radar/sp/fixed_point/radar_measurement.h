@@ -53,6 +53,21 @@ typedef struct {
 } measurements_list_t;
 
 
+/**
+ * @brief 量测值缓冲区
+ * @details 是一个循环队列，可以输入/输出一帧量测值
+ */
+typedef struct {
+    size_t* gp_fifo;          ///< 每帧元素数量
+    measurement_t* meas_fifo; ///< 测量值循环队列
+    size_t gp_size;           ///< gp_fifo容量
+    size_t gp_in;             ///< gp_fifo入队位置
+    size_t gp_out;            ///< gp_fifo出队位置
+    size_t m_size;            ///< meas容量
+    size_t m_in;              ///< meas_fifo入队位置
+    size_t m_out;             ///< meas_fifo出队位置
+} measurements_buffer_t;
+
 measurements_t *radar_measurements_alloc(size_t capacity);
 measurements_list_t *radar_measurements_list_alloc(size_t capacity);
 
@@ -66,6 +81,18 @@ int radar_measurements_list_copyout(measurements_t *dest, measurements_list_t *m
 
 size_t radar_measurements_list_len(measurements_list_t *m);
 size_t radar_measurements_list_get_meas_num(measurements_list_t *m);
+
+measurements_buffer_t* radar_measurements_buffer_alloc(size_t gp_size, size_t m_size);
+void radar_measurements_buffer_free(measurements_buffer_t* buf);
+int radar_measurements_buffer_push(measurements_buffer_t* buf, measurements_t* frame);
+int radar_measurements_buffer_pop(measurements_buffer_t* buf);
+int radar_measurements_buffer_copyout(measurements_t* dest, measurements_buffer_t* buf);
+
+static inline size_t radar_measurements_buffer_framenum(measurements_buffer_t* buf)
+{
+    return (buf->gp_size + buf->gp_in - buf->gp_out) % buf->gp_size;
+}
+
 
 int32_t radar_measure_distance(measurement_t *ma, measurement_t *mb, int32_t wr, int32_t wv);
 
