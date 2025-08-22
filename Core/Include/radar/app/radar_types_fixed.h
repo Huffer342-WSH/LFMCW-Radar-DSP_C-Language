@@ -86,17 +86,18 @@ typedef struct {
 } radar_hook_t;
 
 typedef struct {
-    uint32_t cntFrame;
-    radar_param_t param;
-    radar_config_t config;
-    radar_basic_data_t basic;
-    radar_micromotion_handle_t micromotion;
-    cfar2d_result_t *cfar;
-    radar_cluster_t cluster;
-    radar_hook_t hook;
-    tracker_handel_t *tracker;
-    tracked_targets_list_t *tracked_targets;
-    tracked_targets_list_t *unconfirmed_targets;
+    uint32_t cntFrame;                           ///< 帧计数器
+    radar_param_t param;                         ///< 只读参数
+    radar_config_t config;                       ///< 可配置参数
+    radar_basic_data_t basic;                    ///< 基础数据（RDM、幅度谱等）
+    radar_micromotion_handle_t micromotion;      ///< 微动信息
+    cfar2d_result_t *cfar;                       ///< CFAR检测结果
+    measurements_t *meas;                        ///< 量测值
+    radar_cluster_t cluster;                     ///< 聚类结果
+    radar_hook_t hook;                           ///< 钩子函数
+    tracker_handel_t *tracker;                   ///< 航迹管理器
+    tracked_targets_list_t *tracked_targets;     ///< 已跟踪目标列表
+    tracked_targets_list_t *unconfirmed_targets; ///< 未确认目标列表
 } radar_handle_t;
 
 

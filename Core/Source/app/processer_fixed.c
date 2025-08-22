@@ -5,7 +5,8 @@
  *
  * @note  应用算法步骤如下
  *          1. radardsp_init()初始化参数并分配内存。
- *          2. 调用 radardsp_register_hook_<type> 注册钩子函数，钩子函数会在信号处理个各个阶段依次调用，用于获取雷达算法的处理结果。
+ *          2. 调用 radardsp_register_hook_<type>
+ * 注册钩子函数，钩子函数会在信号处理个各个阶段依次调用，用于获取雷达算法的处理结果。
  *          3. 然后每收到一帧数据就调用radardsp_input_new_frame()输入数据。
  *
  * @version 0.1
@@ -58,9 +59,11 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
     radar->param.numChirp = param->numChirp;
 
     radar->param.timeFrameDuration = radar->param.numChirp * radar->param.timeChirpPeriod;
-    radar->param.resRange = 149896229.0 / radar->param.bandwidth * 1000;
-    radar->param.resVelocity = radar->param.wavelength / (2 * radar->param.timeFrameDuration) * 1000;
-    radar->param.lambda_over_d_q15 = radar->param.wavelength / param->rx_antenna_spacing * ((int32_t)1 << 15);
+    radar->param.resRange = (LIGHT_SPEED / 2) / radar->param.bandwidth * 1000;
+    radar->param.resVelocity =
+        radar->param.wavelength / (2 * radar->param.timeFrameDuration) * 1000;
+    radar->param.lambda_over_d_q15 =
+        radar->param.wavelength / param->rx_antenna_spacing * ((int32_t)1 << 15);
 
     /* 设置配置 */
     memcpy(&radar->config, config, sizeof(radar_config_t));
@@ -73,7 +76,8 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
     }
 
     /* 初始化微动检测 */
-    status = radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin, (size_t)(4.0 / radar->param.timeFramePeriod));
+    status = radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin,
+        (size_t)(4.0 / radar->param.timeFramePeriod));
     if (status != 0) {
         status = 2;
         goto RADARDSP_INIT_FAILED2;
@@ -86,9 +90,16 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
         goto RADARDSP_INIT_FAILED3;
     }
 
+    /* 初始化量测值（一帧） */
+    radar->meas = radar_measurements_alloc(param->numMaxCfarPoints);
+    if (radar->meas == NULL) {
+        status = 3;
+        goto RADARDSP_INIT_FAILED3;
+    }
 
     /* 初始化聚类 */
-    status = radar_cluster_init(&radar->cluster, param->numMaxCachedFrame, param->numInitialMultiMeas, param->numInitialCluster);
+    status = radar_cluster_init(
+        &radar->cluster, param->numMaxCachedFrame, param->numMaxMeas, param->numMaxCluster);
     if (status != 0) {
         status = 4;
         goto RADARDSP_INIT_FAILED4;
@@ -129,18 +140,21 @@ void radardsp_register_hook_cfar_raw(radar_handle_t *radar, void (*func)(const c
 }
 
 
-void radardsp_register_hook_cfar_filtered(radar_handle_t *radar, void (*func)(const cfar2d_result_t *))
+void radardsp_register_hook_cfar_filtered(
+    radar_handle_t *radar, void (*func)(const cfar2d_result_t *))
 {
     radar->hook.hook_cfar_filtered = func;
 }
 
 
-void radardsp_register_hook_point_clouds(radar_handle_t *radar, void (*func)(const measurements_t *))
+void radardsp_register_hook_point_clouds(
+    radar_handle_t *radar, void (*func)(const measurements_t *))
 {
     radar->hook.hook_point_clouds = func;
 }
 
-void radardsp_register_hook_point_clouds_filtered(radar_handle_t *radar, void (*func)(const measurements_t *))
+void radardsp_register_hook_point_clouds_filtered(
+    radar_handle_t *radar, void (*func)(const measurements_t *))
 {
     radar->hook.hook_point_clouds_filtered = func;
 }
@@ -169,19 +183,24 @@ static int cb_set_track_meas(rd_float_t *meas, size_t capacity, void *args)
 /**
  * @brief 输入一帧RDM
  *
- * @param radar 雷达句柄
- * @param data 一帧RDM，三维数组，维度依次为[通道,距离,速度]
- * @param size data的大小，单位int16。 冗余参数，增加代码可靠性
+ * @param radar         雷达句柄
+ * @param rdms          一帧RDM，三维数组，维度依次为[通道,距离,速度]
+ * @param timestamp_ms  时间戳，单位毫秒
  * @return int
  */
-int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rdms, uint32_t timestamp_ms)
+int radardsp_input_new_frame(
+    radar_handle_t *radar, matrix3d_complex_int16_t *rdms, uint32_t timestamp_ms)
 {
-    RADAR_ASSERT(rdms != NULL && rdms->size0 == radar->param.numChannel && rdms->size1 == radar->param.numRangeBin && rdms->size2 == radar->param.numChirp);
+    measurements_t *meas = radar->meas;
+
+    RADAR_ASSERT(rdms != NULL && rdms->size0 == radar->param.numChannel &&
+        rdms->size1 == radar->param.numRangeBin && rdms->size2 == radar->param.numChirp);
     RD_DEBUG("开始处理一帧数据\r\n");
+
     /*
-    输入一帧RDM（2D-FFT后的产物）
-    RDM的两个维度是(距离，速度)，速度是没有结果fftshift的，所以说后一半是负速度，前一半是正速度
-    */
+     * 输入一帧RDM（2D-FFT后的产物）
+     * RDM的两个维度是(距离，速度)，速度是没有结果fftshift的，所以说后一半是负速度，前一半是正速度
+     */
     radar->basic.rdms = rdms;
 
 
@@ -194,19 +213,17 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
 #if AMPLITUDE_SPECTRUM_CALCULATION_METHOD == AMP_SPEC_CLAC_METHOD_INSIDE
 
     /* 2. 计算幅度谱 */
-    radar_clac_magSpec2D(radar->basic.magSpec2D,  // 幅度谱
-                         radar->basic.rdms,       // RDM
-                         radar->param.numChannel, // 需要累加的通道数
-                         0                        // 起始RDM编号
+    radar_clac_magSpec2D(        //
+        radar->basic.magSpec2D,  // 幅度谱
+        radar->basic.rdms,       // RDM
+        radar->param.numChannel, // 需要累加的通道数
+        0                        // 起始RDM编号
     );
-
 
 #endif /* AMPLITUDE_SPECTRUM_CALCULATION_METHOD */
 
-
     /* 3. 维护微动信息 */
     radar_micromotion_add_frame(&radar->micromotion, radar->basic.rdms);
-
 
     /* 4. CFAR搜索点，最终输出的检测结果包含点的 */
     radar_cfar2d_goca(radar->cfar, radar->basic.magSpec2D, &radar->config.cfarCfg);
@@ -215,9 +232,11 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
         radar->hook.hook_cfar_raw(radar->cfar);
     }
 
-    /* 5. 点云凝聚： 删除CFAR结果中一些幅度较小的点 */
-    /* 一个目标的信号往往会分散到多个单元中，部分单元中的能量较小，导致测角精度低，\
-        进而导致点云聚类的时候不能很好的将这些点分到一个簇中，因此要提前把这些点删除掉 */
+    /* 5. 点云凝聚： 删除CFAR结果中一些幅度较小的点
+     *
+     *  一个目标的信号往往会分散到多个单元中，部分单元中的能量较小，导致测角精度低，
+     *  进而导致点云聚类的时候不能很好的将这些点分到一个簇中，因此要提前把这些点删除掉
+     */
     radar_cfar_result_filtering(radar->cfar, &radar->config.cfar_filter_cfg);
 
 
@@ -228,50 +247,58 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
         radar->hook.hook_cfar_filtered(radar->cfar);
     }
 
-
-    measurements_t *one_frame_meas = radar_measurements_alloc(radar->cfar->numPoint);
-    if (one_frame_meas == NULL) {
-        RADAR_ERROR("radar_measurements_alloc failed", RADAR_ENOMEM);
-        return -1;
-    }
-
     /* 7. 计算角度，删除一部分可能导致角度模糊的点 */
-    radar_dual_channel_clac_angle(one_frame_meas, radar->cfar, radar->basic.rdms, radar->param.lambda_over_d_q15, radar->config.channel_phase_diff_threshold,
-                                  radar->config.channel_mag_diff_threshold);
+    meas->num = 0;
+    radar_dual_channel_clac_angle(                  //
+        meas,                                       // 量测值数组
+        radar->cfar,                                // CFAR结果
+        radar->basic.rdms,                          // RDM
+        radar->param.lambda_over_d_q15,             // 波长/天线间距
+        radar->config.channel_phase_diff_threshold, // 通道间相位差阈值
+        radar->config.channel_mag_diff_threshold    // 通道间幅度差阈值
+    );
 
-    RADAR_ASSERT(radar->cfar->numPoint == one_frame_meas->num);
 
     /* 8. 计算速度和距离 */
-    radar_clac_dis_and_velo(one_frame_meas, radar->cfar, radar->basic.magSpec2D, radar->param.resRange, radar->param.resVelocity);
+    radar_clac_dis_and_velo(     //
+        meas,                    // 量测值数组
+        radar->cfar,             // CFAR结果
+        radar->basic.magSpec2D,  // 幅度谱
+        radar->param.resRange,   // 距离分辨率
+        radar->param.resVelocity // 速度分辨率
+    );
 
+    RADAR_ASSERT(radar->cfar->numPoint == meas->num);
 
     if (radar->hook.hook_point_clouds != NULL) {
-        radar->hook.hook_point_clouds(one_frame_meas);
+        radar->hook.hook_point_clouds(meas);
     }
 
 
     /* 删除被遮挡的点 */
-    radar_measure_delete_obscured(one_frame_meas, radar->config.occlusion_radius);
+    radar_measure_delete_obscured(meas, radar->config.occlusion_radius);
+
     if (radar->hook.hook_point_clouds_filtered != NULL) {
-        radar->hook.hook_point_clouds_filtered(one_frame_meas);
+        radar->hook.hook_point_clouds_filtered(meas);
     }
 
-    /* 9. 二维平面聚类(DBSCAN) */
-    /* 累计多帧数据再做聚类。 因为杂波点往往不会连续多次在小范围内出现，而目标信号可以。
-      合理设置聚类的簇最小点数，可以避免杂波点聚类成一个簇
-      另外当目标偶尔丢失时，累计多帧数据再做聚类，可以避免丢失
-    */
-    point_clouds_clustering(radar, one_frame_meas);
-    radar_measurements_free(one_frame_meas);
+    /* 9. 二维平面聚类(DBSCAN)
+     *
+     *  累计多帧数据再做聚类。 因为杂波点往往不会连续多次在小范围内出现,
+     *  合理设置聚类的簇最小点数，可以避免杂波点聚类成一个簇。另外当目标
+     *  偶尔丢失时，累计多帧数据再做聚类，可以避免丢失
+     */
+    point_clouds_clustering(radar, meas);
+
     if (radar->hook.hook_clusters != NULL) {
         radar->hook.hook_clusters(radar->cluster.cluster_meas);
     }
 
-
     /* 10. 目标跟踪 */
     RD_DEBUG("运行目标跟踪");
-    tracker_run(radar->tracker, radar->tracked_targets, radar->unconfirmed_targets, radar->cluster.cluster_meas->num, timestamp_ms, cb_set_track_meas,
-                radar->cluster.cluster_meas);
+    tracker_run(radar->tracker, radar->tracked_targets, radar->unconfirmed_targets,
+        radar->cluster.cluster_meas->num, timestamp_ms, cb_set_track_meas,
+        radar->cluster.cluster_meas);
 
     if (radar->hook.hook_unconfirmed_targets != NULL) {
         radar->hook.hook_unconfirmed_targets(radar->unconfirmed_targets);
@@ -280,10 +307,6 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
         radar->hook.hook_tracked_targets(radar->tracked_targets);
     }
 
-
-#if 0
-
-#endif
     radar->cntFrame++;
     return 0;
 }
@@ -293,9 +316,7 @@ int radardsp_input_new_frame(radar_handle_t *radar, matrix3d_complex_int16_t *rd
  *
  * @param radar
  */
-static void check_and_delete_static_point(radar_handle_t *radar)
-{
-}
+static void check_and_delete_static_point(radar_handle_t *radar) { }
 
 
 /**
@@ -308,8 +329,9 @@ static void check_and_delete_static_point(radar_handle_t *radar)
  */
 static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame)
 {
+    int status;
     radar_cluster_t *cluster = &radar->cluster;
-    measurements_buffer_t* buf = cluster->buffer;
+    measurements_buffer_t *buf = cluster->buffer;
 
     /* 如果缓冲区满了，删除最早的一帧 */
     if (radar_measurements_buffer_framenum(buf) >= buf->gp_size - 1) {
@@ -320,7 +342,10 @@ static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFr
     radar_measurements_buffer_push(buf, newFrame);
 
     /* 将缓冲区中的所有量测值复制到multi_frame_meas中 */
-    radar_measurements_buffer_copyout(cluster->multi_frame_meas, buf);
+    status = radar_measurements_buffer_copyout(cluster->multi_frame_meas, buf);
+    if (status) {
+        RADAR_LOG_PRINTF("Warning! radar_init_param_t::numMaxMeas too small\n");
+    }
 
     /* DBSCAN */
     int num_cluster = radar_cluster_dbscan(  //
@@ -333,9 +358,6 @@ static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFr
     );
 
     /* 点云融合 */
-    if (cluster->cluster_meas->capacity < num_cluster) {
-        radar_measurements_free(cluster->cluster_meas);
-        cluster->cluster_meas = radar_measurements_alloc(num_cluster);
-    }
-    radar_cluster_fusion(cluster->cluster_meas, num_cluster, cluster->multi_frame_meas_labels, cluster->multi_frame_meas);
+    radar_cluster_fusion(cluster->cluster_meas, num_cluster, cluster->multi_frame_meas_labels,
+        cluster->multi_frame_meas);
 }

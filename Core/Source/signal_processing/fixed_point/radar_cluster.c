@@ -172,74 +172,78 @@ static void radar_calc_neighbors_info(size_t n, int32_t *D, int32_t eps, size_t 
  * @brief  创建DBSCAN聚类的邻居信息
  *
  * @param[in] meas 量测值列表
- * @param[in] wr  DBSCAN的领域半径
- * @param[in] wv  DBSCAN的领域半径
- * @param[in] eps DBSCAN的领域大小
+ * @param[in] wr   DBSCAN的领域半径
+ * @param[in] wv   DBSCAN的速度半径
+ * @param[in] eps  DBSCAN的邻域阈值
  * @return dbscan_neighbors_t*  Created dbscan_neighbors_t
  *
- * @note  该函数会分配内存，需要调用radar_cluster_dbscan_neighbors_free()来释放
+ * @note  该函数会分配内存，需要调用 radar_cluster_dbscan_neighbors_free() 来释放
  */
-dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(measurements_t *meas, int32_t wr, int32_t wv, int32_t eps)
+dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(
+    measurements_t *meas, int32_t wr, int32_t wv, int32_t eps)
 {
-    dbscan_neighbors_t *nb = (dbscan_neighbors_t *)rd_malloc(sizeof(dbscan_neighbors_t));
-    size_t i;
-    int failed_number = 0;
+    dbscan_neighbors_t *nb;
+    int n;
+    size_t capacity;
+
+    n = meas->num;
+    nb = (dbscan_neighbors_t *)rd_malloc(sizeof(dbscan_neighbors_t));
     if (nb == NULL) {
         RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc dbscan_neighbors_t failed", RADAR_ENOMEM);
         return NULL;
     }
-    size_t capacity = meas->num * (meas->num - 1) / 2;
-    nb->n = meas->num;
+
+    /* 初始化指针，避免 free 崩溃 */
+    nb->D = NULL;
+    nb->n_neighbors = NULL;
+    nb->neighborhoods = NULL;
+    nb->n = n;
+
+    capacity = meas->num * (meas->num - 1) / 2;
 
     /* 距离矩阵 */
     nb->D = (int32_t *)rd_malloc(capacity * sizeof(nb->D[0]));
     if (nb->D == NULL) {
         RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc D failed", RADAR_ENOMEM);
-        failed_number = 1;
+        goto errout;
     }
     radar_calc_meas_distance(meas, wr, wv, nb->D);
 
-
     /* 邻居数量 */
-    nb->n_neighbors = (size_t *)rd_calloc(nb->n, sizeof(nb->n_neighbors[0]));
+    nb->n_neighbors = (size_t *)rd_calloc(n, sizeof(nb->n_neighbors[0]));
     if (nb->n_neighbors == NULL) {
         RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc n_neighbors failed", RADAR_ENOMEM);
-        failed_number = 2;
+        goto errout;
     }
-    radar_calc_neighbors_num(nb->n, nb->D, eps, nb->n_neighbors);
+    radar_calc_neighbors_num(n, nb->D, eps, nb->n_neighbors);
 
-    /* 邻居信息 */
-    nb->neighborhoods = (size_t **)rd_malloc(nb->n * sizeof(nb->neighborhoods[0]));
+    /* 邻居信息数组 */
+    nb->neighborhoods = (size_t **)rd_calloc(n, sizeof(nb->neighborhoods[0]));
     if (nb->neighborhoods == NULL) {
         RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc neighborhoods failed", RADAR_ENOMEM);
-        failed_number = 3;
+        goto errout;
     }
-    for (i = 0; i < nb->n; i++) {
+
+    for (size_t i = 0; i < n; i++) {
+
+        /* 没邻居就不分配 */
+        if (nb->n_neighbors[i] == 0)
+            continue;
+
+        /* 分配邻居信息数组 */
         nb->neighborhoods[i] = (size_t *)rd_malloc(nb->n_neighbors[i] * sizeof(nb->neighborhoods[0][0]));
         if (nb->neighborhoods[i] == NULL) {
-            RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc failed", RADAR_ENOMEM);
-            failed_number = 4;
-            break;
+            RADAR_ERROR("radar_cluster_dbscan_neighbors_create rd_malloc neighborhoods failed",
+                RADAR_ENOMEM);
+            goto errout;
         }
     }
-    radar_calc_neighbors_info(nb->n, nb->D, eps, nb->neighborhoods);
 
-    /* 发生分配失败时，释放已经成功分配的内存 */
-    switch (failed_number) {
-    case 4:
-        for (size_t j = 0; j < i; j++) rd_free(nb->neighborhoods[j]);
-    case 3:
-        rd_free(nb->neighborhoods);
-    case 2:
-        rd_free(nb->n_neighbors);
-    case 1:
-        rd_free(nb->D);
-        break;
-    default:
-        break;
-    }
+    radar_calc_neighbors_info(n, nb->D, eps, nb->neighborhoods);
 
     return nb;
+errout:
+    radar_cluster_dbscan_neighbors_free(nb);
 }
 
 /**
@@ -249,12 +253,26 @@ dbscan_neighbors_t *radar_cluster_dbscan_neighbors_create(measurements_t *meas, 
  */
 void radar_cluster_dbscan_neighbors_free(dbscan_neighbors_t *nb)
 {
-    for (size_t i = 0; i < nb->n; i++) {
-        rd_free(nb->neighborhoods[i]);
+    if (nb == NULL)
+        return;
+
+    if (nb->neighborhoods) {
+        for (size_t i = 0; i < nb->n; i++) {
+            if (nb->neighborhoods[i]) {
+                rd_free(nb->neighborhoods[i]);
+            }
+        }
+        rd_free(nb->neighborhoods);
     }
-    rd_free(nb->neighborhoods);
-    rd_free(nb->n_neighbors);
-    rd_free(nb->D);
+
+    if (nb->n_neighbors) {
+        rd_free(nb->n_neighbors);
+    }
+
+    if (nb->D) {
+        rd_free(nb->D);
+    }
+
     rd_free(nb);
 }
 
@@ -285,7 +303,8 @@ size_t *radar_get_neighbors(size_t *count, size_t idx, int32_t eps, void *param)
  * @param eps DBSCAN的领域大小
  * @param min_samples DBSCAN的核心点需要的最小邻居数
  */
-int radar_cluster_dbscan(size_t *labels, measurements_t *meas, int32_t wr, int32_t wv, int32_t eps, size_t min_samples)
+int radar_cluster_dbscan(
+    size_t *labels, measurements_t *meas, int32_t wr, int32_t wv, int32_t eps, size_t min_samples)
 {
     int num_cluster;
     dbscan_neighbors_t *nb = radar_cluster_dbscan_neighbors_create(meas, wr, wv, eps);
@@ -306,14 +325,26 @@ int radar_cluster_dbscan(size_t *labels, measurements_t *meas, int32_t wr, int32
  * @param num_cluster 聚类的数量
  * @param labels 量测值的聚类标签
  * @param meas 量测值列表
+ *
+ * @return int 0表示成功，-1表示失败(clusters容量不足)
  */
-int radar_cluster_fusion(measurements_t *clusters, size_t num_cluster, size_t *labels, measurements_t *meas)
+int radar_cluster_fusion(
+    measurements_t *clusters, size_t num_cluster, size_t *labels, measurements_t *meas)
 {
+    int ret = 0;
     RADAR_ASSERT(clusters != NULL && clusters->capacity >= num_cluster);
+
+    if (clusters->capacity < num_cluster) {
+        RD_WARN("radar_cluster_fusion clusters->capacity < num_cluster");
+        ret = -1;
+        num_cluster = clusters->capacity;
+    }
+
     for (size_t i = 0; i < num_cluster; i++) {
-        int64_t distance, velocity, azimuth, amp, snr;
-        int64_t cnt = 0;
-        amp = distance = velocity = azimuth = snr = 0;
+        measurement_t *m = &clusters->data[i];
+        int64_t distance = 0, velocity = 0, azimuth = 0, amp = 0, snr = 0;
+        int cnt = 0;
+
         for (size_t j = 0; j < meas->num; j++) {
             if (labels[j] != i)
                 continue;
@@ -325,13 +356,14 @@ int radar_cluster_fusion(measurements_t *clusters, size_t num_cluster, size_t *l
             snr += (int64_t)m->snr;
             cnt++;
         }
-        measurement_t *m = &clusters->data[i];
+
         m->amp = amp / cnt;
         m->distance = distance / cnt;
         m->velocity = velocity / cnt;
         m->azimuth = azimuth / cnt;
         m->snr = snr / cnt;
     }
+
     clusters->num = num_cluster;
     return 0;
 }
