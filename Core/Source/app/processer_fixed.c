@@ -32,8 +32,64 @@
 #include <math.h>
 
 
-static void check_and_delete_static_point(radar_handle_t *radar);
-static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame);
+/**
+ * @brief CFAR中的每一个速度为0的点，都一次查询微动信息，不符合要求的点删除
+ *
+ * @param radar
+ */
+static void check_and_delete_static_point(radar_handle_t *radar) { }
+
+
+/**
+ * @brief 聚类，输入当前帧的量测值和历史数据，输出当前帧的聚类结果
+ *        该函数会将当前帧的量测值和历史数据组合成一个大矩阵，然后对
+ *        该矩阵进行DBSCAN聚类，聚类的结果存储到radar->cluster_meas中
+ *
+ * @param radar   雷达句柄
+ * @param newFrame 当前帧的量测值
+ */
+static int point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame)
+{
+    int status;
+    radar_cluster_t *cluster = &radar->cluster;
+    measurements_buffer_t *buf = cluster->buffer;
+
+    /* 如果缓冲区满了，删除最早的一帧 */
+    if (radar_measurements_buffer_framenum(buf) >= buf->gp_size - 1) {
+        radar_measurements_buffer_pop(buf);
+    }
+
+    /* 将当前帧的量测值放入缓冲区 */
+    radar_measurements_buffer_push(buf, newFrame);
+
+    /* 将缓冲区中的所有量测值复制到multi_frame_meas中 */
+    status = radar_measurements_buffer_copyout(cluster->multi_frame_meas, buf);
+    if (status) {
+        RADAR_LOG_PRINTF("Warning! radar_init_param_t::numMaxMeas too small\n");
+    }
+
+    /* DBSCAN */
+    int num_cluster = radar_cluster_dbscan(  //
+        cluster->multi_frame_meas_labels,    // 聚类后的标签
+        cluster->multi_frame_meas,           // 待聚类的量测值
+        radar->config.dbscan_cfg.wr,         // 距离权重
+        radar->config.dbscan_cfg.wv,         // 速度权重
+        radar->config.dbscan_cfg.eps,        // 广义距离阈值
+        radar->config.dbscan_cfg.min_samples // 每个簇的最小点数
+    );
+
+    /* DBSCAN因为内存不足没有执行。从缓冲区弹出一帧量测值并直接返回 */
+    if (num_cluster < 0) {
+        RADAR_LOG_PRINTF("Warning! DBSCAN is out of memory.\n");
+        radar_measurements_buffer_pop(buf);
+        return -1;
+    }
+
+    /* 点云融合 */
+    radar_cluster_fusion(cluster->cluster_meas, num_cluster, cluster->multi_frame_meas_labels,
+        cluster->multi_frame_meas);
+    return 0;
+}
 
 
 /**
@@ -191,6 +247,7 @@ static int cb_set_track_meas(rd_float_t *meas, size_t capacity, void *args)
 int radardsp_input_new_frame(
     radar_handle_t *radar, matrix3d_complex_int16_t *rdms, uint32_t timestamp_ms)
 {
+    int status;
     measurements_t *meas = radar->meas;
 
     RADAR_ASSERT(rdms != NULL && rdms->size0 == radar->param.numChannel &&
@@ -288,7 +345,11 @@ int radardsp_input_new_frame(
      *  合理设置聚类的簇最小点数，可以避免杂波点聚类成一个簇。另外当目标
      *  偶尔丢失时，累计多帧数据再做聚类，可以避免丢失
      */
-    point_clouds_clustering(radar, meas);
+    status = point_clouds_clustering(radar, meas);
+    if (status) {
+        RADAR_LOG_PRINTF("Warning! point_clouds_clustering failed.\n");
+        return -9;
+    }
 
     if (radar->hook.hook_clusters != NULL) {
         radar->hook.hook_clusters(radar->cluster.cluster_meas);
@@ -309,55 +370,4 @@ int radardsp_input_new_frame(
 
     radar->cntFrame++;
     return 0;
-}
-
-/**
- * @brief CFAR中的每一个速度为0的点，都一次查询微动信息，不符合要求的点删除
- *
- * @param radar
- */
-static void check_and_delete_static_point(radar_handle_t *radar) { }
-
-
-/**
- * @brief 聚类，输入当前帧的量测值和历史数据，输出当前帧的聚类结果
- *        该函数会将当前帧的量测值和历史数据组合成一个大矩阵，然后对
- *        该矩阵进行DBSCAN聚类，聚类的结果存储到radar->cluster_meas中
- *
- * @param radar   雷达句柄
- * @param newFrame 当前帧的量测值
- */
-static void point_clouds_clustering(radar_handle_t *radar, measurements_t *newFrame)
-{
-    int status;
-    radar_cluster_t *cluster = &radar->cluster;
-    measurements_buffer_t *buf = cluster->buffer;
-
-    /* 如果缓冲区满了，删除最早的一帧 */
-    if (radar_measurements_buffer_framenum(buf) >= buf->gp_size - 1) {
-        radar_measurements_buffer_pop(buf);
-    }
-
-    /* 将当前帧的量测值放入缓冲区 */
-    radar_measurements_buffer_push(buf, newFrame);
-
-    /* 将缓冲区中的所有量测值复制到multi_frame_meas中 */
-    status = radar_measurements_buffer_copyout(cluster->multi_frame_meas, buf);
-    if (status) {
-        RADAR_LOG_PRINTF("Warning! radar_init_param_t::numMaxMeas too small\n");
-    }
-
-    /* DBSCAN */
-    int num_cluster = radar_cluster_dbscan(  //
-        cluster->multi_frame_meas_labels,    // 聚类后的标签
-        cluster->multi_frame_meas,           // 待聚类的量测值
-        radar->config.dbscan_cfg.wr,         // 距离权重
-        radar->config.dbscan_cfg.wv,         // 速度权重
-        radar->config.dbscan_cfg.eps,        // 广义距离阈值
-        radar->config.dbscan_cfg.min_samples // 每个簇的最小点数
-    );
-
-    /* 点云融合 */
-    radar_cluster_fusion(cluster->cluster_meas, num_cluster, cluster->multi_frame_meas_labels,
-        cluster->multi_frame_meas);
 }
