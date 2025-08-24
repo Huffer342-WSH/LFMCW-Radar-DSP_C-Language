@@ -1,6 +1,4 @@
-// Deleter.cpp
 #include <radar/ot/track_deleter.hh>
-
 
 void Deleter::delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses)
 {
@@ -17,7 +15,6 @@ void Deleter::delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothe
     tracked_targets.delete_invalid_targets();
     return;
 }
-
 
 void Deleter::update_score(TrackedTarget &target, Hypothesis &hypothesis)
 {

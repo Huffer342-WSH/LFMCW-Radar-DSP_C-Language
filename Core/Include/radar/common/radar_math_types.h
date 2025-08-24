@@ -17,24 +17,8 @@
 #ifndef _RADAR_MATH_TYPES_H_
 #define _RADAR_MATH_TYPES_H_
 
-#include <stdint.h>
-
 #include <radar/common/radar_config.h>
 
 typedef FLOAT_TYPE rd_float_t;
-
-
-#ifdef __cplusplus
-#include <Eigen/Dense>
-typedef Eigen::Matrix<rd_float_t, 3, 1> Vector3r;
-typedef Eigen::Matrix<rd_float_t, 3, 3> Matrix33r;
-typedef Eigen::Matrix<rd_float_t, 3, 4> Matrix34r;
-typedef Eigen::Matrix<rd_float_t, 4, 1> Vector4r;
-typedef Eigen::Matrix<rd_float_t, 4, 3> Matrix43r;
-typedef Eigen::Matrix<rd_float_t, 4, 4> Matrix44r;
-
-
-#endif
-
 
 #endif /* _RADAR_MATH_TYPES_H_ */

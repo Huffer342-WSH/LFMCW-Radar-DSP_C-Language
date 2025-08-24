@@ -1,8 +1,6 @@
 #pragma once
 
-#include <radar/common/radar_math_types.h>
 #include <radar/ot/track_associator.hh>
-#include <radar/ot/track_kalman.hh>
 #include <radar/ot/track_target.hh>
 
 #include <vector>

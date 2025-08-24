@@ -14,7 +14,7 @@
 #include <radar/common/mm.h>
 
 #include <string.h>
-#include <stdio.h>
+
 /**
  * @brief 返回一个大于等于ptr且是alignment的倍数的指针
  *

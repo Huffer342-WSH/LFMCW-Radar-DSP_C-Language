@@ -26,8 +26,6 @@ else()
     add_subdirectory(${RADAR_BOARD_PATH})
 endif()
 
-
-
 # 可修改选项
 option(CROSS_COMPILE "使能交叉编译" OFF)
 option(BUILD_DOCUMENT "生成文档" OFF)
@@ -40,12 +38,6 @@ if(CROSS_COMPILE)
     set(BUILD_TEST OFF)
     set(BUILD_PythonWrapper OFF)
 endif()
-
-# 设置 C++ 标准
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS ON)
 
 # 设置输出路径
 if(${PROJECT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
@@ -62,7 +54,7 @@ include(configGitInfo)
 
 # 包含 AddressSanitizer 配置文件
 if(CONFIG_ASAN)
-include(configAddressSanitizer) # 测试中使用了AddressSanitizer
+    include(configAddressSanitizer) # 测试中使用了AddressSanitizer
 endif()
 
 # 设置 MSVC 编译选项

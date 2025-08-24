@@ -11,12 +11,11 @@
 #include <radar/sp/fixed_point/radar_measurement.h>
 
 #include <radar/common/radar_log.h>
-#include <radar/common/radar_log.h>
+#include <radar/lib/bitset.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-#include <radar/lib/bitset.h>
 
 /**
  * @brief 分配一个量测值列表，可容纳capacity个量测值
@@ -230,7 +229,8 @@ int32_t radar_measure_distance(measurement_t *ma, measurement_t *mb, int32_t wr,
 
     int64_t wr2_q31 = ((int64_t)wr * wr) >> 1;
     int64_t wv2_q31 = ((int64_t)wv * wv) >> 1;
-    sum = (wr2_q31 * c2 + wv2_q31 * v * v) >> 30; // 少右移一位，即乘以2，配合radar_sqrt_q31后面的右移16位抵消radar_sqrt_q31()多乘的sqrt(2^31)
+    sum = (wr2_q31 * c2 + wv2_q31 * v * v) >>
+        30; // 少右移一位，即乘以2，配合radar_sqrt_q31后面的右移16位抵消radar_sqrt_q31()多乘的sqrt(2^31)
     if (sum < 0 || sum > INT32_MAX) {
         RADAR_ERROR("radar_cluster_calc_distance overflow", RADAR_EOVRFLW);
     }
@@ -298,24 +298,24 @@ int radar_measure_delete_obscured(measurements_t *meas, int32_t r)
  * @param m_size  最多可以存储多少个量测值
  * @return measurements_buffer_t*
  */
-measurements_buffer_t* radar_measurements_buffer_alloc(size_t gp_size, size_t m_size)
+measurements_buffer_t *radar_measurements_buffer_alloc(size_t gp_size, size_t m_size)
 {
-    measurements_buffer_t* buf;
+    measurements_buffer_t *buf;
 
     gp_size++;
     m_size++;
 
-    buf = (measurements_buffer_t*)malloc(sizeof(measurements_buffer_t));
+    buf = (measurements_buffer_t *)malloc(sizeof(measurements_buffer_t));
     if (!buf)
         return NULL;
 
-    buf->gp_fifo = (size_t*)malloc(sizeof(size_t) * gp_size);
+    buf->gp_fifo = (size_t *)malloc(sizeof(size_t) * gp_size);
     if (!buf->gp_fifo) {
         free(buf);
         return NULL;
     }
 
-    buf->meas_fifo = (measurement_t*)malloc(sizeof(measurement_t) * m_size);
+    buf->meas_fifo = (measurement_t *)malloc(sizeof(measurement_t) * m_size);
     if (!buf->meas_fifo) {
         free(buf->gp_fifo);
         free(buf);
@@ -335,7 +335,7 @@ measurements_buffer_t* radar_measurements_buffer_alloc(size_t gp_size, size_t m_
  *
  * @param buf 量测值缓冲区
  */
-void radar_measurements_buffer_free(measurements_buffer_t* buf)
+void radar_measurements_buffer_free(measurements_buffer_t *buf)
 {
     RADAR_ASSERT(buf != NULL && buf->gp_fifo != NULL && buf->meas_fifo != NULL);
     free(buf->gp_fifo);
@@ -346,7 +346,7 @@ void radar_measurements_buffer_free(measurements_buffer_t* buf)
 /**
  * @brief 计算 meas 队列可用空间
  */
-static size_t meas_available_space(measurements_buffer_t* buf)
+static size_t meas_available_space(measurements_buffer_t *buf)
 {
     if (buf->m_in >= buf->m_out)
         return buf->m_size - (buf->m_in - buf->m_out);
@@ -357,7 +357,7 @@ static size_t meas_available_space(measurements_buffer_t* buf)
 /**
  * @brief 计算 gp_fifo 队列可用空间
  */
-static size_t gp_available_space(measurements_buffer_t* buf)
+static size_t gp_available_space(measurements_buffer_t *buf)
 {
     if (buf->gp_in >= buf->gp_out)
         return buf->gp_size - (buf->gp_in - buf->gp_out);
@@ -372,7 +372,7 @@ static size_t gp_available_space(measurements_buffer_t* buf)
  * @param frame 量测值帧
  * @return int
  */
-int radar_measurements_buffer_push(measurements_buffer_t* buf, measurements_t* frame)
+int radar_measurements_buffer_push(measurements_buffer_t *buf, measurements_t *frame)
 {
     size_t n;
     n = frame->num;
@@ -390,8 +390,8 @@ int radar_measurements_buffer_push(measurements_buffer_t* buf, measurements_t* f
     } else {
         // 分两次拷贝以处理循环队列 wrap-around
         memcpy(&buf->meas_fifo[buf->m_in], frame->data, first_part * sizeof(measurement_t));
-        memcpy(
-            &buf->meas_fifo[0], frame->data + first_part, (n - first_part) * sizeof(measurement_t));
+        memcpy(&buf->meas_fifo[0], frame->data + first_part,
+               (n - first_part) * sizeof(measurement_t));
         buf->m_in = n - first_part;
     }
 
@@ -407,7 +407,7 @@ int radar_measurements_buffer_push(measurements_buffer_t* buf, measurements_t* f
  * @param buf
  * @return int
  */
-int radar_measurements_buffer_pop(measurements_buffer_t* buf)
+int radar_measurements_buffer_pop(measurements_buffer_t *buf)
 {
     RADAR_ASSERT(buf);
 
@@ -428,7 +428,7 @@ int radar_measurements_buffer_pop(measurements_buffer_t* buf)
  * @param m    量测值缓冲区
  * @return int
  */
-int radar_measurements_buffer_copyout(measurements_t* dest, measurements_buffer_t* buf)
+int radar_measurements_buffer_copyout(measurements_t *dest, measurements_buffer_t *buf)
 {
     if (!dest || !buf)
         return -1;

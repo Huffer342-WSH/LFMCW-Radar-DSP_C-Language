@@ -9,7 +9,6 @@
  *
  */
 
-
 #include <radar/sp/fixed_point/radar_mag.h>
 
 #include <radar/common/radar_log.h>
