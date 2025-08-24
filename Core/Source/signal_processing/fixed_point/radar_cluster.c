@@ -30,8 +30,6 @@
 #include <radar/common/radar_log.h>
 #include <radar/common/mm.h>
 
-#include <stdio.h>
-
 
 /**
  * @brief  计算量测值列表任意两点之间的距离

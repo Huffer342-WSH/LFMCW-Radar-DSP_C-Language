@@ -2,7 +2,6 @@
 
 #include <radar/ot/track_kalman.hh>
 #include <radar/ot/track_target.hh>
-#include <radar/ot/track_kalman.hh>
 
 #include <vector>
 #include <Eigen/Dense>

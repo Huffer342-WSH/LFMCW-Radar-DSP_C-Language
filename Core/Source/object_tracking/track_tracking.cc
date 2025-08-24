@@ -13,7 +13,6 @@
 #include <radar/ot/track_target.hh>
 
 #include <vector>
-#include <algorithm>
 
 
 /**

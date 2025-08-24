@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <radar/common/radar_math_types.h>
 #include <radar/sp/fixed_point/radar_cfar.h>
 #include <radar/app/radar_types_fixed.h>
 

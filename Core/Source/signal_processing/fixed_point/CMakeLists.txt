@@ -14,11 +14,9 @@ target_sources(RadarDP_SigProc_fixed_objs PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_dis_velo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_doa.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_mag.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/radar_math.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_matrix.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_measurement.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_micromotion.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/radar_types.c
 )
 
 target_link_libraries(RadarDP_SigProc_fixed PUBLIC

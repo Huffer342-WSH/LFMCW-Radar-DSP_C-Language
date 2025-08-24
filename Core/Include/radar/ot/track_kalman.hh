@@ -1,7 +1,6 @@
 #pragma once
 
 #include <radar/common/radar_log.h>
-#include <radar/common/radar_math_types.h>
 #include <radar/ot/track_model.hh>
 
 class GaussianState

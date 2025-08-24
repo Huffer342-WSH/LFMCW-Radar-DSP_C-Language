@@ -9,12 +9,12 @@
  *
  */
 
-
 #include <radar/sp/fixed_point/radar_doa.h>
 #include <radar/sp/fixed_point/radar_cfar.h>
 #include <radar/common/radar_log.h>
 
 #include <stdlib.h>
+
 /**
  * @brief 输入两个复数，返回相位差
  *

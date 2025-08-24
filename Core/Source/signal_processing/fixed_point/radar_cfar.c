@@ -12,12 +12,11 @@
 #include <radar/sp/fixed_point/radar_cfar.h>
 
 #include <radar/common/radar_log.h>
-#include <radar/common/radar_log.h>
+#include <radar/lib/bitset.h>
 
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <radar/lib/bitset.h>
 
 static inline int unwrapper_neg(int x, int n);
 static inline int wrap_pos(int x, int n);

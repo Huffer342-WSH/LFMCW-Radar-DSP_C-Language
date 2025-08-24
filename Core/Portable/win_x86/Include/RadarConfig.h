@@ -1,9 +1,7 @@
 #ifndef _RADARCONFIG_H_
 #define _RADARCONFIG_H_
 
-#include <stdio.h>
 #include <stdint.h>
-
 
 #ifdef __cplusplus
 extern "C" {

@@ -38,22 +38,14 @@ void tracker_run(tracker_handel_t *tracker_handel, tracked_targets_list_t *track
 {
     Tracker *tracker = reinterpret_cast<Tracker *>(tracker_handel);
 
-
     /* 转换测量值 */
     RD_DEBUG("初始化测量向量");
     tracker->measurements.resize(meas_num);
     cb(tracker->measurements.data()->data(), tracker->measurements.capacity(), args);
-    // size_t num_measurements = measurements->num;
-    // std::vector<Vector3r> meas_vectors(num_measurements);
-    // for (size_t i = 0; i < num_measurements; i++) {
-    //     measurement_t *m = &measurements->data[i];
-    //     meas_vectors[i] << (rd_float_t)m->azimuth / (8192.0), (rd_float_t)m->distance / 1000.0, (rd_float_t)m->velocity / 1000.0;
-    // }
 
     /* 转换跟踪目标 */
     TrackedTargets *cxx_tracked_targets = reinterpret_cast<TrackedTargets *>(tracked_targets);
     TrackedTargets *cxx_unconfirmed_targets = reinterpret_cast<TrackedTargets *>(unconfirmed_targets);
-
 
     RD_DEBUG("运行C++ 跟踪器");
 

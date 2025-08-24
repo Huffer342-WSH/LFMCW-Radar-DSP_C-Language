@@ -27,5 +27,13 @@
 			// "-DCMAKE_TOOLCHAIN_FILE=CMake/toolchain-armclang.cmake"
 		],
 		"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+		"cmake.options.advanced": {
+			"workflow": {
+				"statusBarVisibility": "hidden",
+			},
+			"cpack": {
+				"statusBarVisibility": "hidden",
+			},
+		}
 	},
 }

@@ -9,6 +9,7 @@ target_link_libraries(RadarDP_Processer_fixed_objs PUBLIC
 
 target_sources(RadarDP_Processer_fixed_objs PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/processer_fixed.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/radar_types.c
 )
 
 target_link_libraries(RadarDP_Processer_fixed PUBLIC

@@ -12,7 +12,6 @@
 #include <radar/sp/fixed_point/radar_dis_velo.h>
 
 #include <radar/common/radar_log.h>
-#include <radar/common/radar_log.h>
 
 /**
  * @brief 坐标估计

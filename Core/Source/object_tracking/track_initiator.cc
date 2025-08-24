@@ -1,10 +1,6 @@
 #include <radar/ot/track_initiator.hh>
-
 #include <radar/ot/track_kalman.hh>
-
 #include <radar/common/radar_log.h>
-#include <Eigen/Dense>
-
 
 void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconfirmed_targets, std::vector<Vector3r> &measurements, uint32_t timestamp_ms)
 {

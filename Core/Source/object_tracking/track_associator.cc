@@ -3,10 +3,28 @@
 #include "rectangular_lsap.hh"
 #include <cmath>
 #include <vector>
-#include <bitset>
 
-static inline void move_unused_measurements(std::vector<Vector3r> &measurements, std::vector<int64_t> &used);
+static inline void move_unused_measurements(std::vector<Vector3r> &measurements, std::vector<int64_t> &used)
+{
+    size_t n = measurements.size();
+    std::vector<bool> is_used(n, false); // 位集，初始化全为 false
+    for (int64_t index : used) {
+        if (index >= 0 && index < n) {
+            is_used[index] = true;
+        }
+    }
 
+    int i = 0;
+    for (int j = 0; j < n; j++) {
+        if (!is_used[j]) {
+            if (i != j) {
+                measurements[i] = measurements[j];
+            }
+            i++;
+        }
+    }
+    measurements.resize(i);
+}
 
 /**
  * @brief 根据目标列表初始化假设
@@ -122,30 +140,6 @@ void Associator::associate(std::vector<Hypothesis> &hypotheses, std::vector<Vect
 #endif
     return;
 };
-
-
-static inline void move_unused_measurements(std::vector<Vector3r> &measurements, std::vector<int64_t> &used)
-{
-    size_t n = measurements.size();
-    std::vector<bool> is_used(n, false); // 位集，初始化全为 false
-    for (int64_t index : used) {
-        if (index >= 0 && index < n) {
-            is_used[index] = true;
-        }
-    }
-
-    int i = 0;
-    for (int j = 0; j < n; j++) {
-        if (!is_used[j]) {
-            if (i != j) {
-                measurements[i] = measurements[j];
-            }
-            i++;
-        }
-    }
-    measurements.resize(i);
-}
-
 
 /**
  * @brief  计算假设中的预测测量值和测量值之间的距离
