@@ -72,6 +72,7 @@ typedef struct {
     measurements_t *multi_frame_meas;
     size_t *multi_frame_meas_labels;
     measurements_t *cluster_meas;
+    dbscan_neighbors_t *dbscan_handle;
 } radar_cluster_t;
 
 
