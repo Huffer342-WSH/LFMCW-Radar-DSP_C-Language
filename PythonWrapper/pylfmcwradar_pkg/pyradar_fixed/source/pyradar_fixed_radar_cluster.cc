@@ -18,21 +18,23 @@ void bind_radar_cluster_dbscan(pybind11::module_ &m)
 {
     m.def(
         "radar_cluster_dbscan",
-        [](measurements_t *meas, int32_t wr, int32_t wv, int32_t eps, size_t min_samples) -> py::array_t<ssize_t> {
-            // 获取输入的测量数据数组
-
+        [](measurements_t *meas, int32_t wr, int32_t wv, int32_t eps,
+           size_t min_samples) -> py::array_t<ssize_t> {
             size_t *labels = new size_t[meas->num];
+            size_t n_labels;
+            dbscan_neighbors_t *nb;
 
-
-            // 调用原始的 C++ 函数
-            radar_cluster_dbscan(labels, meas, wr, wv, eps, min_samples);
+            nb = radar_cluster_dbscan_neighbors_alloc(meas->num);
+            radar_cluster_dbscan(nb, labels, &n_labels, meas, wr, wv, eps, min_samples);
+            radar_cluster_dbscan_neighbors_free(nb);
 
             // 返回一个 NumPy 数组
             return py::array_t<ssize_t>({ meas->num },      // 形状
                                         { sizeof(size_t) }, // 步长
                                         (ssize_t *)labels); // 数据指针
         },
-        py::arg("meas_array"), py::arg("wr"), py::arg("wv"), py::arg("eps"), py::arg("min_samples"), "Cluster radar measurements using DBSCAN.");
+        py::arg("meas_array"), py::arg("wr"), py::arg("wv"), py::arg("eps"), py::arg("min_samples"),
+        "Cluster radar measurements using DBSCAN.");
 }
 
 

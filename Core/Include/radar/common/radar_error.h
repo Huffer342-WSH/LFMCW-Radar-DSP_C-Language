@@ -11,11 +11,12 @@ extern "C" {
 
 
 enum {
-    RADAR_SUCCESS = 0,
-    RADAR_ENOMEM,
-    RADAR_EFREENULL,
-    RADAR_EOVRFLW
-
+    OK = 0,          ///< 成功
+    RADAR_ENOMEM,    ///< 内存分配失败
+    RADAR_ECAPACITY, ///< 容量不足
+    RADAR_EFREENULL, ///< 释放空指针
+    RADAR_EOVRFLW,   ///< 超出范围
+    RADAR_EINVAL,    ///< 参数无效
 };
 
 
