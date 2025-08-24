@@ -53,6 +53,7 @@ static int point_clouds_clustering(radar_handle_t *radar, measurements_t *newFra
     int status;
     radar_cluster_t *cluster = &radar->cluster;
     measurements_buffer_t *buf = cluster->buffer;
+    size_t num_cluster;
 
     /* 如果缓冲区满了，删除最早的一帧 */
     if (radar_measurements_buffer_framenum(buf) >= buf->gp_size - 1) {
@@ -65,12 +66,14 @@ static int point_clouds_clustering(radar_handle_t *radar, measurements_t *newFra
     /* 将缓冲区中的所有量测值复制到multi_frame_meas中 */
     status = radar_measurements_buffer_copyout(cluster->multi_frame_meas, buf);
     if (status) {
-        RADAR_LOG_PRINTF("Warning! radar_init_param_t::numMaxMeas too small\n");
+        RD_WARN("Warning! radar_init_param_t::numMaxMeas too small\n");
     }
 
     /* DBSCAN */
-    int num_cluster = radar_cluster_dbscan(  //
+    status = radar_cluster_dbscan(           //
+        cluster->dbscan_handle,              // 预分配的DBSCAN句柄
         cluster->multi_frame_meas_labels,    // 聚类后的标签
+        &num_cluster,                        // 标签数量
         cluster->multi_frame_meas,           // 待聚类的量测值
         radar->config.dbscan_cfg.wr,         // 距离权重
         radar->config.dbscan_cfg.wv,         // 速度权重
@@ -78,11 +81,17 @@ static int point_clouds_clustering(radar_handle_t *radar, measurements_t *newFra
         radar->config.dbscan_cfg.min_samples // 每个簇的最小点数
     );
 
-    /* DBSCAN因为内存不足没有执行。从缓冲区弹出一帧量测值并直接返回 */
-    if (num_cluster < 0) {
-        RADAR_LOG_PRINTF("Warning! DBSCAN is out of memory.\n");
-        radar_measurements_buffer_pop(buf);
-        return -1;
+    if (status) {
+        if (status == -RADAR_ECAPACITY) {
+            /* DBSCAN预分配的内存不足，建议修改初始化参数(偶尔的情况可以忽略) */
+            RD_WARN("[DBSCAN] Warning! radar_handle_t::cluster::dbscan_handle is out of memory.\n");
+        } else if (status == -RADAR_ENOMEM) {
+            /* 堆内存不足 */
+            RD_ERROR("[DBSCAN] Error! Hea is out of memory.\n");
+        } else {
+            RD_ERROR("[DBSCAN] Error! Unknown error %d.\n", status);
+            RADAR_ASSERT(0);
+        }
     }
 
     /* 点云融合 */

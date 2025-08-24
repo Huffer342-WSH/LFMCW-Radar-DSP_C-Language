@@ -35,10 +35,7 @@ int radar_cluster_init(radar_cluster_t *cluster, size_t num_frame, size_t num_me
 {
     int status = 0;
 
-    cluster->buffer = NULL;
-    cluster->multi_frame_meas = NULL;
-    cluster->multi_frame_meas_labels = NULL;
-    cluster->cluster_meas = NULL;
+    memset(cluster, 0, sizeof(radar_cluster_t));
 
     /* 分配 measurements buffer */
     cluster->buffer = radar_measurements_buffer_alloc(num_frame + 1, num_meas + 1);
@@ -73,25 +70,18 @@ int radar_cluster_init(radar_cluster_t *cluster, size_t num_frame, size_t num_me
         goto errout;
     }
 
+    /* 分配DBSCAN的邻居信息 */
+    cluster->dbscan_handle = radar_cluster_dbscan_neighbors_alloc(num_meas);
+    if (cluster->dbscan_handle == NULL) {
+        RADAR_ERROR("radar_cluster_init() failed to allocate dbscan neighbors", RADAR_ENOMEM);
+        status = -5;
+        goto errout;
+    }
+
     return 0;
 
 errout:
-    if (cluster->cluster_meas) {
-        radar_measurements_free(cluster->cluster_meas);
-        cluster->cluster_meas = NULL;
-    }
-    if (cluster->multi_frame_meas_labels) {
-        rd_free(cluster->multi_frame_meas_labels);
-        cluster->multi_frame_meas_labels = NULL;
-    }
-    if (cluster->multi_frame_meas) {
-        radar_measurements_free(cluster->multi_frame_meas);
-        cluster->multi_frame_meas = NULL;
-    }
-    if (cluster->buffer) {
-        radar_measurements_buffer_free(cluster->buffer);
-        cluster->buffer = NULL;
-    }
+    radar_cluster_deinit(cluster);
 
     return status;
 }
@@ -109,10 +99,18 @@ void radar_basic_data_deinit(radar_basic_data_t *basic)
 
 void radar_cluster_deinit(radar_cluster_t *cluster)
 {
-    rd_free(cluster->multi_frame_meas_labels);
-    radar_measurements_free(cluster->multi_frame_meas);
-    radar_measurements_free(cluster->cluster_meas);
-    radar_measurements_buffer_free(cluster->buffer);
+    if (cluster->cluster_meas)
+        radar_measurements_free(cluster->cluster_meas);
+    if (cluster->multi_frame_meas_labels)
+        rd_free(cluster->multi_frame_meas_labels);
+    if (cluster->multi_frame_meas)
+        radar_measurements_free(cluster->multi_frame_meas);
+    if (cluster->buffer)
+        radar_measurements_buffer_free(cluster->buffer);
+    if (cluster->dbscan_handle)
+        radar_cluster_dbscan_neighbors_free(cluster->dbscan_handle);
+
+    memset(cluster, 0, sizeof(radar_cluster_t));
     return;
 }
 
