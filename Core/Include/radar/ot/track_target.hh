@@ -1,11 +1,12 @@
 #pragma once
 
 // #include <radar/sp/fixed_point/radar_measurement.h>
-#include <radar/ot/track_kalman.hh>
-#include <radar/ot/track_target.h>
 #include <Eigen/Dense>
 #include <cstdint>
 #include <list>
+#include <radar/ot/track_kalman.hh>
+#include <radar/ot/track_target.h>
+
 
 #define CXX_LIST_NODE_TTPE std::__detail::_List_node_base
 /**
@@ -14,13 +15,12 @@
  * @note 定点数版本，所以定义不用浮点数（❗❗❗❗不确定是否用浮点数来保证精度）
  *
  */
-class LifeCycle
-{
+class LifeCycle {
 private:
 public:
-    int32_t score;            //< 当前评分
-    double unassociated_time; //< 关联失败时间
-    int deducted_score;       //< 未关联扣除分数
+    int32_t score;            ///< 当前评分
+    double unassociated_time; ///< 关联失败时间
+    Vector3r meas_prederr;    ///< 观测向量预测误差(z(k|k-1) - z(k))
     rd_float_t timestep;      ///< 时间间隔
 
     // 动态列表
@@ -28,27 +28,27 @@ public:
     {
         this->score = score; // 当前评分
         this->unassociated_time = 0;
-        this->deducted_score = 0;
     }
     ~LifeCycle() { }; // 析构函数
 
     void update_data(Hypothesis &hypothesis)
     {
+        if (hypothesis.has_meas) {
+            meas_prederr = hypothesis.measurement - hypothesis.measurement_prediction.state_vector;
+        }
         timestep = (hypothesis.prediction.timestamp_ms - hypothesis.prior_state.timestamp_ms) /
             (rd_float_t)1000;
     }
 
-    void update_score(Hypothesis &hypothesis, ...)
-    {
-    }
+    void update_score(Hypothesis &hypothesis, ...) { }
 };
 
-class TrackedTarget
-{
+class TrackedTarget {
 public:
     static uint32_t next_uuid;
     uint32_t uuid;
-    GaussianState state;
+    GaussianState state; ///< 先验/后验状态，包含误差协方差矩阵、状态向量、时间戳
+    Vector3r meas_post;  ///< 后验测量值
     LifeCycle life_cycle;
     TrackedTarget(uint32_t uuid, GaussianState &state)
         : uuid(uuid)
@@ -83,10 +83,7 @@ public:
     ~TrackedTarget() = default;
 
 
-    void update_life_cycle_data(Hypothesis &hypothesis)
-    {
-        life_cycle.update_data(hypothesis);
-    }
+    void update_life_cycle_data(Hypothesis &hypothesis) { life_cycle.update_data(hypothesis); }
 };
 
 
@@ -103,10 +100,7 @@ public:
         return (reinterpret_cast<TrackedTargets *>((tracked_targets_list_t *)targets));
     }
 
-    tracked_targets_list_t *cast_to_c()
-    {
-        return reinterpret_cast<tracked_targets_list_t *>(this);
-    }
+    tracked_targets_list_t *cast_to_c() { return reinterpret_cast<tracked_targets_list_t *>(this); }
 
     static TrackedTarget *cast_from_c(const tracked_targets_list_node_t node)
     {

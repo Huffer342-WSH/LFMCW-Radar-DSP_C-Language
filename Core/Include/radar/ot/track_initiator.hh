@@ -1,7 +1,9 @@
 #pragma once
 
+#include <radar/lib/PiecewiseLinear.hh>
 #include <radar/ot/track_associator.hh>
 #include <radar/ot/track_target.hh>
+
 
 #include <vector>
 
@@ -13,10 +15,11 @@ public:
     static const int32_t max_score = 3000;
 
     Associator &associator;
-    rd_float_t unassociated_time; // 目标关联失败超时时间
-    rd_float_t time2init_motion;  // 目标是连续运动时，多少时间关联成功
-    rd_float_t time2init_static;  // 目标是连续静止时，多少时间关联成功
-    rd_float_t speed_threshold;   // 速度阈值
+    PiecewiseLinear<rd_float_t> gain_func; ///< 增益函数
+    rd_float_t unassociated_time;          ///< 目标关联失败超时时间
+    rd_float_t time2init_motion;           ///< 目标是连续运动时，多少时间关联成功
+    rd_float_t time2init_static;           ///< 目标是连续静止时，多少时间关联成功
+    rd_float_t speed_threshold;            ///< 速度阈值
     rd_float_t missed_distance;
     Eigen::Matrix<double, 4, 4> init_covar = Eigen::Matrix<double, 4, 4>::Zero();
 
@@ -25,9 +28,10 @@ public:
     int32_t motion_score;
     int32_t static_score;
 
-    Initiator(Associator &associator, rd_float_t unassociated_time, rd_float_t time2init_motion, rd_float_t time2init_static, rd_float_t speed_threshold,
-              rd_float_t missed_distance)
+    Initiator(Associator &associator, rd_float_t unassociated_time, rd_float_t time2init_motion,
+              rd_float_t time2init_static, rd_float_t speed_threshold, rd_float_t missed_distance)
         : associator(associator)
+        , gain_func(0.05, 1.1, 0.1, -0.1)
         , unassociated_time(unassociated_time)
         , time2init_motion(time2init_motion)
         , time2init_static(time2init_static)

@@ -164,7 +164,7 @@ rd_float_t Associator::distance(Hypothesis &hypothesis, Vector3r &measurement, r
 }
 
 /**
- * @brief  更新器
+ * @brief  更新器，完成滤波以及相关数据的更新
  *
  * @param hypotheses 假设
  * @param targets 目标
@@ -179,7 +179,13 @@ void Associator::update(TrackedTargets &targets, std::vector<Hypothesis> &hypoth
     // 对每一个目标执行卡尔曼更新
     std::vector<Hypothesis>::iterator h = hypotheses.begin();
     for (TrackedTarget &target : targets) {
+        // 卡尔曼滤波
         this->updater.update(target.state, *h);
+
+        // 保存后验测量值
+        updater.measurement_model.function(target.meas_post, target.state.state_vector);
+
+        // 更新生命周期
         target.update_life_cycle_data(*h);
         h++;
     }
