@@ -18,10 +18,9 @@ class LifeCycle
 {
 private:
 public:
-    int32_t score;            // 当前评分
-    double unassociated_time; // 关联失败时间
-    int deducted_score;       // 未关联扣除分数
-    GaussianState state_prev; ///< 上一个关联成功的状态
+    int32_t score;            //< 当前评分
+    double unassociated_time; //< 关联失败时间
+    int deducted_score;       //< 未关联扣除分数
     rd_float_t timestep;      ///< 时间间隔
 
     // 动态列表
@@ -35,9 +34,8 @@ public:
 
     void update_data(Hypothesis &hypothesis)
     {
-        if (hypothesis.has_meas)
-            state_prev = hypothesis.prior_state;
-        timestep = (hypothesis.prediction.timestamp_ms - hypothesis.prior_state.timestamp_ms) / (rd_float_t)1000;
+        timestep = (hypothesis.prediction.timestamp_ms - hypothesis.prior_state.timestamp_ms) /
+            (rd_float_t)1000;
     }
 
     void update_score(Hypothesis &hypothesis, ...)
@@ -92,8 +90,7 @@ public:
 };
 
 
-class TrackedTargets : public std::list<TrackedTarget>
-{
+class TrackedTargets : public std::list<TrackedTarget> {
 public:
     TrackedTargets() = default;
     ~TrackedTargets() = default;
