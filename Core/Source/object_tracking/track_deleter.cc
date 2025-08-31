@@ -76,20 +76,26 @@ void Deleter::update_score(TrackedTargets &tracked_targets, std::vector<Hypothes
 
 void Deleter::update_state(TrackedTarget &target, Hypothesis &hypothesis)
 {
-    GaussianState &state = target.state;
-    state.covar *= 2;
-
     auto calc_v = [](rd_float_t v0, rd_float_t T, rd_float_t t) {
         rd_float_t ans = 0;
-        if (T == INFINITY) {
+        if (T == INFINITY || t < 1e-6) {
             ans = v0;
         } else if (t < T && T > 1e-6) {
             ans = v0 * (T - t) / T;
+        } else {
+            ans = 0;
         }
         return ans;
     };
-    rd_float_t T = this->time2stop_unassociated;
+
     rd_float_t t = target.life_cycle.unassociated_time;
-    state.state_vector(1) = calc_v(target.life_cycle.state_prev.state_vector(1), T, t);
-    state.state_vector(3) = calc_v(target.life_cycle.state_prev.state_vector(3), T, t);
+
+    if (t > 1e-6) {
+        GaussianState &state = target.state;
+        rd_float_t T = this->time2stop_unassociated;
+
+        state.covar *= 2;
+        state.state_vector(1) = calc_v(target.life_cycle.state_prev.state_vector(1), T, t);
+        state.state_vector(3) = calc_v(target.life_cycle.state_prev.state_vector(3), T, t);
+    }
 }
