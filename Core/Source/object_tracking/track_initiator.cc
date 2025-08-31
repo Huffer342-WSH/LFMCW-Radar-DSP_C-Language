@@ -39,65 +39,53 @@ void Initiator::initiate(TrackedTargets &tracked_targets, TrackedTargets &unconf
 void Initiator::update_score(TrackedTargets &tracked_targets, std::vector<Hypothesis> &hypotheses)
 {
     RD_DEBUG("[航迹起始]-更新生命周期 开始");
-#if LOG_LEVEL <= LOG_LEVEL_DEBUG
-#define LLOG(format, ...) RADAR_LOG_PRINTF(format, ##__VA_ARGS__)
-#else
-#define LLOG(format, ...)
-#endif
 
     std::vector<Hypothesis>::iterator h = hypotheses.begin();
-
-
     for (TrackedTarget &target : tracked_targets) {
+        LifeCycle &l = target.life_cycle;
+        Vector3r &meas_in = h->measurement;
+        Vector3r &meas_pre = h->measurement_prediction.state_vector;
         int32_t score = 0;
         rd_float_t speed = 0;
-        LifeCycle &l = target.life_cycle;
-        LLOG("\n目标%d:\n", target.uuid);
-        LLOG("score:%d\n", score);
-        LLOG("lifecycle_score:%d\n", l.score);
-        LLOG("unassociated_time:%f\n", l.unassociated_time);
-        rd_float_t dt = (rd_float_t)(h->prediction.timestamp_ms - h->prior_state.timestamp_ms) / 1000; // 计算时间戳差的秒数
-        LLOG("时间戳 %u %u dt:%f\n", h->prediction.timestamp_ms, h->prior_state.timestamp_ms, dt);
+        rd_float_t dt = l.timestep;
+        rd_float_t r_err;
 
         if (!(h->has_meas)) {
             // 关联失败，超时了，扣除一半分数
             if (l.unassociated_time > this->unassociated_time) {
-                LLOG("enter unassociated\n");
-                score -= l.score / 2; // 改用有符号数表示score，不用右移代替除以2
-
-                LLOG("score:%d\n", score);
-                LLOG("unassociated_time:%f\n", l.unassociated_time);
+                score -= l.score / 2;
             }
             score += int32_t(this->unassociated_score * dt); // 加上未关联时间乘时间差
-            LLOG("unassociated_score:%d\n", this->unassociated_score);
+
             l.unassociated_time += dt;
-            LLOG("score:%d\n", score);
-            LLOG("unassociated_time:%f\n", l.unassociated_time);
         } else {
-            LLOG("enter associated\n");
-            score -= l.unassociated_time * this->unassociated_score / 2;
-            LLOG("score:%d\n", score);
-            speed = std::abs(h->measurement(2));
-            LLOG("测量值：[%f %f %f]\n", h->measurement(0), h->measurement(1), h->measurement(2));
-            LLOG("速度 %f  阈值%f\n", speed, this->speed_threshold);
+            rd_float_t gain; ///< 加分增益，预测和测量之间的误差越小，增益越高
+            Vector4r &x = target.state.state_vector;
+
+            r_err = abs(l.meas_prederr(1));
+            speed = hypot(x(1), x(3));
+
+            // 加分
             if (speed > this->speed_threshold) {
-                LLOG("enter move\n");
                 score += (int32_t)(this->motion_score * dt);
-                LLOG("motion_score:%d\n", this->motion_score);
-                LLOG("score:%d\n", score);
             } else {
-                LLOG("enter static\n");
                 score += (int32_t)(this->static_score * dt);
-                LLOG("static_score:%d\n", this->static_score);
-                LLOG("score:%d\n", score);
             }
+
+            // 预测的准获得额外增益
+            gain = gain_func(r_err);
+            score = (int32_t)((rd_float_t)score * gain);
+
+            // 返还一部分因为关联失败扣掉的分数
+            score -= l.unassociated_time * this->unassociated_score / 2;
+
             l.unassociated_time = 0;
         }
-        l.score += score;
-        LLOG("score:%d\n", score);
-        LLOG("lifecycle_score:%d\n", l.score);
-        LLOG("unassociated_time:%f\n", l.unassociated_time);
 
+        RD_DEBUG("目标%d 关联[%c] dt=%f err=%f speed=%f score=%d\n", target.uuid,
+                 (h->has_meas) ? 'Y' : 'N', dt, r_err, speed, score);
+
+        l.score += score;
         h++;
     }
     RD_DEBUG("[航迹起始]-更新生命周期 结束");

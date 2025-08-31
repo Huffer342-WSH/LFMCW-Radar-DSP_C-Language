@@ -18,49 +18,52 @@ void Deleter::delete_tracks(TrackedTargets &tracked_targets, std::vector<Hypothe
 
 void Deleter::update_score(TrackedTarget &target, Hypothesis &hypothesis)
 {
-#undef FORCE_ENABLE_LOG
-#define FORCE_ENABLE_LOG 0
+    LifeCycle &l = target.life_cycle;
+    int32_t score = 0;
+    rd_float_t dt = l.timestep;
+    rd_float_t angle = target.meas_post(0);
+    rd_float_t r = target.meas_post(1);
+    rd_float_t r_err;
 
     RD_DEBUG("[航迹删除管理——更新生命周期]");
-#define LOG_NO_PREFIX
-
-
-    LifeCycle &l = target.life_cycle;
-    rd_float_t dt = (rd_float_t)(hypothesis.prediction.timestamp_ms - hypothesis.prior_state.timestamp_ms) / 1000; // 计算时间戳差的秒数
-
-    RD_DEBUG("UUID: %d score:%d\n", target.uuid, target.life_cycle.score);
-    RD_DEBUG("dt:%f  has_meas: %s\n", dt, hypothesis.has_meas ? "yes" : "no");
 
     /* 根据关联结果更新生命周期 */
-    int32_t score = 0;
     if (!(hypothesis.has_meas)) {
         l.unassociated_time += dt;
-        score += int32_t(this->unassociated_score * dt); // 加上未关联时间乘时间差
+        score += (int32_t)(unassociated_score * dt);
+
+        RD_DEBUG("目标[%d] 关联失败 dt=%.2f utime=%.2f score=%d\n", target.uuid, dt,
+                 l.unassociated_time, score);
     } else {
-        score -= l.unassociated_time * this->unassociated_score * this->missed_probability / (1 - this->missed_probability);
+        rd_float_t gain;
+
+        r_err = abs(l.meas_prederr(1));
+
+        score -= l.unassociated_time * this->unassociated_score * this->missed_probability /
+            (1 - this->missed_probability);
         score -= static_cast<int32_t>(dt * this->unassociated_score);
-        l.unassociated_time = 0; // 重置未关联时间
+
+        // 预测的准获得额外增益
+        gain = gain_func(r_err);
+        score = (int32_t)((rd_float_t)score * gain);
+
+        // 重置未关联时间
+        l.unassociated_time = 0;
+
+        RD_DEBUG("目标[%d] 关联成功 dt=%.2f r_err=%.2f utime=%.2f score=%d\n", target.uuid, dt,
+                 r_err, l.unassociated_time, score);
     }
     l.score += score;
 
-    /* 检查目标是否在范围内 */
-    rd_float_t angle = std::atan2(target.state.state_vector[2], target.state.state_vector[0]); // 计算角度
-    Eigen::Vector2d sub_vector(target.state.state_vector[0], target.state.state_vector[2]);
-    rd_float_t r = sub_vector.norm();
-    RD_DEBUG("angle:%f [%f %f] r: %f[%f %f]\n", angle, this->fov[0], this->fov[1], r, this->radius_range[0], this->radius_range[1]);
-    if (angle < this->fov[0] || angle > this->fov[1] || r > this->radius_range[1] || r < this->radius_range[0]) {
+    /* 超出roi删除 */
+    if (angle < this->fov[0] || angle > this->fov[1] || r > this->radius_range[1] ||
+        r < this->radius_range[0]) {
         l.score = -1;
     }
 
     if (l.score > this->max_score) {
         l.score = this->max_score;
     }
-
-    RD_DEBUG("score:%d\n\n", target.life_cycle.score);
-
-
-#undef FORCE_ENABLE_LOG
-#define FORCE_ENABLE_LOG 0
 }
 
 

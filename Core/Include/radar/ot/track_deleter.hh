@@ -1,5 +1,6 @@
 #pragma once
 
+#include <radar/lib/PiecewiseLinear.hh>
 #include <radar/ot/track_kalman.hh>
 #include <radar/ot/track_target.hh>
 
@@ -12,6 +13,7 @@ private:
 public:
     static const int max_score = 5000;
 
+    PiecewiseLinear<rd_float_t> gain_func; ///< 增益函数
     rd_float_t unassociated_time;
     rd_float_t missed_probability;
     int32_t unassociated_score;
@@ -19,8 +21,10 @@ public:
 
     std::array<rd_float_t, 2> fov;
     std::array<rd_float_t, 2> radius_range;
-    Deleter(rd_float_t unassociated_time, rd_float_t missed_probability, rd_float_t time2stop_unassociated, rd_float_t fov[2], rd_float_t radius_range[2])
-        : unassociated_time(unassociated_time)
+    Deleter(rd_float_t unassociated_time, rd_float_t missed_probability,
+            rd_float_t time2stop_unassociated, rd_float_t fov[2], rd_float_t radius_range[2])
+        : gain_func(0.05, 1.1, 0.1, -0.1)
+        , unassociated_time(unassociated_time)
         , missed_probability(missed_probability)
         , time2stop_unassociated(time2stop_unassociated)
     {

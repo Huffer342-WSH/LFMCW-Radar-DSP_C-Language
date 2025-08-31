@@ -13,8 +13,7 @@ void bind_track_target(pybind11::module_ &m)
     py::class_<LifeCycle>(m, "LifeCycle")
         .def(py::init<int32_t>())
         .def_readwrite("score", &LifeCycle::score)
-        .def_readwrite("unassociated_time", &LifeCycle::unassociated_time)
-        .def_readwrite("deducted_score", &LifeCycle::deducted_score);
+        .def_readwrite("unassociated_time", &LifeCycle::unassociated_time);
 
 
     py::class_<TrackedTarget>(m, "TrackedTarget")
