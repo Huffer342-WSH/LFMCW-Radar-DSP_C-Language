@@ -88,14 +88,15 @@ void Deleter::update_state(TrackedTarget &target, Hypothesis &hypothesis)
         return ans;
     };
 
-    rd_float_t t = target.life_cycle.unassociated_time;
 
-    if (t > 1e-6) {
-        GaussianState &state = target.state;
+    if (!hypothesis.has_meas) {
         rd_float_t T = this->time2stop_unassociated;
+        rd_float_t t = target.life_cycle.unassociated_time;
+        Vector4r &x = target.state.state_vector;
+        Matrix44r &covar = target.state.covar;
 
-        state.covar *= 2;
-        state.state_vector(1) = calc_v(target.life_cycle.state_prev.state_vector(1), T, t);
-        state.state_vector(3) = calc_v(target.life_cycle.state_prev.state_vector(3), T, t);
+        covar *= 2;
+        x(1) = calc_v(x(1), T, t);
+        x(3) = calc_v(x(3), T, t);
     }
 }
