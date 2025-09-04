@@ -172,6 +172,7 @@ int dbscan_core(size_t *labels, size_t *n_labels, size_t n, int32_t eps, size_t 
     size_t label_num;
 
     if (n == 0) {
+        *n_labels = 0;
         return OK;
     }
     if (n == 1) {
@@ -433,7 +434,8 @@ int radar_cluster_fusion(measurements_t *clusters, size_t num_cluster, size_t *l
     RADAR_ASSERT(clusters != NULL || num_cluster >= 0);
 
     if (clusters->capacity < num_cluster) {
-        RD_WARN("radar_cluster_fusion clusters->capacity < num_cluster");
+        RD_WARN("radar_cluster_fusion clusters->capacity < num_cluster %d < %d\n",
+                clusters->capacity, num_cluster);
         ret = -RADAR_ECAPACITY;
         num_cluster = clusters->capacity;
     }
