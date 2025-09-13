@@ -10,10 +10,10 @@
  */
 #pragma once
 
-#include <stdint.h>
 #include <radar/common/radar_log.h>
 #include <radar/common/radar_math_types.h>
 #include <radar/sp/fixed_point/radar_matrix.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,12 +49,10 @@ static inline int16_t radar_cos_q15(int16_t x)
     return arm_cos_q15(x);
 }
 
-
 static inline int32_t radar_cos_q31(int32_t x)
 {
     return arm_cos_q31(x);
 }
-
 
 static inline int16_t radar_atan2_q15(int16_t y, int16_t x)
 {
@@ -63,14 +61,12 @@ static inline int16_t radar_atan2_q15(int16_t y, int16_t x)
     return angle;
 }
 
-
 static inline int32_t radar_atan2_q31(int32_t y, int32_t x)
 {
     int32_t angle;
     arm_atan2_q31(y, x, &angle);
     return angle;
 }
-
 
 // arcsin = arctan(x/sqrt(1-x^2))
 
@@ -89,7 +85,6 @@ static inline int16_t radar_asin_q15(int16_t x)
     return theta_q29 >> 16;
 }
 
-
 static inline int32_t mult_i32_i32q16_i32(int32_t a, int32_t b)
 {
     return (int64_t)a * b >> 16;
@@ -100,9 +95,25 @@ static inline int32_t div_i32q16_i32q16(int32_t a, int32_t b)
     return (int64_t)a * (1 << 16) / b;
 }
 
-
 #define abs_diff(a, b) ((a) > (b) ? (a) - (b) : (b) - (a))
 
+/**
+ * @brief 计算相位差
+ *
+ * @param a 被减数
+ * @param b 减数
+ * @return int16_t Q2.13, 属于[-PI, PI]
+ */
+static inline int16_t unwrap_phase_diff_q13(int16_t a, int16_t b)
+{
+    int32_t diff = (int32_t)a - (int32_t)b;
+    if (diff > PI_Q13) {
+        diff -= (PI_Q13 * 2);
+    } else if (diff < -PI_Q13) {
+        diff += (PI_Q13 * 2);
+    }
+    return diff;
+}
 
 #ifdef __cplusplus
 }

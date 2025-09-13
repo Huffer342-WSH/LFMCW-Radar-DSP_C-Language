@@ -2,16 +2,12 @@
 #include <radar/common/radar_log.h>
 #include <radar/common/mm.h>
 
+#include <string.h>
 
 int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param)
 {
     basic->param = param;
     basic->rdms = NULL; //  rdm由外部输入，不需要内部分配
-
-#if ENABLE_STATIC_CLUTTER_FILTERING == ON
-    basic->staticClutter = radar_matrix2d_complex_int32_alloc(param->numChannel, param->numRangeBin);
-    basic->staticClutterAccBuffer = radar_matrix2d_complex_int32_alloc(param->numChannel, param->numRangeBin);
-#endif
     basic->magSpec2D = radar_matrix2d_int32_alloc(param->numRangeBin, param->numChirp);
     if (basic->magSpec2D == NULL) {
         RADAR_ERROR("failed to allocate space for magSpec2D", RADAR_ENOMEM);
@@ -20,14 +16,9 @@ int radar_basic_data_init(radar_basic_data_t *basic, radar_param_t *param)
     return 0;
 }
 
-
 int radar_hook_init(radar_hook_t *hook)
 {
-    hook->hook_cfar_raw = NULL;
-    hook->hook_cfar_filtered = NULL;
-    hook->hook_point_clouds = NULL;
-    hook->hook_point_clouds_filtered = NULL;
-    hook->hook_clusters = NULL;
+    memset(hook, 0, sizeof(radar_hook_t));
     return 0;
 }
 
@@ -90,10 +81,6 @@ errout:
 void radar_basic_data_deinit(radar_basic_data_t *basic)
 {
     radar_matrix2d_int32_free(basic->magSpec2D);
-#if ENABLE_STATIC_CLUTTER_FILTERING == ON
-    radar_matrix2d_complex_int32_free(basic->staticClutter);
-    radar_matrix2d_complex_int32_free(basic->staticClutterAccBuffer);
-#endif
     return;
 }
 

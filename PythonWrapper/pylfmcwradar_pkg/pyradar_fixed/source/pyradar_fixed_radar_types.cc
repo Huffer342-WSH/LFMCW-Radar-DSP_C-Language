@@ -110,9 +110,11 @@ void bind_radar_config(pybind11::module_ &m)
 {
     pybind11::class_<radar_config_t>(m, "radar_config")
         .def(pybind11::init<>())
+        .def_readwrite("clutter_filter_cfg", &radar_config_t::clutter_filter_cfg)
         .def_readwrite("cfarCfg", &radar_config_t::cfarCfg)
         .def_readwrite("cfar_filter_cfg", &radar_config_t::cfar_filter_cfg)
-        .def_readwrite("channel_phase_diff_threshold", &radar_config_t::channel_phase_diff_threshold)
+        .def_readwrite("channel_phase_diff_threshold",
+                       &radar_config_t::channel_phase_diff_threshold)
         .def_readwrite("channel_mag_diff_threshold", &radar_config_t::channel_mag_diff_threshold)
         .def_readwrite("occlusion_radius", &radar_config_t::occlusion_radius)
         .def_readwrite("dbscan_config", &radar_config_t::dbscan_cfg)
@@ -126,10 +128,6 @@ void bind_radar_basic_data(pybind11::module_ &m)
         .def(pybind11::init<>())
         .def_readwrite("param", &radar_basic_data_t::param)
         .def_readwrite("rdms", &radar_basic_data_t::rdms)
-#if ENABLE_STATIC_CLUTTER_FILTERING == ON
-        .def_readwrite("staticClutter", &radar_basic_data_t::staticClutter)
-        .def_readwrite("staticClutterAccBuffer", &radar_basic_data_t::staticClutterAccBuffer)
-#endif
         .def_readwrite("magSpec2D", &radar_basic_data_t::magSpec2D);
 }
 

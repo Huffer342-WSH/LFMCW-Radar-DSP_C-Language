@@ -1,17 +1,46 @@
-BasedOnStyle: WebKit # 风格基准
+BasedOnStyle: WebKit            # 风格基准
+ColumnLimit: 100                # 每行的最大列数
+TabWidth: 4                     # 制表符宽度
+UseTab: Never                   # 使用空格而不是制表符
 
-ColumnLimit: 100 # 每行的最大列数。
+# === 缩进与修饰符 ===
+AccessModifierOffset: -4        # 访问修饰符（如 public、protected）缩进偏移量
+PointerAlignment: Right         # 指针对齐方式（* 或 & 在右边）
 
-MaxEmptyLinesToKeep: 2 # 要保留的最大连续空行数。
+# === 对齐设置 ===
+AlignAfterOpenBracket: Align        # 在换行时对齐括号内的参数
+AlignConsecutiveAssignments: false  # 对齐连续的赋值语句
+AlignConsecutiveBitFields: Consecutive # 对齐连续的位域声明
+AlignConsecutiveDeclarations: false # 对齐连续的声明
+AlignConsecutiveMacros: true        # 对齐连续的宏定义
+AlignEscapedNewlines: Left          # 续行符（\）对齐方向
+AlignOperands: Align                # 多行表达式中对齐操作数
+AlignTrailingComments: true         # 对齐行尾注释
+AlignArrayOfStructures: Left        # 对齐数组中的结构体元素
 
-AlignTrailingComments: true
-AlignAfterOpenBracket: Align
-AllowAllArgumentsOnNextLine: false
-AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortEnumsOnASingleLine: false
-BinPackParameters: BinPack
-BinPackArguments: true
-BreakBeforeBinaryOperators: None # 二进制运算符前是否换行。
-PointerAlignment: Right
+# === 短语句单行化规则 ===
+AllowAllParametersOfDeclarationOnNextLine: false # 所有参数是否允许放在下一行
+AllowShortBlocksOnASingleLine: Empty             # 允许单行显示的短代码块
+AllowShortCaseLabelsOnASingleLine: false         # 允许单行的 switch case 标签
+AllowShortFunctionsOnASingleLine: None           # 允许单行短函数
+AllowShortIfStatementsOnASingleLine: false       # 允许单行短 if
+AllowShortLambdasOnASingleLine: Empty            # 允许单行短 lambda
+AllowShortLoopsOnASingleLine: true               # 允许单行短循环
 
-UseTab: Never # 是否使用制表符代替空格。
+# === 换行规则 ===
+AlwaysBreakAfterDefinitionReturnType: None   # 函数定义返回类型后是否换行
+AlwaysBreakAfterReturnType: None             # 函数声明返回类型后是否换行
+AlwaysBreakBeforeMultilineStrings: false     # 多行字符串前是否换行
+AlwaysBreakTemplateDeclarations: false       # 模板声明是否换行
+
+BreakBeforeBinaryOperators: None             # 二元运算符前换行
+BreakBeforeBraces: Linux                     # 大括号换行方式
+BreakBeforeInheritanceComma: false           # 继承列表逗号前换行
+BreakBeforeTernaryOperators: false           # 三元运算符前换行
+
+BreakConstructorInitializers: BeforeComma    # 构造函数初始化列表换行位置
+BreakConstructorInitializersBeforeComma: false # 构造函数初始化列表的逗号前换行
+
+# === 其他 ===
+MaxEmptyLinesToKeep: 1            # 保留的最大连续空行数
+CommentPragmas: '^ IWYU pragma:'  # 注释中的编译指令匹配

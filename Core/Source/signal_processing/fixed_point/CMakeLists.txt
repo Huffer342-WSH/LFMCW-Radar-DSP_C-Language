@@ -11,6 +11,7 @@ target_link_libraries(RadarDP_SigProc_fixed_objs PUBLIC
 target_sources(RadarDP_SigProc_fixed_objs PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_cfar.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_cluster.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/radar_clutter_filter.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_dis_velo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_doa.c
     ${CMAKE_CURRENT_SOURCE_DIR}/radar_mag.c

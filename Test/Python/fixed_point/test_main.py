@@ -57,6 +57,7 @@ rdms_list.imag = rdms_list.imag.astype(np.int16)
 # %% 初始化雷达算法
 pi = 3.14159
 pi = 3.14159
+PI_Q13 = int(np.pi * 2**13)
 radar_init_param = pyRadar.radar_init_param()
 radar_handle = pyRadar.radar_handle()
 rdms = pyRadar.matrix3d_complex_int16_alloc(numChannel, numRangeBin, numChirp)
@@ -77,6 +78,16 @@ radar_init_param.numMaxMeas = 100
 radar_init_param.numMaxCluster = 10
 
 radar_config = pyRadar.radar_config()
+
+radar_config.clutter_filter_cfg.n_channel = 2
+radar_config.clutter_filter_cfg.n_rb = numRangeBin
+radar_config.clutter_filter_cfg.fifo_len = 20
+radar_config.clutter_filter_cfg.weight_max = int(0.999 * (1 << 15))
+radar_config.clutter_filter_cfg.weight_min = int(0.3 * (1 << 15))
+radar_config.clutter_filter_cfg.phase_max = PI_Q13
+radar_config.clutter_filter_cfg.phase_min = PI_Q13 // 6
+radar_config.clutter_filter_cfg.update_interval = 5
+
 radar_config.cfarCfg.numGuard[0] = 1
 radar_config.cfarCfg.numGuard[1] = 1
 radar_config.cfarCfg.numTrain[0] = 2

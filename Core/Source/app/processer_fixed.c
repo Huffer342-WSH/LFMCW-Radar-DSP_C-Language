@@ -140,6 +140,26 @@ int radardsp_init(radar_handle_t *radar, radar_init_param_t *param, radar_config
         goto RADARDSP_INIT_FAILED1;
     }
 
+    /* 初始化杂波滤波器 */
+    radar_clutter_filter_cfg_t clutter_filter_cfg = {
+        .n_channel = 2,
+        .n_rb = radar->param.numRangeBin,
+        .fifo_len = 20,
+        .weight_max = (uint16_t)(0.999 * (1 << 15)),
+        .weight_min = (uint16_t)(0.3 * (1 << 15)),
+        .phase_max = PI_Q13,
+        .phase_min = PI_Q13 / 6,
+        .update_interval = 5,
+    };
+
+#ifdef CONFIG_CLUTTER_FILTER
+    radar->clutter_filter = radar_static_clutter_filter_new(&config->clutter_filter_cfg);
+    if (radar->clutter_filter == NULL) {
+        status = 1;
+        goto RADARDSP_INIT_FAILED1;
+    }
+#endif
+
     /* 初始化微动检测 */
     status = radar_micromotion_handle_init(&radar->micromotion, radar->param.numRangeBin,
         (size_t)(4.0 / radar->param.timeFramePeriod));
@@ -269,12 +289,14 @@ int radardsp_input_new_frame(
      */
     radar->basic.rdms = rdms;
 
-
-#if ENABLE_STATIC_CLUTTER_FILTERING == ON
+#ifdef CONFIG_CLUTTER_FILTER
     /* 1. 更新静态杂波，并减去静态杂波 */
+    radar_static_clutter_filter(radar->clutter_filter, rdms);
+#endif
 
-#endif /* ENABLE_STATIC_CLUTTER_FILTERING */
-
+    if (radar->hook.hook_rdm != NULL) {
+        radar->hook.hook_rdm(rdms->data, rdms->size0, rdms->size1, rdms->size2);
+    }
 
 #if AMPLITUDE_SPECTRUM_CALCULATION_METHOD == AMP_SPEC_CLAC_METHOD_INSIDE
 

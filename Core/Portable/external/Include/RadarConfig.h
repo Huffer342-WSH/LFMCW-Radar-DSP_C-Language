@@ -15,7 +15,7 @@ extern "C" {
 #define RADAR_TICK() get_tick()
 
 /* 静态杂波滤除 */
-#define ENABLE_STATIC_CLUTTER_FILTERING OFF
+#define CONFIG_CLUTTER_FILTER
 
 /* 内部计算幅度谱还是外部直接提供 */
 #define AMPLITUDE_SPECTRUM_CALCULATION_METHOD AMP_SPEC_CLAC_METHOD_INSIDE
